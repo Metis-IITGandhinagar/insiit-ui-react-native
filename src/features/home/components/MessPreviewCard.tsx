@@ -3,88 +3,111 @@ import { View } from "react-native";
 
 import { Card, Divider, Text } from "../../../components/ui";
 import { useTheme } from "../../../theme";
-
-type Meal = {
-  title: string;
-  items: string[];
-};
+import { Pressable } from "react-native";
+import { Meal } from "../../mess/types";
+import { MealStatusChip } from "../../mess/components";
+import { getMealStatus } from "../../mess/mealStatus";
 
 type Props = {
-  breakfast?: Meal;
-  lunch?: Meal;
-  dinner?: Meal;
+  meal?: Meal;
+  onPress?: () => void;
 };
 
-function MealSection({
-  meal,
-  isLast = false,
-}: {
-  meal?: Meal;
-  isLast?: boolean;
-}) {
-  const { spacing } = useTheme();
-
-  return (
-    <>
-      <View
-        style={{
-          marginTop: spacing.md,
-        }}
-      >
-        <Text variant="subtitle">
-          {meal?.title ?? "Unavailable"}
-        </Text>
-
-        <Text
-          variant="body"
-          style={{
-            marginTop: spacing.sm,
-          }}
-        >
-          {meal
-            ? meal.items.join(" • ")
-            : "Menu not published"}
-        </Text>
-      </View>
-
-      {!isLast && (
-        <View
-          style={{
-            marginTop: spacing.md,
-          }}
-        >
-          <Divider />
-        </View>
-      )}
-    </>
-  );
-}
-
 export function MessPreviewCard({
-  breakfast,
-  lunch,
-  dinner,
+  meal,
+  onPress,
 }: Props) {
   const { spacing } = useTheme();
 
   return (
+    <Pressable onPress={onPress}>
     <Card
       style={{
         marginTop: spacing.lg,
       }}
     >
       <Text variant="subtitle">
-        Today's Mess
+        Next Meal
       </Text>
 
-      <MealSection meal={breakfast} />
+      {!meal ? (
+        <Text
+          variant="caption"
+          style={{
+            marginTop: spacing.md,
+          }}
+        >
+          Menu not available.
+        </Text>
+      ) : (
+        <>
+          <View
+            style={{
+              marginTop: spacing.md,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text variant="body">
+                {meal.type}
+              </Text>
 
-      <MealSection meal={lunch} />
+              <Text
+                variant="caption"
+                style={{
+                  marginTop: spacing.xs,
+                }}
+              >
+                {meal.startTime} – {meal.endTime}
+              </Text>
+            </View>
 
-      <MealSection
-        meal={dinner}
-        isLast
-      />
+            <MealStatusChip
+              status={getMealStatus(meal)}
+            />
+          </View>
+
+          <View
+            style={{
+              marginTop: spacing.md,
+            }}
+          >
+            <Divider />
+          </View>
+
+          <View
+            style={{
+              marginTop: spacing.sm,
+            }}
+          >
+            {meal.items.slice(0, 4).map((item) => (
+              <Text
+                key={item}
+                variant="body"
+                style={{
+                  marginTop: spacing.xs,
+                }}
+              >
+                • {item}
+              </Text>
+            ))}
+
+            {meal.items.length > 4 && (
+              <Text
+                variant="caption"
+                style={{
+                  marginTop: spacing.sm,
+                }}
+              >
+                +{meal.items.length - 4} more items
+              </Text>
+            )}
+          </View>
+        </>
+      )}
     </Card>
+    </Pressable>
   );
 }

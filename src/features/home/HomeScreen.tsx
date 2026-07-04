@@ -1,10 +1,7 @@
 import React from "react";
-
-import {
-    ScreenContainer,
-    LoadingView,
-} from "../../components/layout";
-
+import {ScreenContainer,LoadingView,} from "../../components/layout";
+import { useNavigation } from "@react-navigation/native";
+import { MainTabNavigationProp, RootNavigationProp } from "../../navigation/types";
 import {
     GreetingCard,
     MessPreviewCard,
@@ -13,44 +10,60 @@ import {
     UpcomingEventsCard,
     QuickActionsGrid,
 } from "./components";
-
 import { useHome } from "./hooks/useHome";
+import { useMess } from "../mess/hooks/useMess";
+import { getNextMeal } from "../mess/mealStatus";
+import { getCurrentDayIndex } from "../mess/utils/day";
 
 export function HomeScreen() {
-    const { data, isLoading } = useHome();
+    const navigation = useNavigation<RootNavigationProp>();
+    const home = useHome();
+    const mess = useMess();
+    
 
-    if (isLoading || !data) {
+    if (
+        home.isLoading ||
+        mess.isLoading ||
+        !home.data ||
+        !mess.data
+    ) {
         return <LoadingView />;
     }
+
+    const nextMeal = getNextMeal(
+        mess.data.week,
+        getCurrentDayIndex()
+    );
 
     return (
         <ScreenContainer>
             <GreetingCard
-                name={data?.user?.name}
+                name={home.data.user.name}
             />
 
             <MessPreviewCard
-                breakfast={data?.mess?.breakfast}
-                lunch={data?.mess?.lunch}
-                dinner={data?.mess?.dinner}
+                meal={nextMeal}
+                onPress={() => navigation.navigate("Mess")}
             />
 
             <BusPreviewCard
-                route={data?.nextBus?.route}
-                departure={data?.nextBus?.departure}
-                arrival={data?.nextBus?.arrival}
-                minutes={data?.nextBus?.minutes}
+                route={home.data.nextBus?.route}
+                departure={home.data.nextBus?.departure}
+                arrival={home.data.nextBus?.arrival}
+                minutes={home.data.nextBus?.minutes}
             />
 
             <AnnouncementList
-                announcements={data?.announcements}
+                announcements={home.data.announcements}
             />
 
             <UpcomingEventsCard
-                events={data?.events}
+                events={home.data.events}
             />
 
-            <QuickActionsGrid actions={data.quickActions} />
+            <QuickActionsGrid
+                actions={home.data.quickActions}
+            />
         </ScreenContainer>
     );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-
+import { RootStack } from "./RootStack";
 import { AuthStack } from "./AuthStack";
 import { MainTabs } from "./MainTabs";
 
@@ -9,7 +9,7 @@ export function RootNavigator() {
 
     return (
         <NavigationContainer>
-            {isAuthenticated ? <MainTabs /> : <AuthStack />}
+            {isAuthenticated ? <RootStack /> : <AuthStack />}
         </NavigationContainer>
     );
 }
