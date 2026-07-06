@@ -13,6 +13,7 @@ import QRBottomSheet from "./components/QRBottomSheet";
 import WeeklyMenuSheet from "./components/WeeklyMenuSheet";
 import TimetableSheet from "./components/TimetableSheet";
 import GreetingSection from "./components/GreetingSection";
+import { colors } from "@/theme";
 
 const HomeScreen = () => {
     const qrSheetRef = useRef<any>(null);
@@ -21,7 +22,7 @@ const HomeScreen = () => {
 
     return (
         <>
-            <StatusBar barStyle="dark-content" backgroundColor="#F5F8FC" />
+            <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
             <SafeAreaView style={styles.container}>
                 <ScrollView
@@ -67,7 +68,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F5F8FC",
+        backgroundColor: colors.background,
     },
 
     content: {

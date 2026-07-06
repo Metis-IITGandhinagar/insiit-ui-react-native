@@ -12,6 +12,7 @@ import {
     View,
 } from "react-native";
 import { CalendarDays, X } from "lucide-react-native";
+import { colors } from "@/theme";
 
 export type TimetableSheetRef = {
     expand: () => void;
@@ -85,7 +86,7 @@ const TimetableSheet = forwardRef<TimetableSheetRef>((_, ref) => {
                     <View style={styles.titleRow}>
                         <CalendarDays
                             size={22}
-                            color="#2563EB"
+                            color={colors.primary}
                         />
 
                         <Text style={styles.title}>
@@ -96,7 +97,7 @@ const TimetableSheet = forwardRef<TimetableSheetRef>((_, ref) => {
                     <Pressable
                         onPress={() => setVisible(false)}
                     >
-                        <X size={22} color="#64748B" />
+                        <X size={22} color={colors.textSecondary}/>
                     </Pressable>
                 </View>
 
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
 
         marginBottom: 10,
 
-        color: "#2563EB",
+        color: colors.primary,
     },
 
     classItem: {

@@ -11,6 +11,7 @@ import {
     QrCode,
     ChevronRight,
 } from "lucide-react-native";
+import { colors, typography } from "@/theme";
 
 type Meal = {
     mealName: string;
@@ -43,7 +44,7 @@ const MessCard = ({ onShowQR, onShowMenu }: Props) => {
                     <View style={styles.iconCircle}>
                         <UtensilsCrossed
                             size={22}
-                            color="#2563EB"
+                            color= {colors.primary}
                             strokeWidth={2.2}
                         />
                     </View>
@@ -54,7 +55,7 @@ const MessCard = ({ onShowQR, onShowMenu }: Props) => {
                         <View style={styles.timeRow}>
                             <Clock3
                                 size={14}
-                                color="#64748B"
+                                color={colors.textSecondary}
                             />
 
                             <Text style={styles.timeText}>
@@ -103,7 +104,7 @@ const MessCard = ({ onShowQR, onShowMenu }: Props) => {
 
                     <ChevronRight
                         size={18}
-                        color="#2563EB"
+                        color={colors.primary}
                     />
                 </TouchableOpacity>
             </View>
@@ -115,7 +116,7 @@ export default MessCard;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.surface,
         borderRadius: 28,
         padding: 22,
 
@@ -157,21 +158,19 @@ const styles = StyleSheet.create({
     },
 
     featuredDish: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: "#0F172A",
+        ...typography.subtitle,
+        color: "#000000",
     },
 
     moreItems: {
         marginTop: 6,
-        fontSize: 14,
-        color: "#64748B",
+        ...typography.caption,
+        color: colors.textSecondary,
     },
 
     mealTitle: {
-        fontSize: 24,
-        fontWeight: "700",
-        color: "#0F172A",
+        ...typography.h2,
+        color: "#000000",
     },
 
     timeRow: {
@@ -182,9 +181,8 @@ const styles = StyleSheet.create({
 
     timeText: {
         marginLeft: 6,
-        color: "#64748B",
-        fontSize: 14,
-        fontWeight: "500",
+        color: colors.textSecondary,
+        ...typography.caption,
     },
 
     footer: {
@@ -197,7 +195,7 @@ const styles = StyleSheet.create({
     qrButton: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#2563EB",
+        backgroundColor: colors.primary,
         paddingHorizontal: 18,
         paddingVertical: 13,
         borderRadius: 16,
@@ -205,9 +203,9 @@ const styles = StyleSheet.create({
 
     qrText: {
         color: "white",
-        fontWeight: "700",
+        ...typography.button,
         marginLeft: 8,
-        fontSize: 15,
+        
     },
 
     menuButton: {
@@ -216,9 +214,8 @@ const styles = StyleSheet.create({
     },
 
     menuButtonText: {
-        fontSize: 15,
-        fontWeight: "700",
-        color: "#2563EB",
+        ...typography.body,
+        color: colors.primary,
         marginRight: 4,
     },
 });

@@ -11,6 +11,7 @@ import {
     ArrowRight,
     ChevronRight,
 } from "lucide-react-native";
+import { colors } from "@/theme";
 
 type Props = {
     onPress?: () => void;
@@ -50,7 +51,7 @@ const NextBusCard = ({ onPress }: Props) => {
 
                         <ArrowRight
                             size={15}
-                            color="#64748B"
+                            color={colors.textSecondary}
                         />
 
                         <Text style={styles.route}>
@@ -61,7 +62,7 @@ const NextBusCard = ({ onPress }: Props) => {
                     <View style={styles.timeRow}>
                         <Clock3
                             size={14}
-                            color="#64748B"
+                            color={colors.textSecondary}
                         />
 
                         <Text style={styles.time}>
@@ -73,7 +74,7 @@ const NextBusCard = ({ onPress }: Props) => {
 
             <ChevronRight
                 size={22}
-                color="#94A3B8"
+                color={colors.inactive}
             />
         </TouchableOpacity>
     );
@@ -83,7 +84,7 @@ export default NextBusCard;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.surface,
         borderRadius: 24,
         padding: 18,
 
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
     },
 
     label: {
-        fontSize: 12,
+        fontSize: 15,
         fontWeight: "700",
         color: "#0F766E",
         letterSpacing: 1,
@@ -136,9 +137,9 @@ const styles = StyleSheet.create({
     },
 
     route: {
-        fontSize: 17,
+        fontSize: 15,
         fontWeight: "700",
-        color: "#0F172A",
+        color: "#000000",
     },
 
     timeRow: {
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
     time: {
         marginLeft: 6,
         fontSize: 14,
-        color: "#64748B",
+        color: colors.textSecondary,
         fontWeight: "500",
     },
 });

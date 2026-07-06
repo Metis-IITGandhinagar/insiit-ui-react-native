@@ -15,6 +15,7 @@ import {
     RefreshCcw,
     X,
 } from "lucide-react-native";
+import { colors } from "@/theme";
 
 export type QRBottomSheetRef = {
     expand: () => void;
@@ -49,7 +50,7 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                     <View style={styles.titleRow}>
                         <QrCode
                             size={22}
-                            color="#2563EB"
+                            color={colors.primary}
                         />
 
                         <Text style={styles.title}>
@@ -62,7 +63,7 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                     >
                         <X
                             size={22}
-                            color="#64748B"
+                            color={colors.textSecondary}
                         />
                     </Pressable>
                 </View>
@@ -88,7 +89,7 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                 <Pressable style={styles.refreshButton}>
                     <RefreshCcw
                         size={18}
-                        color="#FFFFFF"
+                        color={colors.surface}
                     />
 
                     <Text style={styles.refreshText}>
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     subtitle: {
         marginTop: 10,
         textAlign: "center",
-        color: "#64748B",
+        color: colors.textSecondary,
         fontSize: 15,
     },
 
@@ -170,13 +171,13 @@ const styles = StyleSheet.create({
 
     expiry: {
         textAlign: "center",
-        color: "#64748B",
+        color: colors.textSecondary,
         marginBottom: 22,
         fontSize: 14,
     },
 
     refreshButton: {
-        backgroundColor: "#2563EB",
+        backgroundColor: colors.primary,
         borderRadius: 16,
 
         paddingVertical: 15,
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
     note: {
         marginTop: 16,
         textAlign: "center",
-        color: "#94A3B8",
+        color: colors.inactive,
         fontSize: 13,
         lineHeight: 20,
     },

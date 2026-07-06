@@ -11,6 +11,7 @@ import {
     MapPin,
     ChevronRight,
 } from "lucide-react-native";
+import { colors } from "@/theme";
 
 type Props = {
     onPress: () => void;
@@ -49,7 +50,7 @@ const NextClassCard = ({ onPress }: Props) => {
                     <View style={styles.metaRow}>
                         <Clock3
                             size={14}
-                            color="#64748B"
+                            color={colors.textSecondary}
                         />
 
                         <Text style={styles.metaText}>
@@ -60,7 +61,7 @@ const NextClassCard = ({ onPress }: Props) => {
                     <View style={styles.metaRow}>
                         <MapPin
                             size={14}
-                            color="#64748B"
+                            color={colors.textSecondary}
                         />
 
                         <Text style={styles.metaText}>
@@ -72,7 +73,8 @@ const NextClassCard = ({ onPress }: Props) => {
 
             <ChevronRight
                 size={22}
-                color="#94A3B8"
+                color={colors.inactive
+                }
             />
         </TouchableOpacity>
     );
@@ -82,7 +84,7 @@ export default NextClassCard;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.surface,
         borderRadius: 24,
         padding: 18,
 
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
     },
 
     label: {
-        fontSize: 12,
+        fontSize: 15,
         fontWeight: "700",
         color: "#7C3AED",
         letterSpacing: 1,
@@ -145,7 +147,7 @@ const styles = StyleSheet.create({
     metaText: {
         marginLeft: 6,
         fontSize: 14,
-        color: "#64748B",
+        color: colors.textSecondary ,
         fontWeight: "500",
     },
 });

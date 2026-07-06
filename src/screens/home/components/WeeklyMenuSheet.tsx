@@ -15,11 +15,13 @@ import {
     UtensilsCrossed,
     X,
 } from "lucide-react-native";
+import { colors } from "@/theme";
 
 export type WeeklyMenuSheetRef = {
     expand: () => void;
     close: () => void;
 };
+
 
 const weeklyMenu = [
     {
@@ -115,7 +117,7 @@ const WeeklyMenuSheet = forwardRef<WeeklyMenuSheetRef>((_, ref) => {
                     <View style={styles.headerLeft}>
                         <UtensilsCrossed
                             size={22}
-                            color="#2563EB"
+                            color={colors.primary}
                         />
 
                         <Text style={styles.title}>
@@ -126,7 +128,7 @@ const WeeklyMenuSheet = forwardRef<WeeklyMenuSheetRef>((_, ref) => {
                     <Pressable onPress={() => setVisible(false)}>
                         <X
                             size={22}
-                            color="#64748B"
+                            color={colors.textSecondary}
                         />
                     </Pressable>
                 </View>
@@ -221,7 +223,7 @@ const styles = StyleSheet.create({
         fontSize: 19,
         fontWeight: "700",
 
-        color: "#2563EB",
+        color: colors.primary,
 
         marginBottom: 14,
     },
@@ -239,7 +241,7 @@ const styles = StyleSheet.create({
 
     menu: {
         fontSize: 14,
-        color: "#64748B",
+        color:colors.textSecondary,
         lineHeight: 20,
     },
 });

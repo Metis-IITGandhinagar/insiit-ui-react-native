@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Settings2 } from "lucide-react-native";
+import { colors, typography } from "@/theme";
 
 const GreetingSection = () => {
     const hour = new Date().getHours();
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.surface,
         justifyContent: "center",
         alignItems: "center",
 
@@ -76,15 +77,13 @@ const styles = StyleSheet.create({
 
     greeting: {
         marginTop:30,
-        fontSize: 15,
-        color: "#64748B",
-        fontWeight: "500",
+        ...typography.h3,
+        color: colors.textSecondary,
     },
 
     name: {
         marginTop: 2,
-        fontSize: 28,
-        fontWeight: "800",
-        color: "#0F172A",
+        ...typography.h1,
+        color: "#000000",
     },
 });
