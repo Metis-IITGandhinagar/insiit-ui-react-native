@@ -15,7 +15,7 @@ import {
     RefreshCcw,
     X,
 } from "lucide-react-native";
-import { colors } from "@/theme";
+import { colors, radius, spacing, typography } from "@/theme";
 
 export type QRBottomSheetRef = {
     expand: () => void;
@@ -117,12 +117,10 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 0,
         width: "100%",
-        backgroundColor: "#FFF",
-
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-
-        padding: 24,
+        backgroundColor: colors.surface,
+        borderTopLeftRadius: radius.xl,
+        borderTopRightRadius: radius.xl,
+        padding: spacing.xl,
         paddingBottom: 40,
     },
 
@@ -160,13 +158,11 @@ const styles = StyleSheet.create({
         width: 240,
         height: 240,
         borderRadius: 24,
-        backgroundColor: "#F8FAFC",
-
+        backgroundColor: colors.surfaceAlt,
         justifyContent: "center",
         alignItems: "center",
-
         borderWidth: 1,
-        borderColor: "#E2E8F0",
+        borderColor: colors.borderSoft,
     },
 
     expiry: {
@@ -178,8 +174,7 @@ const styles = StyleSheet.create({
 
     refreshButton: {
         backgroundColor: colors.primary,
-        borderRadius: 16,
-
+        borderRadius: radius.lg,
         paddingVertical: 15,
 
         justifyContent: "center",
@@ -190,9 +185,8 @@ const styles = StyleSheet.create({
 
     refreshText: {
         marginLeft: 8,
-        color: "#FFF",
-        fontWeight: "700",
-        fontSize: 16,
+        color: colors.surface,
+        ...typography.body,
     },
 
     note: {

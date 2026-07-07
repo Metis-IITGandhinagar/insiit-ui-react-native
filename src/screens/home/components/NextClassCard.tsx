@@ -11,7 +11,7 @@ import {
     MapPin,
     ChevronRight,
 } from "lucide-react-native";
-import { colors } from "@/theme";
+import { colors, radius, shadows, spacing, typography } from "@/theme";
 
 type Props = {
     onPress: () => void;
@@ -85,22 +85,12 @@ export default NextClassCard;
 const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.surface,
-        borderRadius: 24,
-        padding: 18,
-
+        borderRadius: radius.xl,
+        padding: spacing.lg,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-
-        shadowColor: "#000",
-        shadowOpacity: 0.06,
-        shadowRadius: 14,
-        shadowOffset: {
-            width: 0,
-            height: 6,
-        },
-
-        elevation: 5,
+        ...shadows.card,
     },
 
     leftSection: {
@@ -111,13 +101,11 @@ const styles = StyleSheet.create({
     iconContainer: {
         width: 52,
         height: 52,
-        borderRadius: 26,
+        borderRadius: radius.round,
         backgroundColor: "#F3E8FF",
-
         justifyContent: "center",
         alignItems: "center",
-
-        marginRight: 16,
+        marginRight: spacing.md,
     },
 
     info: {
@@ -125,17 +113,14 @@ const styles = StyleSheet.create({
     },
 
     label: {
-        fontSize: 15,
-        fontWeight: "700",
+        ...typography.label,
         color: "#7C3AED",
-        letterSpacing: 1,
     },
 
     subject: {
         marginTop: 4,
-        fontSize: 19,
-        fontWeight: "700",
-        color: "#0F172A",
+        ...typography.h3,
+        color: colors.text,
     },
 
     metaRow: {

@@ -1,19 +1,12 @@
 import React, { useMemo, useState } from "react";
-import {
-    SafeAreaView,
-    View,
-    FlatList,
-    StyleSheet,
-    Text,
-    StatusBar,
-} from "react-native";
+import { FlatList, SafeAreaView, StatusBar, StyleSheet, Text, View } from "react-native";
 
 import SearchBar from "./components/SearchBar";
 import EventCard from "./components/EventCard";
 
 import { events } from "./data/events";
 import FloatingNavbar from "../home/components/FloatingNavbar";
-import { colors } from "@/theme";
+import { colors, spacing, typography } from "@/theme";
 
 export default function SearchScreen() {
     const [search, setSearch] = useState("");
@@ -78,48 +71,39 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F7F8FC",
+        backgroundColor: colors.background,
     },
-
     content: {
         flex: 1,
     },
-
     header: {
         backgroundColor: colors.background,
-        paddingHorizontal: 20,
+        paddingHorizontal: spacing.lg,
         paddingTop: 50,
-        paddingBottom: 16,
+        paddingBottom: spacing.md,
     },
-
     listContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 120, 
+        paddingHorizontal: spacing.lg,
+        paddingBottom: 120,
     },
-
     heading: {
-        fontSize: 24,
-        fontWeight: "700",
-        color: "#111827",
-        marginHorizontal: 20,
+        ...typography.h2,
+        color: colors.text,
+        marginHorizontal: spacing.lg,
         marginBottom: 5,
-        paddingTop:20,
+        paddingTop: spacing.lg,
     },
-
     emptyContainer: {
         alignItems: "center",
         marginTop: 80,
     },
-
     emptyTitle: {
-        fontSize: 20,
-        fontWeight: "600",
-        color: "#111827",
+        ...typography.h3,
+        color: colors.text,
     },
-
     emptySubtitle: {
-        marginTop: 8,
-        color: "#6B7280",
-        fontSize: 15,
+        marginTop: spacing.sm,
+        color: colors.textSecondary,
+        ...typography.body,
     },
 });

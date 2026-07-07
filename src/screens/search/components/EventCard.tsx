@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { colors, radius, shadows, spacing, typography } from "@/theme";
 import { Event } from "../types";
 
 interface Props {
@@ -76,19 +77,10 @@ export default EventCard;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 22,
-        marginBottom: 22,
-
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        shadowOffset: {
-            width: 0,
-            height: 5,
-        },
-
-        elevation: 5,
+        backgroundColor: colors.surface,
+        borderRadius: radius.xl,
+        marginBottom: spacing.xl,
+        ...shadows.card,
         overflow: "hidden",
     },
 
@@ -118,25 +110,24 @@ const styles = StyleSheet.create({
     },
 
     content: {
-        padding: 18,
+        padding: spacing.lg,
     },
 
     title: {
-        fontSize: 22,
-        fontWeight: "700",
-        color: "#111827",
-        marginBottom: 14,
+        ...typography.h3,
+        color: colors.text,
+        marginBottom: spacing.md,
     },
 
     infoRow: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 10,
+        marginBottom: spacing.sm,
     },
 
     infoText: {
-        marginLeft: 10,
-        fontSize: 15,
-        color: "#6B7280",
+        marginLeft: spacing.sm,
+        ...typography.body,
+        color: colors.textSecondary,
     },
 });

@@ -9,23 +9,12 @@ import {
     Wrench,
 } from "lucide-react-native";
 
-import {
-    useNavigation,
-    useRoute,
-    NavigationProp,
-} from "@react-navigation/native";
-import { colors } from "@/theme";
+import { useNavigation, useRoute, NavigationProp } from "@react-navigation/native";
+import { colors, radius, spacing } from "@/theme";
+import type { RootStackParamList } from "@/navigation/types";
 
 const PRIMARY = colors.primary;
 const INACTIVE = colors.inactive;
-
-type RootStackParamList = {
-    Home: undefined;
-    Search: undefined;
-    Tools: undefined;
-    Bus: undefined;
-    More: undefined;
-};
 
 type NavItemProps = {
     icon: LucideIcon;
@@ -101,20 +90,18 @@ export default FloatingNavbar;
 const styles = StyleSheet.create({
     wrapper: {
         position: "absolute",
-        left: 20,
-        right: 20,
+        left: spacing.lg,
+        right: spacing.lg,
         bottom: 70,
     },
 
     container: {
         height: 72,
         backgroundColor: colors.surface,
-        borderRadius: 36,
-
+        borderRadius: radius.round,
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
-
         shadowColor: "#000",
         shadowOpacity: 0.12,
         shadowRadius: 20,
@@ -122,14 +109,13 @@ const styles = StyleSheet.create({
             width: 0,
             height: 10,
         },
-
         elevation: 12,
     },
 
     item: {
         width: 52,
         height: 52,
-        borderRadius: 26,
+        borderRadius: radius.round,
         justifyContent: "center",
         alignItems: "center",
     },

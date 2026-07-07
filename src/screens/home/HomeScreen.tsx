@@ -1,10 +1,6 @@
 import React, { useRef } from "react";
-import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    StatusBar,
-} from "react-native";
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet } from "react-native";
+
 import MessCard from "./components/MessCard";
 import NextClassCard from "./components/NextClassCard";
 import NextBusCard from "./components/NextBusCard";
@@ -13,12 +9,15 @@ import QRBottomSheet from "./components/QRBottomSheet";
 import WeeklyMenuSheet from "./components/WeeklyMenuSheet";
 import TimetableSheet from "./components/TimetableSheet";
 import GreetingSection from "./components/GreetingSection";
-import { colors } from "@/theme";
+import { colors, spacing } from "@/theme";
+import type { QRBottomSheetRef } from "./components/QRBottomSheet";
+import type { WeeklyMenuSheetRef } from "./components/WeeklyMenuSheet";
+import type { TimetableSheetRef } from "./components/TimetableSheet";
 
 const HomeScreen = () => {
-    const qrSheetRef = useRef<any>(null);
-    const menuSheetRef = useRef<any>(null);
-    const timetableSheetRef = useRef<any>(null);
+    const qrSheetRef = useRef<QRBottomSheetRef>(null);
+    const menuSheetRef = useRef<WeeklyMenuSheetRef>(null);
+    const timetableSheetRef = useRef<TimetableSheetRef>(null);
 
     return (
         <>
@@ -70,11 +69,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background,
     },
-
     content: {
-        paddingHorizontal: 20,
-        paddingTop: 18,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
         paddingBottom: 120,
-        gap: 20,
+        gap: spacing.lg,
     },
 });

@@ -1,36 +1,28 @@
 import React from "react";
-import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { colors } from "@/theme";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
+import { colors, radius, spacing, typography } from "@/theme";
+import type { RootStackParamList } from "@/navigation/types";
+
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen = () => {
-    const navigation = useNavigation<any>();
+    const navigation = useNavigation<LoginScreenNavigationProp>();
+
+    const goHome = () => navigation.replace("Home");
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-
                 <Text style={styles.logo}>INSIIT</Text>
+                <Text style={styles.title}>Welcome to INSIIT</Text>
+                <Text style={styles.subtitle}>Connecting IIT Gandhinagar</Text>
 
-                <Text style={styles.title}>
-                    Welcome to INSIIT
-                </Text>
-
-                <Text style={styles.subtitle}>
-                    Connecting IIT Gandhinagar
-                </Text>
-
-                <TouchableOpacity activeOpacity={0.85} style={styles.button}
-                    onPress={() => navigation.replace("Home")}>
-                    <Text style={styles.buttonText}>
-                        Login with IITGN ID
-                    </Text>
+                <TouchableOpacity activeOpacity={0.85} style={styles.button} onPress={goHome}>
+                    <Text style={styles.buttonText}>Login with IITGN ID</Text>
                 </TouchableOpacity>
 
                 <Text style={styles.description}>
@@ -39,12 +31,9 @@ const LoginScreen = () => {
                     & community
                 </Text>
 
-                <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.replace("Home")}>
-                    <Text style={styles.guest}>
-                        Login as Guest
-                    </Text>
+                <TouchableOpacity activeOpacity={0.7} onPress={goHome}>
+                    <Text style={styles.guest}>Login as Guest</Text>
                 </TouchableOpacity>
-
             </View>
         </SafeAreaView>
     );
@@ -53,77 +42,62 @@ const LoginScreen = () => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-
     container: {
         flex: 1,
-        backgroundColor:colors.surface,
+        backgroundColor: colors.surface,
     },
-
     content: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        paddingHorizontal: 30,
+        paddingHorizontal: spacing.xl,
     },
-
     logo: {
-        fontSize: 52,
-        fontWeight: "800",
-        color: "#1695D2",
+        ...typography.display,
+        color: colors.accent,
         letterSpacing: 1,
-        marginBottom: 35,
+        marginBottom: spacing.xxl,
     },
-
     title: {
-        fontSize: 32,
-        fontWeight: "700",
-        color: "#111",
-        marginBottom: 8,
+        ...typography.h1,
+        color: colors.textStrong,
+        marginBottom: spacing.xs,
     },
-
     subtitle: {
-        fontSize: 17,
-        color: "#555",
-        marginBottom: 50,
+        ...typography.body,
+        color: colors.textSecondary,
+        marginBottom: spacing.xxl,
     },
-
     button: {
         width: "100%",
-        backgroundColor: "#1695D2",
-        borderRadius: 40,
-        paddingVertical: 18,
+        backgroundColor: colors.accent,
+        borderRadius: radius.round,
+        paddingVertical: spacing.lg,
         alignItems: "center",
-
-        shadowColor: "#1695D2",
+        shadowColor: colors.accent,
         shadowOpacity: 0.25,
         shadowRadius: 10,
         shadowOffset: {
             width: 0,
             height: 5,
         },
-
         elevation: 6,
     },
-
     buttonText: {
-        color: "#FFF",
-        fontSize: 18,
-        fontWeight: "700",
+        color: colors.surface,
+        ...typography.button,
     },
-
     description: {
-        marginTop: 18,
+        marginTop: spacing.md,
         textAlign: "center",
-        color: "#666",
-        fontSize: 15,
+        color: colors.textSecondary,
+        ...typography.caption,
         lineHeight: 22,
     },
-
     guest: {
-        marginTop: 45,
-        fontSize: 19,
-        color: "#148CC8",
+        marginTop: spacing.xxl,
+        ...typography.body,
+        color: colors.accent,
         fontWeight: "600",
     },
-
 });

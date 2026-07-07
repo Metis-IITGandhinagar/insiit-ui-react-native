@@ -12,7 +12,7 @@ import {
     View,
 } from "react-native";
 import { CalendarDays, X } from "lucide-react-native";
-import { colors } from "@/theme";
+import { colors, radius, spacing, typography } from "@/theme";
 
 export type TimetableSheetRef = {
     expand: () => void;
@@ -143,12 +143,10 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "72%",
 
-        backgroundColor: "#FFF",
-
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-
-        padding: 24,
+        backgroundColor: colors.surface,
+        borderTopLeftRadius: radius.xl,
+        borderTopRightRadius: radius.xl,
+        padding: spacing.xl,
     },
 
     header: {
@@ -172,27 +170,22 @@ const styles = StyleSheet.create({
     },
 
     dayCard: {
-        backgroundColor: "#F8FAFC",
-
-        borderRadius: 18,
-
-        padding: 18,
+        backgroundColor: colors.surfaceAlt,
+        borderRadius: radius.lg,
+        padding: spacing.lg,
 
         marginBottom: 14,
     },
 
     day: {
-        fontSize: 18,
-        fontWeight: "700",
-
+        ...typography.h3,
         marginBottom: 10,
-
         color: colors.primary,
     },
 
     classItem: {
-        fontSize: 15,
-        color: "#334155",
+        ...typography.body,
+        color: colors.textSecondary,
         marginBottom: 6,
     },
 });

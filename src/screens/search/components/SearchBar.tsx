@@ -6,6 +6,7 @@ import {
     StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { colors, radius, shadows, spacing } from "@/theme";
 
 interface Props {
     value: string;
@@ -18,14 +19,14 @@ const SearchBar = ({ value, onChangeText }: Props) => {
             <Ionicons
                 name="search"
                 size={20}
-                color="#9CA3AF"
+                color={colors.inactive}
                 style={styles.icon}
             />
 
             <TextInput
                 style={styles.input}
                 placeholder="Search events..."
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.inactive}
                 value={value}
                 onChangeText={onChangeText}
                 autoCorrect={false}
@@ -40,7 +41,7 @@ const SearchBar = ({ value, onChangeText }: Props) => {
                     <Ionicons
                         name="close-circle"
                         size={20}
-                        color="#9CA3AF"
+                        color={colors.inactive}
                     />
                 </TouchableOpacity>
             )}
@@ -54,24 +55,11 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
-
-        backgroundColor: "#FFFFFF",
-
-        borderRadius: 18,
-
+        backgroundColor: colors.surface,
+        borderRadius: radius.lg,
         height: 56,
-
-        paddingHorizontal: 16,
-
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-
-        elevation: 3,
+        paddingHorizontal: spacing.md,
+        ...shadows.card,
     },
 
     icon: {
@@ -81,6 +69,6 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         fontSize: 16,
-        color: "#111827",
+        color: colors.text,
     },
 });

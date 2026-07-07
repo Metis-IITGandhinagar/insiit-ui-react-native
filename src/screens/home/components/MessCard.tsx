@@ -11,7 +11,7 @@ import {
     QrCode,
     ChevronRight,
 } from "lucide-react-native";
-import { colors, typography } from "@/theme";
+import { colors, radius, shadows, spacing, typography } from "@/theme";
 
 type Meal = {
     mealName: string;
@@ -117,18 +117,9 @@ export default MessCard;
 const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.surface,
-        borderRadius: 28,
-        padding: 22,
-
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 18,
-        shadowOffset: {
-            width: 0,
-            height: 10,
-        },
-
-        elevation: 6,
+        borderRadius: radius.xl,
+        padding: spacing.xl,
+        ...shadows.card,
     },
 
     header: {
@@ -145,21 +136,21 @@ const styles = StyleSheet.create({
     iconCircle: {
         width: 54,
         height: 54,
-        borderRadius: 27,
+        borderRadius: radius.round,
         backgroundColor: "#EAF2FF",
         justifyContent: "center",
         alignItems: "center",
-        marginRight: 16,
+        marginRight: spacing.md,
     },
 
     featuredContainer: {
-        marginTop: 20,
+        marginTop: spacing.lg,
         marginBottom: 4,
     },
 
     featuredDish: {
         ...typography.subtitle,
-        color: "#000000",
+        color: colors.text,
     },
 
     moreItems: {
@@ -170,7 +161,7 @@ const styles = StyleSheet.create({
 
     mealTitle: {
         ...typography.h2,
-        color: "#000000",
+        color: colors.text,
     },
 
     timeRow: {
@@ -189,16 +180,16 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 14,
+        marginTop: spacing.md,
     },
 
     qrButton: {
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: colors.primary,
-        paddingHorizontal: 18,
+        paddingHorizontal: spacing.md,
         paddingVertical: 13,
-        borderRadius: 16,
+        borderRadius: radius.lg,
     },
 
     qrText: {

@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Settings2 } from "lucide-react-native";
-import { colors, typography } from "@/theme";
+import { colors, radius, shadows, spacing, typography } from "@/theme";
 
 const GreetingSection = () => {
     const hour = new Date().getHours();
@@ -48,42 +48,29 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 6,
+        marginBottom: spacing.xs,
     },
-
     settingsButton: {
         marginTop: 30,
         width: 48,
         height: 48,
-        borderRadius: 24,
+        borderRadius: radius.round,
         backgroundColor: colors.surface,
         justifyContent: "center",
         alignItems: "center",
-
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 10,
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-
-        elevation: 3,
+        ...shadows.card,
     },
-
     textContainer: {
         alignItems: "flex-end",
     },
-
     greeting: {
-        marginTop:30,
+        marginTop: 30,
         ...typography.h3,
         color: colors.textSecondary,
     },
-
     name: {
         marginTop: 2,
         ...typography.h1,
-        color: "#000000",
+        color: colors.text,
     },
 });

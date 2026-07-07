@@ -15,7 +15,7 @@ import {
     UtensilsCrossed,
     X,
 } from "lucide-react-native";
-import { colors } from "@/theme";
+import { colors, radius, spacing, typography } from "@/theme";
 
 export type WeeklyMenuSheetRef = {
     expand: () => void;
@@ -181,12 +181,10 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "82%",
 
-        backgroundColor: "#FFF",
-
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-
-        padding: 24,
+        backgroundColor: colors.surface,
+        borderTopLeftRadius: radius.xl,
+        borderTopRightRadius: radius.xl,
+        padding: spacing.xl,
     },
 
     header: {
@@ -210,19 +208,15 @@ const styles = StyleSheet.create({
     },
 
     dayCard: {
-        backgroundColor: "#F8FAFC",
-
-        borderRadius: 18,
-
-        padding: 18,
+        backgroundColor: colors.surfaceAlt,
+        borderRadius: radius.lg,
+        padding: spacing.lg,
 
         marginBottom: 16,
     },
 
     day: {
-        fontSize: 19,
-        fontWeight: "700",
-
+        ...typography.h3,
         color: colors.primary,
 
         marginBottom: 14,
@@ -233,15 +227,14 @@ const styles = StyleSheet.create({
     },
 
     meal: {
-        fontSize: 15,
-        fontWeight: "700",
-        color: "#0F172A",
+        ...typography.body,
+        color: colors.text,
         marginBottom: 3,
     },
 
     menu: {
-        fontSize: 14,
-        color:colors.textSecondary,
+        ...typography.caption,
+        color: colors.textSecondary,
         lineHeight: 20,
     },
 });
