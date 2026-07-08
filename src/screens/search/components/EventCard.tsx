@@ -14,6 +14,7 @@ interface Props {
     event: Event;
     onPress?: () => void;
     onBookmark?: () => void;
+    onDelete?: () => void;
 }
 
 const EventCard = ({ event, onPress, onBookmark }: Props) => {
@@ -129,5 +130,22 @@ const styles = StyleSheet.create({
         marginLeft: spacing.sm,
         ...typography.body,
         color: colors.textSecondary,
+    },
+    footer: {
+        marginTop: spacing.md,
+        flexDirection: "row",
+        justifyContent: "flex-end",
+    },
+
+    deleteButton: {
+        width: 38,
+        height: 38,
+
+        borderRadius: 19,
+
+        justifyContent: "center",
+        alignItems: "center",
+
+        backgroundColor: "#FEF2F2",
     },
 });

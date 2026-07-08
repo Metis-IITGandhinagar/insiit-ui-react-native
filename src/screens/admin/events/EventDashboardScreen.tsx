@@ -6,38 +6,36 @@ import {
     StyleSheet,
 } from "react-native";
 
-import FloatingNavbar from "../home/components/FloatingNavbar";
-
-import ToolsHeader from "./components/ToolsHeader";
-import EmergencyCard from "./components/EmergencyCard";
-import ToolSection from "./components/ToolSection";
 import { colors, spacing } from "@/theme";
-import QuickActions from "./components/QuickActions";
 
-const ToolsScreen = () => {
+import AdminHeader from "../components/AdminHeader";
+
+import EventToolbar from "./components/EventToolbar";
+
+const EventDashboardScreen = () => {
     return (
         <>
+            <StatusBar
+                barStyle="dark-content"
+                backgroundColor={colors.background}
+            />
+
             <SafeAreaView style={styles.container}>
                 <ScrollView
-                    showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.content}
+                    showsVerticalScrollIndicator={false}
                 >
-                    <ToolsHeader />
+                    <AdminHeader />
 
-                    <EmergencyCard />
+                    <EventToolbar />
 
-                    <QuickActions />
-
-                    <ToolSection />
                 </ScrollView>
-
-                <FloatingNavbar />
             </SafeAreaView>
         </>
     );
 };
 
-export default ToolsScreen;
+export default EventDashboardScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -48,7 +46,7 @@ const styles = StyleSheet.create({
     content: {
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.md,
-        paddingBottom: 120,
+        paddingBottom: spacing.xxxl,
         gap: spacing.lg,
     },
 });

@@ -1,16 +1,14 @@
-import React, { useState } from "react";
-import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { BusType } from "../services/busTypes";
+import { colors, radius, shadows, spacing, typography } from "@/theme";
 
-type BusType = "EECO" | "29" | "56";
+interface Props {
+    selected: BusType;
+    onSelect: (tab: BusType) => void;
+}
 
-const BusTypeTabs = () => {
-    const [selected, setSelected] = useState<BusType>("EECO");
-
+const BusTypeTabs: React.FC<Props> = ({ selected, onSelect }) => {
     const tabs: BusType[] = ["EECO", "29", "56"];
 
     return (
@@ -26,7 +24,7 @@ const BusTypeTabs = () => {
                             styles.tab,
                             active && styles.activeTab,
                         ]}
-                        onPress={() => setSelected(tab)}
+                        onPress={() => onSelect(tab)}
                     >
                         <Text
                             style={[
@@ -47,47 +45,32 @@ export default BusTypeTabs;
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "#FFFFFF",
-
-        borderRadius: 18,
-
-        padding: 6,
-
+        backgroundColor: colors.surface,
+        borderRadius: radius.lg,
+        padding: spacing.xs,
         flexDirection: "row",
-
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-
-        elevation: 3,
+        ...shadows.card,
     },
 
     tab: {
         flex: 1,
-
-        height: 48,
-
-        borderRadius: 14,
-
+        height: 46,
+        borderRadius: radius.md,
         justifyContent: "center",
         alignItems: "center",
     },
 
     activeTab: {
-        backgroundColor: "#2563EB",
+        backgroundColor: colors.primary,
     },
 
     tabText: {
-        fontSize: 16,
+        ...typography.body,
         fontWeight: "700",
-        color: "#64748B",
+        color: colors.textSecondary,
     },
 
     activeTabText: {
-        color: "#FFFFFF",
+        color: colors.surface,
     },
 });

@@ -1,30 +1,28 @@
 import React from "react";
-import {
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import {
-    Bus,
-    Clock3,
-    ArrowRight,
-} from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Bus, Clock3, ArrowRight } from "lucide-react-native";
+import { colors, radius, spacing, typography } from "@/theme";
 
-const NextBusHero = () => {
-    // Replace with API/service later
-    const vehicle = "EECO Shuttle";
-    const departure = "8:00 AM";
-    const countdown = "8 min";
-    const from = "Mess";
-    const to = "JEET";
+interface NextBusProps {
+    data: {
+        vehicle: string;
+        departure: string;
+        countdown: string;
+        from: string;
+        to: string;
+    } | null;
+}
+
+const NextBusHero: React.FC<NextBusProps> = ({ data }) => {
+    if (!data) return null;
 
     return (
         <View style={styles.card}>
             <View style={styles.topRow}>
                 <View style={styles.iconContainer}>
                     <Bus
-                        size={30}
-                        color="#2563EB"
+                        size={26}
+                        color={colors.surface}
                         strokeWidth={2.2}
                     />
                 </View>
@@ -35,14 +33,14 @@ const NextBusHero = () => {
                     </Text>
 
                     <Text style={styles.vehicle}>
-                        {vehicle}
+                        {data.vehicle}
                     </Text>
                 </View>
             </View>
 
             <View style={styles.countdownSection}>
                 <Text style={styles.countdown}>
-                    {countdown}
+                    {data.countdown}
                 </Text>
 
                 <Text style={styles.leavesIn}>
@@ -52,27 +50,28 @@ const NextBusHero = () => {
 
             <View style={styles.routeRow}>
                 <Text style={styles.location}>
-                    {from}
+                    {data.from}
                 </Text>
 
                 <ArrowRight
                     size={18}
-                    color="#64748B"
+                    color={colors.surface}
+                    strokeWidth={2.5}
                 />
 
                 <Text style={styles.location}>
-                    {to}
+                    {data.to}
                 </Text>
             </View>
 
             <View style={styles.bottomRow}>
                 <Clock3
                     size={16}
-                    color="#64748B"
+                    color="rgba(255, 255, 255, 0.75)"
                 />
 
                 <Text style={styles.departure}>
-                    Departure • {departure}
+                    Departure • {data.departure}
                 </Text>
             </View>
         </View>
@@ -83,9 +82,9 @@ export default NextBusHero;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#2563EB",
-        borderRadius: 28,
-        padding: 24,
+        backgroundColor: colors.primary,
+        borderRadius: radius.xl,
+        padding: spacing.xl,
     },
 
     topRow: {
@@ -94,15 +93,13 @@ const styles = StyleSheet.create({
     },
 
     iconContainer: {
-        width: 58,
-        height: 58,
-        borderRadius: 29,
-        backgroundColor: "rgba(255,255,255,0.15)",
-
+        width: 52,
+        height: 52,
+        borderRadius: radius.round,
+        backgroundColor: "rgba(255, 255, 255, 0.18)",
         justifyContent: "center",
         alignItems: "center",
-
-        marginRight: 16,
+        marginRight: spacing.md,
     },
 
     info: {
@@ -110,66 +107,57 @@ const styles = StyleSheet.create({
     },
 
     label: {
-        color: "#DCEAFE",
-        fontSize: 12,
-        fontWeight: "700",
-        letterSpacing: 1,
+        ...typography.label,
+        color: "rgba(255, 255, 255, 0.7)",
     },
 
     vehicle: {
-        color: "#FFFFFF",
-        fontSize: 24,
-        fontWeight: "800",
-        marginTop: 4,
+        ...typography.h2,
+        color: colors.surface,
+        marginTop: 2,
     },
 
     countdownSection: {
-        marginTop: 28,
+        marginTop: spacing.xl,
         alignItems: "center",
     },
 
     countdown: {
-        color: "#FFFFFF",
-        fontSize: 48,
-        fontWeight: "800",
+        ...typography.display,
+        fontSize: 52,
+        color: colors.surface,
     },
 
     leavesIn: {
-        color: "#DBEAFE",
-        fontSize: 16,
-        marginTop: 4,
-        textTransform: "uppercase",
-        letterSpacing: 1,
+        ...typography.label,
+        color: "rgba(255, 255, 255, 0.8)",
+        marginTop: 2,
     },
 
     routeRow: {
-        marginTop: 30,
-
+        marginTop: spacing.xl,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-
-        gap: 10,
+        gap: spacing.sm,
     },
 
     location: {
-        color: "#FFFFFF",
-        fontSize: 18,
-        fontWeight: "700",
+        ...typography.h3,
+        color: colors.surface,
     },
 
     bottomRow: {
-        marginTop: 24,
-
+        marginTop: spacing.lg,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
     },
 
     departure: {
-        color: "#DBEAFE",
-        fontSize: 15,
-        marginLeft: 8,
+        ...typography.caption,
+        color: "rgba(255, 255, 255, 0.85)",
+        marginLeft: spacing.xs,
         fontWeight: "600",
     },
 });

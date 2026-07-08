@@ -1,72 +1,38 @@
 import React from "react";
-import {
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import {
-    Clock3,
-    ArrowRight,
-} from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Clock3, ArrowRight } from "lucide-react-native";
+import { BusDeparture } from "../services/busTypes";
+import { colors, radius, shadows, spacing, typography } from "@/theme";
 
-const departures = [
-    {
-        time: "7:50 AM",
-        from: "Mess",
-        to: "JEET",
-        next: false,
-    },
-    {
-        time: "8:00 AM",
-        from: "JEET",
-        to: "Mess",
-        next: true,
-    },
-    {
-        time: "10:00 AM",
-        from: "Mess",
-        to: "JEET",
-        next: false,
-    },
-    {
-        time: "10:30 AM",
-        from: "JEET",
-        to: "Mess",
-        next: false,
-    },
-    {
-        time: "11:00 AM",
-        from: "Mess",
-        to: "JEET",
-        next: false,
-    },
-];
+interface ScheduleProps {
+    departures: BusDeparture[];
+}
 
-const TodaySchedule = () => {
+const TodaySchedule: React.FC<ScheduleProps> = ({ departures }) => {
     return (
         <View style={styles.card}>
             <Text style={styles.heading}>
                 Today's Schedule
             </Text>
 
-            {departures.map((bus) => (
+            {departures.map((bus, idx) => (
                 <View
-                    key={`${bus.time}-${bus.from}`}
+                    key={`${bus.time}-${bus.from}-${idx}`}
                     style={[
                         styles.row,
-                        bus.next && styles.nextRow,
+                        bus.isNext && styles.nextRow,
                     ]}
                 >
                     <View style={styles.left}>
                         <Clock3
                             size={16}
-                            color={bus.next ? "#2563EB" : "#64748B"}
+                            color={bus.isNext ? colors.primary : colors.textSecondary}
                         />
 
                         <Text
                             style={[
                                 styles.time,
-                                bus.next && styles.nextTime,
+                                bus.isNext && styles.nextTime,
                             ]}
                         >
                             {bus.time}
@@ -80,7 +46,7 @@ const TodaySchedule = () => {
 
                         <ArrowRight
                             size={14}
-                            color="#64748B"
+                            color={colors.textSecondary}
                         />
 
                         <Text style={styles.place}>
@@ -88,7 +54,7 @@ const TodaySchedule = () => {
                         </Text>
                     </View>
 
-                    {bus.next && (
+                    {bus.isNext && (
                         <View style={styles.badge}>
                             <Text style={styles.badgeText}>
                                 NEXT
@@ -105,62 +71,53 @@ export default TodaySchedule;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 24,
-        padding: 20,
-
-        shadowColor: "#000",
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        shadowOffset: {
-            width: 0,
-            height: 6,
-        },
-
-        elevation: 4,
+        backgroundColor: colors.surface,
+        borderRadius: radius.xl,
+        padding: spacing.lg,
+        ...shadows.card,
     },
 
     heading: {
-        fontSize: 20,
-        fontWeight: "700",
-        color: "#0F172A",
-        marginBottom: 18,
+        ...typography.h3,
+        color: colors.text,
+        marginBottom: spacing.md,
     },
 
     row: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-
-        paddingVertical: 14,
-
+        paddingVertical: spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: "#F1F5F9",
+        borderBottomColor: colors.borderSoft,
     },
 
     nextRow: {
-        backgroundColor: "#EFF6FF",
-        borderRadius: 14,
-        paddingHorizontal: 12,
+        backgroundColor: colors.surfaceAlt,
+        borderRadius: radius.md,
+        paddingHorizontal: spacing.sm,
         borderBottomWidth: 0,
-        marginBottom: 8,
+        marginVertical: spacing.xs,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
 
     left: {
         flexDirection: "row",
         alignItems: "center",
-        width: 95,
+        width: 100,
     },
 
     time: {
-        marginLeft: 8,
-        fontSize: 15,
+        ...typography.caption,
+        marginLeft: spacing.sm,
+        color: colors.textSecondary,
         fontWeight: "600",
-        color: "#334155",
     },
 
     nextTime: {
-        color: "#2563EB",
+        color: colors.primary,
+        fontWeight: "700",
     },
 
     route: {
@@ -168,25 +125,25 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        gap: 6,
+        gap: spacing.xs,
     },
 
     place: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#0F172A",
+        ...typography.caption,
+        fontWeight: "700",
+        color: colors.text,
     },
 
     badge: {
-        backgroundColor: "#2563EB",
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 12,
+        backgroundColor: colors.primary,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: 4,
+        borderRadius: radius.sm,
     },
 
     badgeText: {
-        color: "#FFFFFF",
-        fontSize: 11,
-        fontWeight: "700",
+        color: colors.surface,
+        ...typography.label,
+        fontSize: 10,
     },
 });

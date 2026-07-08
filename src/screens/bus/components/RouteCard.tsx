@@ -1,47 +1,39 @@
 import React from "react";
-import {
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import {
-    MapPinned,
-    Circle,
-} from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { MapPinned, Circle } from "lucide-react-native";
+import { colors, radius, shadows, spacing, typography } from "@/theme";
 
-const stops = [
-    "Mess",
-    "Rangmanch",
-    "Research Park",
-    "Gate 1",
-    "JEET",
-];
+interface RouteProps {
+    stops: string[];
+}
 
-const RouteCard = () => {
+const RouteCard: React.FC<RouteProps> = ({ stops }) => {
+    if (stops.length === 0) return null;
+
     return (
         <View style={styles.card}>
             <View style={styles.header}>
                 <MapPinned
                     size={22}
-                    color="#2563EB"
+                    color={colors.primary}
                 />
 
                 <Text style={styles.title}>
-                    Route
+                    Route Timeline
                 </Text>
             </View>
 
             <View style={styles.timeline}>
                 {stops.map((stop, index) => (
                     <View
-                        key={stop}
+                        key={`${stop}-${index}`}
                         style={styles.stopRow}
                     >
                         <View style={styles.indicator}>
                             <Circle
-                                size={12}
-                                color="#2563EB"
-                                fill="#2563EB"
+                                size={10}
+                                color={colors.primary}
+                                fill={colors.primary}
                             />
 
                             {index !== stops.length - 1 && (
@@ -63,39 +55,26 @@ export default RouteCard;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
-
-        borderRadius: 24,
-
-        padding: 20,
-
-        shadowColor: "#000",
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        shadowOffset: {
-            width: 0,
-            height: 6,
-        },
-
-        elevation: 4,
+        backgroundColor: colors.surface,
+        borderRadius: radius.xl,
+        padding: spacing.lg,
+        ...shadows.card,
     },
 
     header: {
         flexDirection: "row",
         alignItems: "center",
-
-        marginBottom: 20,
+        marginBottom: spacing.lg,
     },
 
     title: {
-        marginLeft: 10,
-        fontSize: 20,
-        fontWeight: "700",
-        color: "#0F172A",
+        ...typography.h3,
+        marginLeft: spacing.sm,
+        color: colors.text,
     },
 
     timeline: {
-        marginLeft: 4,
+        marginLeft: spacing.xs,
     },
 
     stopRow: {
@@ -104,21 +83,21 @@ const styles = StyleSheet.create({
     },
 
     indicator: {
-        width: 22,
+        width: 20,
         alignItems: "center",
     },
 
     line: {
         width: 2,
-        height: 34,
-        backgroundColor: "#CBD5E1",
-        marginVertical: 4,
+        height: 36,
+        backgroundColor: colors.borderSoft,
+        marginVertical: spacing.xs,
     },
 
     stop: {
-        marginLeft: 14,
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#334155",
+        marginLeft: spacing.md,
+        ...typography.body,
+        fontSize: 15,
+        color: colors.text,
     },
 });

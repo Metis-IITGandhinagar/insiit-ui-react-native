@@ -11,6 +11,7 @@ import {
     GraduationCap,
     ClipboardList,
     Building2,
+    ArrowRight,
 } from "lucide-react-native";
 
 import {
@@ -56,7 +57,6 @@ const QuickActions = () => {
             <Text style={styles.heading}>
                 Quick Access
             </Text>
-
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -82,8 +82,9 @@ const QuickActions = () => {
                                     color={item.iconColor}
                                     strokeWidth={2}
                                 />
+                                
                             </View>
-
+                            
                             <Text style={styles.title}>
                                 {item.title}
                             </Text>
@@ -111,6 +112,7 @@ const styles = StyleSheet.create({
 
     list: {
         paddingRight: spacing.lg,
+        paddingBottom:spacing.md,
     },
 
     card: {

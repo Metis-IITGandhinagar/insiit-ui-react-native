@@ -2,24 +2,14 @@ import React from "react";
 import {
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
 } from "react-native";
-import { ArrowLeft, Bell } from "lucide-react-native";
+import { spacing } from "@/theme";
 
 const BusHeader = () => {
     return (
         <View style={styles.container}>
-            <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.iconButton}
-            >
-                <ArrowLeft
-                    size={22}
-                    color="#0F172A"
-                />
-            </TouchableOpacity>
-
+            
             <View style={styles.titleContainer}>
                 <Text style={styles.title}>
                     Bus Services
@@ -30,15 +20,6 @@ const BusHeader = () => {
                 </Text>
             </View>
 
-            <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.iconButton}
-            >
-                <Bell
-                    size={21}
-                    color="#0F172A"
-                />
-            </TouchableOpacity>
         </View>
     );
 };
@@ -47,7 +28,7 @@ export default BusHeader;
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: "row",
+        paddingTop: spacing.lg,
         alignItems: "center",
         justifyContent: "space-between",
     },

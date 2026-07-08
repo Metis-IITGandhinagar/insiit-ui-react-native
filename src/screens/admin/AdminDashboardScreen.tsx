@@ -6,29 +6,28 @@ import {
     StyleSheet,
 } from "react-native";
 
-import FloatingNavbar from "../home/components/FloatingNavbar";
-
-import ToolsHeader from "./components/ToolsHeader";
-import EmergencyCard from "./components/EmergencyCard";
-import ToolSection from "./components/ToolSection";
 import { colors, spacing } from "@/theme";
-import QuickActions from "./components/QuickActions";
 
-const ToolsScreen = () => {
+import FloatingNavbar from "@/screens/home/components/FloatingNavbar";
+
+import AdminHeader from "./components/AdminHeader";
+import AdminSection from "./components/AdminSection";
+
+const AdminDashboardScreen = () => {
     return (
         <>
+            <StatusBar
+                barStyle="dark-content"
+                backgroundColor={colors.background}
+            />
+
             <SafeAreaView style={styles.container}>
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.content}
                 >
-                    <ToolsHeader />
-
-                    <EmergencyCard />
-
-                    <QuickActions />
-
-                    <ToolSection />
+                    <AdminHeader />
+                    <AdminSection />
                 </ScrollView>
 
                 <FloatingNavbar />
@@ -37,7 +36,7 @@ const ToolsScreen = () => {
     );
 };
 
-export default ToolsScreen;
+export default AdminDashboardScreen;
 
 const styles = StyleSheet.create({
     container: {
