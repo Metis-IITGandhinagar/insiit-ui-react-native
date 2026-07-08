@@ -9,7 +9,7 @@ interface Props {
 }
 
 const BusTypeTabs: React.FC<Props> = ({ selected, onSelect }) => {
-    const tabs: BusType[] = ["EECO", "29", "56"];
+    const tabs: BusType[] = ["56", "29", "EECO"];
 
     return (
         <View style={styles.container}>

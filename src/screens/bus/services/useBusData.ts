@@ -3,7 +3,7 @@ import { BusType, ApiBusResponse, BusDeparture } from "./busTypes";
 import { busService, calculateMinutesLeft } from "./busServices";
 
 export const useBusData = () => {
-    const [selectedTab, setSelectedTab] = useState<BusType>("EECO");
+    const [selectedTab, setSelectedTab] = useState<BusType>("56");
     const [rawBuses, setRawBuses] = useState<ApiBusResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -20,14 +20,12 @@ export const useBusData = () => {
             });
     }, []);
 
-    // 1. Flexible token matching logic ("56" matches "56-seater" or "56-Seater")
     const filteredBuses = useMemo(() => {
         return rawBuses.filter(bus =>
             bus.BusName.toLowerCase().includes(selectedTab.toLowerCase())
         );
     }, [rawBuses, selectedTab]);
 
-    // 2. Chronological sequence parsing
     const scheduleData = useMemo(() => {
         if (filteredBuses.length === 0) {
             return { departures: [], nextBus: null, stops: [] };
