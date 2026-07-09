@@ -1,21 +1,11 @@
-import React, {
-    forwardRef,
-    useImperativeHandle,
-    useState,
-} from "react";
-import {
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import {
-    QrCode,
-    RefreshCcw,
-    X,
-} from "lucide-react-native";
+import React, { forwardRef, useImperativeHandle, useState, useEffect } from "react";
+import { Modal, Pressable, StyleSheet, Text, View, TextInput, ActivityIndicator } from "react-native";
+import { BlurView } from "expo-blur";
+import { QrCode,LogOut, X, KeyRound, User } from "lucide-react-native";
 import { colors, radius, spacing, typography } from "@/theme";
+import QRCode from "react-native-qrcode-svg";
+import { qrService } from "../services/qrService";
+import { QRSession } from "../services/qrTypes";
 
 export type QRBottomSheetRef = {
     expand: () => void;
@@ -24,82 +14,140 @@ export type QRBottomSheetRef = {
 
 const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
     const [visible, setVisible] = useState(false);
+    const [session, setSession] = useState<QRSession | null>(null);
+    const [uiLoading, setUiLoading] = useState(false);
+
+    const [email, setEmail] = useState("");
+    const [campusPassword, setCampusPassword] = useState("");
+    const [validationMessage, setValidationMessage] = useState<string | null>(null);
 
     useImperativeHandle(ref, () => ({
-        expand() {
-            setVisible(true);
-        },
-        close() {
-            setVisible(false);
-        },
+        expand() { setVisible(true); },
+        close() { setVisible(false); },
     }));
 
+    useEffect(() => {
+        if (visible) {
+            checkActiveAuthenticationState();
+        }
+    }, [visible]);
+
+    const checkActiveAuthenticationState = async () => {
+        const storedUser = await qrService.getSession();
+        setSession(storedUser);
+    };
+
+    const runInstituteSignInFlow = async () => {
+        if (!email.trim() || !campusPassword.trim()) {
+            setValidationMessage("Email and password are required.");
+            return;
+        }
+
+        try {
+            setUiLoading(true);
+            setValidationMessage(null);
+
+            const qrSession = await qrService.refreshQR(
+                email.trim(),
+                campusPassword
+            );
+
+            setSession(qrSession);
+            setCampusPassword("");
+        } catch (err) {
+            console.log("QR ERROR:", err);
+            if (err instanceof Error) {
+                console.log("MESSAGE:", err.message);
+            }
+            setValidationMessage("Unable to fetch your mess QR.");
+        } finally {
+            setUiLoading(false);
+        }
+    };
+
+    const executeDisconnect = async () => {
+        await qrService.clearSession();
+        setSession(null);
+    };
+
     return (
-        <Modal
-            visible={visible}
-            transparent
-            animationType="slide"
-        >
-            <Pressable
-                style={styles.overlay}
-                onPress={() => setVisible(false)}
-            />
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
+            <View style={styles.absoluteViewContainer}>
+                <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill}>
+                    <Pressable style={styles.dismissalCatch} onPress={() => setVisible(false)} />
+                </BlurView>
 
-            <View style={styles.sheet}>
-                <View style={styles.header}>
-                    <View style={styles.titleRow}>
-                        <QrCode
-                            size={22}
-                            color={colors.primary}
-                        />
-
-                        <Text style={styles.title}>
-                            Mess QR
-                        </Text>
+                <View style={styles.sheetLayout}>
+                    <View style={styles.headerRow}>
+                        <View style={styles.titleGroup}>
+                            <QrCode size={22} color={colors.primary} />
+                            <Text style={styles.titleText}>{session ? "Gate Access Pass" : "IITGN Login"}</Text>
+                        </View>
+                        <Pressable onPress={() => setVisible(false)}>
+                            <X size={22} color={colors.textSecondary} />
+                        </Pressable>
                     </View>
 
-                    <Pressable
-                        onPress={() => setVisible(false)}
-                    >
-                        <X
-                            size={22}
-                            color={colors.textSecondary}
-                        />
-                    </Pressable>
+                    {!session ? (
+                        <View style={styles.innerForm}>
+                            <Text style={styles.descParagraph}>
+                                Log in with your campus identity account to access your rolling tracking pass.
+                            </Text>
+
+                            {validationMessage && <Text style={styles.errBanner}>{validationMessage}</Text>}
+
+                            <View style={styles.inputControlRow}>
+                                <User size={18} color={colors.textSecondary} style={styles.iconMargin} />
+                                <TextInput
+                                    style={styles.fieldStyle}
+                                    placeholder="Email ID"
+                                    placeholderTextColor={colors.inactive}
+                                    value={email}
+                                    onChangeText={setEmail}
+                                />
+                            </View>
+
+                            <View style={styles.inputControlRow}>
+                                <KeyRound size={18} color={colors.textSecondary} style={styles.iconMargin} />
+                                <TextInput
+                                    style={styles.fieldStyle}
+                                    placeholder="Password"
+                                    placeholderTextColor={colors.inactive}
+                                    secureTextEntry
+                                    value={campusPassword}
+                                    onChangeText={setCampusPassword}
+                                />
+                            </View>
+
+                            <Pressable style={styles.submitCta} onPress={runInstituteSignInFlow} disabled={uiLoading}>
+                                {uiLoading ? <ActivityIndicator color="white" /> : <Text style={styles.ctaText}>Secure Login</Text>}
+                            </Pressable>
+                        </View>
+                    ) : (
+                        <View style={styles.activeInterface}>
+                            <Text style={styles.descParagraph}>
+                                Account: {session.email}. Scan this barcode token at the mess terminal. 
+                            </Text>
+
+                            <View style={styles.qrCenteredWrapper}>
+                                <View style={styles.barcodeFrameBox}>
+                                        <QRCode
+                                            value={session.qrData}
+                                            size={180}
+                                        />
+                                        <Text style={styles.tokenFooterString}>
+                                            QR Ready
+                                        </Text>
+                                </View>
+                            </View>
+
+                            <Pressable style={styles.logoutButtonCta} onPress={executeDisconnect}>
+                                <LogOut size={18} color={colors.danger} />
+                                <Text style={styles.logoutButtonText}>Login Again</Text>
+                            </Pressable>
+                        </View>
+                    )}
                 </View>
-
-                <Text style={styles.subtitle}>
-                    Scan this QR at the mess entrance.
-                </Text>
-
-                <View style={styles.qrContainer}>
-                    {/* Replace with generated QR later */}
-                    <View style={styles.fakeQR}>
-                        <QrCode
-                            size={170}
-                            color="#0F172A"
-                        />
-                    </View>
-                </View>
-
-                <Text style={styles.expiry}>
-                    Valid until 31 Aug 2026
-                </Text>
-
-                <Pressable style={styles.refreshButton}>
-                    <RefreshCcw
-                        size={18}
-                        color={colors.surface}
-                    />
-
-                    <Text style={styles.refreshText}>
-                        Refresh QR
-                    </Text>
-                </Pressable>
-
-                <Text style={styles.note}>
-                    You'll only need to log in again when the QR expires.
-                </Text>
             </View>
         </Modal>
     );
@@ -108,92 +156,124 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
 export default QRBottomSheet;
 
 const styles = StyleSheet.create({
-    overlay: {
+    absoluteViewContainer: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.35)",
+        justifyContent: "flex-end",
     },
-
-    sheet: {
-        position: "absolute",
-        bottom: 0,
-        width: "100%",
+    dismissalCatch: {
+        flex: 1,
+    },
+    sheetLayout: {
         backgroundColor: colors.surface,
         borderTopLeftRadius: radius.xl,
         borderTopRightRadius: radius.xl,
         padding: spacing.xl,
-        paddingBottom: 40,
+        paddingBottom: 44,
     },
-
-    header: {
+    headerRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        marginBottom: spacing.md,
     },
-
-    titleRow: {
+    titleGroup: {
         flexDirection: "row",
         alignItems: "center",
     },
-
-    title: {
+    titleText: {
         marginLeft: 10,
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: "700",
-        color: "#0F172A",
+        color: colors.text,
     },
-
-    subtitle: {
-        marginTop: 10,
-        textAlign: "center",
+    descParagraph: {
         color: colors.textSecondary,
+        fontSize: 14,
+        lineHeight: 20,
+        marginBottom: spacing.lg,
+    },
+    innerForm: {
+        marginTop: spacing.xs,
+    },
+    errBanner: {
+        color: colors.danger,
+        backgroundColor: "#FEE2E2",
+        padding: spacing.sm,
+        borderRadius: radius.sm,
+        marginBottom: spacing.md,
+        fontSize: 13,
+        fontWeight: "500",
+    },
+    inputControlRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: colors.surfaceAlt,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+        borderRadius: radius.md,
+        marginBottom: spacing.md,
+        paddingHorizontal: spacing.md,
+        height: 50,
+    },
+    iconMargin: {
+        marginRight: spacing.sm,
+    },
+    fieldStyle: {
+        flex: 1,
+        color: colors.text,
         fontSize: 15,
     },
-
-    qrContainer: {
+    submitCta: {
+        backgroundColor: colors.primary,
+        borderRadius: radius.lg,
+        height: 50,
+        justifyContent: "center",
         alignItems: "center",
-        marginVertical: 28,
+        marginTop: spacing.sm,
     },
-
-    fakeQR: {
+    ctaText: {
+        color: "white",
+        ...typography.body,
+        fontWeight: "600",
+    },
+    activeInterface: {
+        alignItems: "stretch",
+    },
+    qrCenteredWrapper: {
+        alignItems: "center",
+        marginVertical: spacing.md,
+    },
+    barcodeFrameBox: {
         width: 240,
-        height: 240,
-        borderRadius: 24,
+        height: 250,
+        borderRadius: radius.xl,
         backgroundColor: colors.surfaceAlt,
         justifyContent: "center",
         alignItems: "center",
         borderWidth: 1,
-        borderColor: colors.borderSoft,
+        borderColor: "#E2E8F0",
     },
-
-    expiry: {
-        textAlign: "center",
+    tokenFooterString: {
+        marginTop: 12,
+        fontSize: 11,
+        fontWeight: "600",
         color: colors.textSecondary,
-        marginBottom: 22,
-        fontSize: 14,
+        letterSpacing: 1,
     },
-
-    refreshButton: {
-        backgroundColor: colors.primary,
+    logoutButtonCta: {
+        flexDirection: "row",
+        backgroundColor: "#FEE2E2",
+        borderWidth: 1,
+        borderColor: "#FCA5A5",
         borderRadius: radius.lg,
-        paddingVertical: 15,
-
+        height: 50,
         justifyContent: "center",
         alignItems: "center",
-
-        flexDirection: "row",
+        gap: 8,
+        marginTop: spacing.sm,
     },
-
-    refreshText: {
-        marginLeft: 8,
-        color: colors.surface,
-        ...typography.body,
-    },
-
-    note: {
-        marginTop: 16,
-        textAlign: "center",
-        color: colors.inactive,
-        fontSize: 13,
-        lineHeight: 20,
+    logoutButtonText: {
+        color: colors.danger,
+        fontWeight: "600",
     },
 });

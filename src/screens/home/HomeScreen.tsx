@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet } from "react-native";
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
+import { RefreshCw } from "lucide-react-native";
 
 import MessCard from "./components/MessCard";
 import NextClassCard from "./components/NextClassCard";
@@ -9,7 +10,10 @@ import QRBottomSheet from "./components/QRBottomSheet";
 import WeeklyMenuSheet from "./components/WeeklyMenuSheet";
 import TimetableSheet from "./components/TimetableSheet";
 import GreetingSection from "./components/GreetingSection";
-import { colors, spacing } from "@/theme";
+
+import { colors, spacing, radius } from "@/theme";
+import { useMessData } from "./services/useMessData";
+
 import type { QRBottomSheetRef } from "./components/QRBottomSheet";
 import type { WeeklyMenuSheetRef } from "./components/WeeklyMenuSheet";
 import type { TimetableSheetRef } from "./components/TimetableSheet";
@@ -19,43 +23,45 @@ const HomeScreen = () => {
     const menuSheetRef = useRef<WeeklyMenuSheetRef>(null);
     const timetableSheetRef = useRef<TimetableSheetRef>(null);
 
+    const { menuData, currentMeal, loading, error, manualRefresh } = useMessData();
+
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
             <SafeAreaView style={styles.container}>
-                <ScrollView
-                    contentContainerStyle={styles.content}
-                    showsVerticalScrollIndicator={false}
-                >
-                    
-                    <GreetingSection />
+                {loading && !menuData ? (
+                    <View style={styles.centeredView}>
+                        <ActivityIndicator size="large" color={colors.primary} />
+                    </View>
+                ) : error && !menuData ? (
+                    <View style={styles.centeredView}>
+                        <Text style={styles.errTitle}>Connectivity Error</Text>
+                        <Text style={styles.errSubtitle}>Could not resolve menu sync tracking files over IITGN infrastructure lanes.</Text>
+                        <TouchableOpacity style={styles.retryBtn} onPress={manualRefresh}>
+                            <RefreshCw size={16} color="white" />
+                            <Text style={styles.retryText}>Retry Connection</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
+                        <GreetingSection />
 
-                    <MessCard
-                        meal={{
-                            mealName: "Lunch",
-                            time: "12:30 PM",
-                            countdown: "1 hr 18 min",
-                            featuredDish: "Paneer Butter Masala",
-                            extraItems: 4,
-                        }}
-                        onShowQR={() => qrSheetRef.current?.expand()}
-                        onShowMenu={() => menuSheetRef.current?.expand()}
-                    />
+                        <MessCard
+                            meal={currentMeal}
+                            onShowQR={() => qrSheetRef.current?.expand()}
+                            onShowMenu={() => menuSheetRef.current?.expand()}
+                        />
 
-                    <NextClassCard
-                        onPress={() => timetableSheetRef.current?.expand()}
-                    />
-
-                    <NextBusCard />
-                </ScrollView>
+                        <NextClassCard onPress={() => timetableSheetRef.current?.expand()} />
+                        <NextBusCard />
+                    </ScrollView>
+                )}
 
                 <FloatingNavbar />
 
                 <QRBottomSheet ref={qrSheetRef} />
-
-                <WeeklyMenuSheet ref={menuSheetRef} />
-
+                <WeeklyMenuSheet ref={menuSheetRef} data={menuData} />
                 <TimetableSheet ref={timetableSheetRef} />
             </SafeAreaView>
         </>
@@ -69,10 +75,43 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background,
     },
-    content: {
+    contentScroll: {
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.md,
         paddingBottom: 120,
         gap: spacing.lg,
     },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: spacing.xl,
+        backgroundColor: colors.background,
+    },
+    errTitle: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: colors.text,
+        marginBottom: 6,
+    },
+    errSubtitle: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        textAlign: "center",
+        marginBottom: spacing.lg,
+        lineHeight: 20,
+    },
+    retryBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: colors.primary,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: 12,
+        borderRadius: radius.md,
+        gap: 8,
+    },
+    retryText: {
+        color: "white",
+        fontWeight: "600",
+    }
 });

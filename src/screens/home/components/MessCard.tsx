@@ -1,111 +1,62 @@
 import React from "react";
-import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import {
-    UtensilsCrossed,
-    Clock3,
-    QrCode,
-    ChevronRight,
-} from "lucide-react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { UtensilsCrossed, Clock3, QrCode, ChevronRight } from "lucide-react-native";
 import { colors, radius, shadows, spacing, typography } from "@/theme";
-
-type Meal = {
-    mealName: string;
-    time: string;
-    countdown: string;
-    featuredDish: string;
-    extraItems: number;
-};
+import { ActiveMealState } from "../services/messTypes";
 
 type Props = {
-    meal: Meal;
+    meal: ActiveMealState | null;
     onShowQR: () => void;
     onShowMenu: () => void;
 };
 
-const MessCard = ({ onShowQR, onShowMenu }: Props) => {
-    // Replace later with API data
-    const nextMeal = "Lunch";
-    const mealTime = "12:30 PM";
-    const countdown = "1 hr 18 min";
+const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
+    if (!meal) return null;
 
-    const featuredDish = "Paneer Butter Masala";
-    const extraItems = 4;
+    // Use the first two items as the primary display highlights
+    const primaryHighlights = meal.itemsList.slice(0, 2);
+    const extraItemsCount = meal.itemsList.length - primaryHighlights.length;
 
     return (
         <View style={styles.card}>
-            {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
                     <View style={styles.iconCircle}>
-                        <UtensilsCrossed
-                            size={22}
-                            color= {colors.primary}
-                            strokeWidth={2.2}
-                        />
+                        <UtensilsCrossed size={22} color={colors.primary} strokeWidth={2.2} />
                     </View>
-
                     <View>
-                        <Text style={styles.mealTitle}>{nextMeal}</Text>
-
+                        <Text style={styles.mealTitle}>{meal.mealName}</Text>
                         <View style={styles.timeRow}>
-                            <Clock3
-                                size={14}
-                                color={colors.textSecondary}
-                            />
-
+                            <Clock3 size={14} color={colors.textSecondary} />
                             <Text style={styles.timeText}>
-                                {mealTime} • {countdown}
+                                {meal.timeWindow} • <Text style={styles.countdownHighlight}>{meal.countdown}</Text>
                             </Text>
                         </View>
                     </View>
                 </View>
             </View>
 
+            {/* Dynamic multiline loop engine */}
             <View style={styles.featuredContainer}>
-                <Text style={styles.featuredDish}>
-                    ⭐ {featuredDish}
+                <Text style={styles.featuredDish} numberOfLines={2}>
+                    ⭐ {primaryHighlights.length > 0 ? primaryHighlights.join(" • ") : "Menu Schedule Standby"}
                 </Text>
-
-                <Text style={styles.moreItems}>
-                    +{extraItems} more items
-                </Text>
+                {extraItemsCount > 0 && (
+                    <Text style={styles.moreItems}>
+                        +{extraItemsCount} more items listed in menu view
+                    </Text>
+                )}
             </View>
 
-            {/* Footer */}
             <View style={styles.footer}>
-                <TouchableOpacity
-                    activeOpacity={0.85}
-                    style={styles.qrButton}
-                    onPress={onShowQR}
-                >
-                    <QrCode
-                        size={18}
-                        color="white"
-                    />
-
-                    <Text style={styles.qrText}>
-                        Show QR
-                    </Text>
+                <TouchableOpacity activeOpacity={0.85} style={styles.qrButton} onPress={onShowQR}>
+                    <QrCode size={18} color="white" />
+                    <Text style={styles.qrText}>Show QR</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    activeOpacity={0.75}
-                    style={styles.menuButton}
-                    onPress={onShowMenu}
-                >
-                    <Text style={styles.menuButtonText}>
-                        Weekly Menu
-                    </Text>
-
-                    <ChevronRight
-                        size={18}
-                        color={colors.primary}
-                    />
+                <TouchableOpacity activeOpacity={0.75} style={styles.menuButton} onPress={onShowMenu}>
+                    <Text style={styles.menuButtonText}>Weekly Menu</Text>
+                    <ChevronRight size={18} color={colors.primary} />
                 </TouchableOpacity>
             </View>
         </View>
@@ -121,18 +72,15 @@ const styles = StyleSheet.create({
         padding: spacing.xl,
         ...shadows.card,
     },
-
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
     },
-
     headerLeft: {
         flexDirection: "row",
         alignItems: "center",
     },
-
     iconCircle: {
         width: 54,
         height: 54,
@@ -142,47 +90,44 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginRight: spacing.md,
     },
-
     featuredContainer: {
         marginTop: spacing.lg,
         marginBottom: 4,
     },
-
     featuredDish: {
         ...typography.subtitle,
         color: colors.text,
+        lineHeight: 22,
     },
-
     moreItems: {
         marginTop: 6,
         ...typography.caption,
         color: colors.textSecondary,
     },
-
     mealTitle: {
         ...typography.h2,
         color: colors.text,
     },
-
     timeRow: {
         flexDirection: "row",
         alignItems: "center",
         marginTop: 6,
     },
-
     timeText: {
         marginLeft: 6,
         color: colors.textSecondary,
         ...typography.caption,
     },
-
+    countdownHighlight: {
+        color: colors.primary,
+        fontWeight: "600",
+    },
     footer: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginTop: spacing.md,
     },
-
     qrButton: {
         flexDirection: "row",
         alignItems: "center",
@@ -191,19 +136,15 @@ const styles = StyleSheet.create({
         paddingVertical: 13,
         borderRadius: radius.lg,
     },
-
     qrText: {
         color: "white",
         ...typography.button,
         marginLeft: 8,
-        
     },
-
     menuButton: {
         flexDirection: "row",
         alignItems: "center",
     },
-
     menuButtonText: {
         ...typography.body,
         color: colors.primary,
