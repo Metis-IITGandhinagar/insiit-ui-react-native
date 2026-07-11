@@ -5,4 +5,5 @@ export type RootStackParamList = {
     Tools: undefined;
     Bus: undefined;
     More: undefined;
+    AdminDashboard: undefined;
 };

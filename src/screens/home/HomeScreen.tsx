@@ -3,27 +3,26 @@ import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, Vie
 import { RefreshCw } from "lucide-react-native";
 
 import MessCard from "./components/MessCard";
-import NextClassCard from "./components/NextClassCard";
-import NextBusCard from "./components/NextBusCard";
 import FloatingNavbar from "./components/FloatingNavbar";
 import QRBottomSheet from "./components/QRBottomSheet";
 import WeeklyMenuSheet from "./components/WeeklyMenuSheet";
-import TimetableSheet from "./components/TimetableSheet";
 import GreetingSection from "./components/GreetingSection";
 
-import { colors, spacing, radius } from "@/theme";
-import { useMessData } from "./services/useMessData";
+import { useTheme } from "@/theme";
+import { useMessData } from "./services/mess/useMessData";
 
 import type { QRBottomSheetRef } from "./components/QRBottomSheet";
 import type { WeeklyMenuSheetRef } from "./components/WeeklyMenuSheet";
-import type { TimetableSheetRef } from "./components/TimetableSheet";
 
 const HomeScreen = () => {
     const qrSheetRef = useRef<QRBottomSheetRef>(null);
     const menuSheetRef = useRef<WeeklyMenuSheetRef>(null);
-    const timetableSheetRef = useRef<TimetableSheetRef>(null);
 
     const { menuData, currentMeal, loading, error, manualRefresh } = useMessData();
+
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
 
     return (
         <>
@@ -53,8 +52,7 @@ const HomeScreen = () => {
                             onShowMenu={() => menuSheetRef.current?.expand()}
                         />
 
-                        <NextClassCard onPress={() => timetableSheetRef.current?.expand()} />
-                        <NextBusCard />
+
                     </ScrollView>
                 )}
 
@@ -62,7 +60,6 @@ const HomeScreen = () => {
 
                 <QRBottomSheet ref={qrSheetRef} />
                 <WeeklyMenuSheet ref={menuSheetRef} data={menuData} />
-                <TimetableSheet ref={timetableSheetRef} />
             </SafeAreaView>
         </>
     );
@@ -70,7 +67,7 @@ const HomeScreen = () => {
 
 export default HomeScreen;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,

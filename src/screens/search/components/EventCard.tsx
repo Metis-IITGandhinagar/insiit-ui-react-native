@@ -7,17 +7,22 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, radius, shadows, spacing, typography } from "@/theme";
+import { useTheme } from "@/theme";
 import { Event } from "../types";
 
 interface Props {
     event: Event;
     onPress?: () => void;
     onBookmark?: () => void;
+    onEdit?: () => void;
     onDelete?: () => void;
 }
 
-const EventCard = ({ event, onPress, onBookmark }: Props) => {
+const EventCard = ({ event, onPress, onBookmark, onEdit, onDelete }: Props) => {
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
+
     return (
         <TouchableOpacity
             activeOpacity={0.92}
@@ -30,17 +35,6 @@ const EventCard = ({ event, onPress, onBookmark }: Props) => {
                     style={styles.image}
                 />
 
-                <TouchableOpacity
-                    style={styles.bookmark}
-                    activeOpacity={0.8}
-                    onPress={onBookmark}
-                >
-                    <Ionicons
-                        name={event.isBookmarked ? "bookmark" : "bookmark-outline"}
-                        size={22}
-                        color="#FFF"
-                    />
-                </TouchableOpacity>
             </View>
 
             <View style={styles.content}>
@@ -54,7 +48,6 @@ const EventCard = ({ event, onPress, onBookmark }: Props) => {
                         size={18}
                         color="#6B7280"
                     />
-
                     <Text style={styles.infoText}>{event.venue}</Text>
                 </View>
 
@@ -64,10 +57,29 @@ const EventCard = ({ event, onPress, onBookmark }: Props) => {
                         size={18}
                         color="#6B7280"
                     />
-
                     <Text style={styles.infoText}>
                         {event.date} • {event.time}
                     </Text>
+                </View>
+
+                {/* Management Utility Buttons (Open to all for testing right now) */}
+                <View style={styles.footer}>
+                    {onEdit && (
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.editButton]}
+                            onPress={(e) => { e.stopPropagation(); onEdit(); }}
+                        >
+                            <Ionicons name="pencil-outline" size={18} color={colors.primary} />
+                        </TouchableOpacity>
+                    )}
+                    {onDelete && (
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.deleteButton]}
+                            onPress={(e) => { e.stopPropagation(); onDelete(); }}
+                        >
+                            <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         </TouchableOpacity>
@@ -76,7 +88,7 @@ const EventCard = ({ event, onPress, onBookmark }: Props) => {
 
 export default EventCard;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     card: {
         backgroundColor: colors.surface,
         borderRadius: radius.xl,
@@ -84,48 +96,26 @@ const styles = StyleSheet.create({
         ...shadows.card,
         overflow: "hidden",
     },
-
     imageContainer: {
         position: "relative",
     },
-
     image: {
         width: "100%",
-        height: 210,
+        height: 300,
     },
-
-    bookmark: {
-        position: "absolute",
-        top: 14,
-        right: 14,
-
-        width: 38,
-        height: 38,
-
-        borderRadius: 19,
-
-        justifyContent: "center",
-        alignItems: "center",
-
-        backgroundColor: "rgba(0,0,0,0.35)",
-    },
-
     content: {
         padding: spacing.lg,
     },
-
     title: {
         ...typography.h3,
         color: colors.text,
         marginBottom: spacing.md,
     },
-
     infoRow: {
         flexDirection: "row",
         alignItems: "center",
         marginBottom: spacing.sm,
     },
-
     infoText: {
         marginLeft: spacing.sm,
         ...typography.body,
@@ -135,17 +125,19 @@ const styles = StyleSheet.create({
         marginTop: spacing.md,
         flexDirection: "row",
         justifyContent: "flex-end",
+        gap: spacing.md,
     },
-
-    deleteButton: {
+    actionButton: {
         width: 38,
         height: 38,
-
         borderRadius: 19,
-
         justifyContent: "center",
         alignItems: "center",
-
+    },
+    editButton: {
+        backgroundColor: "#EFF6FF",
+    },
+    deleteButton: {
         backgroundColor: "#FEF2F2",
     },
 });

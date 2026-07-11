@@ -15,9 +15,7 @@ import {
 } from "lucide-react-native";
 
 import {
-    colors,
-    radius,
-    spacing,
+    useTheme
 } from "@/theme";
 
 const actions = [
@@ -52,6 +50,8 @@ const actions = [
 ];
 
 const QuickActions = () => {
+        const theme = useTheme();
+        const styles = getStyles(theme);
     return (
         <View>
             <Text style={styles.heading}>
@@ -102,7 +102,7 @@ const QuickActions = () => {
 
 export default QuickActions;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     heading: {
         fontSize: 20,
         fontWeight: "700",

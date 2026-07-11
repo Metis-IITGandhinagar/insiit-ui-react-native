@@ -16,7 +16,6 @@ export const useMessData = () => {
         const minute = now.getMinutes();
         const totalMinutes = hour * 60 + minute;
 
-        // Map JS standard index (0 = Sun, 1 = Mon, ..., 6 = Sat) to backend indices (1 = Mon ... 7 = Sun)
         const jsDay = now.getDay();
         const backendDayLookup = jsDay === 0 ? 7 : jsDay;
 
@@ -48,7 +47,6 @@ export const useMessData = () => {
             operationalWindow = "07:30 PM - 09:30 PM";
             closingMinutes = 21 * 60 + 30;
         } else {
-            // Tomorrow rollover sequence logic
             const nextDayIndex = jsDay === 6 ? 7 : (jsDay + 1 === 0 ? 7 : jsDay + 1);
             const tomorrowMenu = data.mess.find(m => m.day === nextDayIndex) || data.mess[0];
             const cleanItems = tomorrowMenu.breakfast.split("\n")
@@ -67,9 +65,8 @@ export const useMessData = () => {
         const delta = closingMinutes - totalMinutes;
         const hrs = Math.floor(delta / 60);
         const mins = delta % 60;
-        const countdownString = delta <= 0 ? "Serving Now" : `${hrs}h ${mins}m closing`;
+        const countdownString = delta <= 0 ? "Serving Now" : hrs > 0 ? `${hrs}h ${mins}m to close`: `${mins}m to close`;
 
-        // Strip characters like "–" from Excel template files
         const rawString = dailyMenu[selectedKey] || "";
         const processedItems = rawString.split("\n")
             .map(item => item.trim())
@@ -86,7 +83,6 @@ export const useMessData = () => {
     const orchestrateDataSync = useCallback(async () => {
         try {
             setError(false);
-            // Step 1: Render cached data offline instantly
             const initialCachedData = await messService.getCachedMenu();
             if (initialCachedData) {
                 setMenuData(initialCachedData);
@@ -94,7 +90,6 @@ export const useMessData = () => {
                 setLoading(false);
             }
 
-            // Step 2: Fetch updates from the network in the background
             const freshData = await messService.fetchAndSyncMenu(initialCachedData?.id);
             setMenuData(freshData);
             computeActiveMealState(freshData);

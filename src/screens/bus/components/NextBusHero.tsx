@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Bus, Clock3, ArrowRight } from "lucide-react-native";
-import { colors, radius, spacing, typography } from "@/theme";
+import { useTheme } from "@/theme";
 
 interface NextBusProps {
     data: {
@@ -15,6 +15,10 @@ interface NextBusProps {
 
 const NextBusHero: React.FC<NextBusProps> = ({ data }) => {
     if (!data) return null;
+
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
 
     return (
         <View style={styles.card}>
@@ -38,14 +42,17 @@ const NextBusHero: React.FC<NextBusProps> = ({ data }) => {
                 </View>
             </View>
 
+
             <View style={styles.countdownSection}>
+                <Text style={styles.leavesIn}>
+                    leaves in
+                </Text>
+                
                 <Text style={styles.countdown}>
                     {data.countdown}
                 </Text>
 
-                <Text style={styles.leavesIn}>
-                    leaves in
-                </Text>
+                
             </View>
 
             <View style={styles.routeRow}>
@@ -80,7 +87,7 @@ const NextBusHero: React.FC<NextBusProps> = ({ data }) => {
 
 export default NextBusHero;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     card: {
         backgroundColor: colors.primary,
         borderRadius: radius.xl,

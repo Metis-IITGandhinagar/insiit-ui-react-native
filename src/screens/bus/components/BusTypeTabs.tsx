@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { BusType } from "../services/busTypes";
-import { colors, radius, shadows, spacing, typography } from "@/theme";
+import { useTheme } from "@/theme";
 
 interface Props {
     selected: BusType;
@@ -10,6 +10,9 @@ interface Props {
 
 const BusTypeTabs: React.FC<Props> = ({ selected, onSelect }) => {
     const tabs: BusType[] = ["56", "29", "EECO"];
+
+    const theme = useTheme();
+    const styles = getStyles(theme);
 
     return (
         <View style={styles.container}>
@@ -43,7 +46,7 @@ const BusTypeTabs: React.FC<Props> = ({ selected, onSelect }) => {
 
 export default BusTypeTabs;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     container: {
         backgroundColor: colors.surface,
         borderRadius: radius.lg,

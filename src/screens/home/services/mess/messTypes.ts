@@ -7,18 +7,18 @@ export interface DayMenu {
 }
 
 export interface MessMenuResponse {
-    id: string;        // Timestamp string identifier
-    mess_name: string; // "Hostel Mess"
-    mess: DayMenu[];   // Array matching your Schema field name
+    id: string;        
+    mess_name: string; 
+    mess: DayMenu[];  
 }
 
 export type MealType = "breakfast" | "lunch" | "snacks" | "dinner";
 
 export interface ActiveMealState {
-    mealName: string;   // Capitalized display name
+    mealName: string;   
     timeWindow: string;
     countdown: string;
-    itemsList: string[]; // Parsed clean array from the \n string
+    itemsList: string[]; 
 }
 
 export interface UserSession {

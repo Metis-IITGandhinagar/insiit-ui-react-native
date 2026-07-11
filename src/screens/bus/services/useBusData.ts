@@ -66,9 +66,21 @@ export const useBusData = () => {
             nextBus: nextBusItem ? {
                 vehicle: nextBusItem.vehicle || `${selectedTab}-Seater`,
                 departure: nextBusItem.time,
-                countdown: nextBusItem.minutesLeft < 0
-                    ? "Passed"
-                    : nextBusItem.minutesLeft === 0 ? "Now" : `${nextBusItem.minutesLeft} min`,
+                countdown:
+                    nextBusItem.minutesLeft < 0
+                        ? "Passed"
+                        : nextBusItem.minutesLeft === 0
+                            ? "Now"
+                            : nextBusItem.minutesLeft >= 60
+                                ? (() => {
+                                    const hours = Math.floor(nextBusItem.minutesLeft / 60);
+                                    const mins = nextBusItem.minutesLeft % 60;
+
+                                    return mins === 0
+                                        ? `${hours}h`
+                                        : `${hours}h ${mins}m`;
+                                })()
+                                : `${nextBusItem.minutesLeft}m`,
                 from: nextBusItem.from,
                 to: nextBusItem.to
             } : null,

@@ -4,9 +4,11 @@ import {
     Text,
     View,
 } from "react-native";
-import { spacing } from "@/theme";
+import { useTheme } from "@/theme";
 
 const BusHeader = () => {
+    const theme = useTheme();
+    const styles = getStyles(theme);
     return (
         <View style={styles.container}>
             
@@ -26,7 +28,7 @@ const BusHeader = () => {
 
 export default BusHeader;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     container: {
         paddingTop: spacing.lg,
         alignItems: "center",

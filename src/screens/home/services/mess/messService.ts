@@ -22,7 +22,6 @@ export const messService = {
 
             const serverData: MessMenuResponse = await response.json();
 
-            // Perform an ID sync check. Only overwrite if the menu configuration has changed
             if (!currentCachedId || serverData.id !== currentCachedId) {
                 await AsyncStorage.setItem(CACHE_KEY_MENU, JSON.stringify(serverData));
             }
@@ -35,9 +34,6 @@ export const messService = {
         }
     },
 
-    /**
-     * Approximate dynamic session handling - Session-based validation 
-     */
     async saveSession(studentId: string, qrToken: string): Promise<UserSession> {
         const session: UserSession = { studentId, qrToken };
         await AsyncStorage.setItem(CACHE_KEY_SESSION, JSON.stringify(session));

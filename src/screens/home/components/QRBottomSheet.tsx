@@ -2,10 +2,10 @@ import React, { forwardRef, useImperativeHandle, useState, useEffect } from "rea
 import { Modal, Pressable, StyleSheet, Text, View, TextInput, ActivityIndicator } from "react-native";
 import { BlurView } from "expo-blur";
 import { QrCode,LogOut, X, KeyRound, User } from "lucide-react-native";
-import { colors, radius, spacing, typography } from "@/theme";
+import { useTheme } from "@/theme";
 import QRCode from "react-native-qrcode-svg";
-import { qrService } from "../services/qrService";
-import { QRSession } from "../services/qrTypes";
+import { qrService } from "../services/mess/qrService";
+import { QRSession } from "../services/mess/qrTypes";
 
 export type QRBottomSheetRef = {
     expand: () => void;
@@ -69,6 +69,10 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
         await qrService.clearSession();
         setSession(null);
     };
+
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
@@ -155,7 +159,7 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
 
 export default QRBottomSheet;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     absoluteViewContainer: {
         flex: 1,
         justifyContent: "flex-end",

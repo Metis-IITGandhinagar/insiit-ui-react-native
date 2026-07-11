@@ -7,10 +7,14 @@ import NextBusHero from "./components/NextBusHero";
 import TodaySchedule from "./components/TodaySchedule";
 import RouteCard from "./components/RouteCard";
 import { useBusData } from "./services/useBusData";
-import { colors, spacing } from "@/theme";
+import { useTheme } from "@/theme";
 
 const BusScreen = () => {
     const { selectedTab, setSelectedTab, departures, nextBus, stops, loading, error } = useBusData();
+    
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
 
     return (
         <>
@@ -53,7 +57,7 @@ const BusScreen = () => {
 
 export default BusScreen;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,

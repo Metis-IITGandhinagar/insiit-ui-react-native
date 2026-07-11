@@ -11,10 +11,12 @@ import FloatingNavbar from "../home/components/FloatingNavbar";
 import ToolsHeader from "./components/ToolsHeader";
 import EmergencyCard from "./components/EmergencyCard";
 import ToolSection from "./components/ToolSection";
-import { colors, spacing } from "@/theme";
+import {  useTheme } from "@/theme";
 import QuickActions from "./components/QuickActions";
 
 const ToolsScreen = () => {
+        const theme = useTheme();
+        const styles = getStyles(theme);
     return (
         <>
             <SafeAreaView style={styles.container}>
@@ -39,7 +41,7 @@ const ToolsScreen = () => {
 
 export default ToolsScreen;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,

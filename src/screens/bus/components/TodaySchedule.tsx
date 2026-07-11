@@ -2,13 +2,18 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Clock3, ArrowRight } from "lucide-react-native";
 import { BusDeparture } from "../services/busTypes";
-import { colors, radius, shadows, spacing, typography } from "@/theme";
+import { useTheme } from "@/theme";
 
 interface ScheduleProps {
     departures: BusDeparture[];
 }
 
 const TodaySchedule: React.FC<ScheduleProps> = ({ departures }) => {
+    
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.card}>
             <Text style={styles.heading}>
@@ -69,7 +74,7 @@ const TodaySchedule: React.FC<ScheduleProps> = ({ departures }) => {
 
 export default TodaySchedule;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     card: {
         backgroundColor: colors.surface,
         borderRadius: radius.xl,

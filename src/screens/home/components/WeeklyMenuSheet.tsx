@@ -2,8 +2,8 @@ import React, { forwardRef, useImperativeHandle, useState, useEffect } from "rea
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { BlurView } from "expo-blur";
 import { UtensilsCrossed, X } from "lucide-react-native";
-import { colors, radius, spacing, typography } from "@/theme";
-import { MessMenuResponse, DayMenu } from "../services/messTypes";
+import { useTheme } from "@/theme";
+import { MessMenuResponse, DayMenu } from "../services/mess/messTypes";
 
 export type WeeklyMenuSheetRef = {
     expand: () => void;
@@ -36,7 +36,6 @@ const WeeklyMenuSheet = forwardRef<WeeklyMenuSheetRef, Props>(({ data }, ref) =>
     useEffect(() => {
         if (visible) {
             const systemIndex = new Date().getDay();
-            // Map Sunday from 0 to 7 matching your backend parser logic loop structures
             const activeMatch = systemIndex === 0 ? 7 : systemIndex;
             setSelectedDayValue(activeMatch);
         }
@@ -64,6 +63,10 @@ const WeeklyMenuSheet = forwardRef<WeeklyMenuSheetRef, Props>(({ data }, ref) =>
             </View>
         );
     };
+    
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
 
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={() => setVisible(false)}>
@@ -126,7 +129,7 @@ const WeeklyMenuSheet = forwardRef<WeeklyMenuSheetRef, Props>(({ data }, ref) =>
 
 export default WeeklyMenuSheet;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     absoluteWrap: {
         flex: 1,
         justifyContent: "flex-end",

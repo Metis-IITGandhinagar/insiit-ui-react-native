@@ -6,7 +6,7 @@ import {
     StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, radius, shadows, spacing } from "@/theme";
+import { useTheme } from "@/theme";
 
 interface Props {
     value: string;
@@ -14,6 +14,9 @@ interface Props {
 }
 
 const SearchBar = ({ value, onChangeText }: Props) => {
+        const theme = useTheme();
+        const { colors } = theme;
+        const styles = getStyles(theme);
     return (
         <View style={styles.container}>
             <Ionicons
@@ -51,7 +54,7 @@ const SearchBar = ({ value, onChangeText }: Props) => {
 
 export default SearchBar;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",

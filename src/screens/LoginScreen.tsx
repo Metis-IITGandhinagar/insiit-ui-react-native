@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import { colors, radius, spacing, typography } from "@/theme";
+import { useTheme } from "@/theme";
 import type { RootStackParamList } from "@/navigation/types";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
@@ -13,6 +13,9 @@ const LoginScreen = () => {
     const navigation = useNavigation<LoginScreenNavigationProp>();
 
     const goHome = () => navigation.replace("Home");
+    const theme = useTheme();
+    const styles = getStyles(theme);
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -41,7 +44,7 @@ const LoginScreen = () => {
 
 export default LoginScreen;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

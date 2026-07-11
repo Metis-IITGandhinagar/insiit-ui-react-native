@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { MapPinned, Circle } from "lucide-react-native";
-import { colors, radius, shadows, spacing, typography } from "@/theme";
+import { useTheme } from "@/theme";
 
 interface RouteProps {
     stops: string[];
@@ -9,6 +9,10 @@ interface RouteProps {
 
 const RouteCard: React.FC<RouteProps> = ({ stops }) => {
     if (stops.length === 0) return null;
+
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
 
     return (
         <View style={styles.card}>
@@ -53,7 +57,7 @@ const RouteCard: React.FC<RouteProps> = ({ stops }) => {
 
 export default RouteCard;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     card: {
         backgroundColor: colors.surface,
         borderRadius: radius.xl,

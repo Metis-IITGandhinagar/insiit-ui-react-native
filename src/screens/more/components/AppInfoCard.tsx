@@ -8,14 +8,16 @@ import {
 } from "react-native";
 
 import {
-    colors,
-    spacing,
+    useTheme
 } from "@/theme";
 
 const VERSION = "2.0.0";
 const BUILD = "24";
 
 const AppInfoCard = () => {
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
     return (
         <View style={styles.container}>
             <Text style={styles.version}>
@@ -42,7 +44,7 @@ const AppInfoCard = () => {
 
 export default AppInfoCard;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     container: {
         alignItems: "center",
         paddingVertical: spacing.xl,

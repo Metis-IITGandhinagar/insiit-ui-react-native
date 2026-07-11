@@ -12,12 +12,13 @@ import {
 } from "lucide-react-native";
 
 import {
-    colors,
-    radius,
-    spacing,
+ useTheme
 } from "@/theme";
 
 const UserCard = () => {
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
     return (
         <View style={styles.card}>
             <View style={styles.top}>
@@ -78,7 +79,7 @@ const UserCard = () => {
 
 export default UserCard;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     card: {
         backgroundColor: colors.surface,
         borderRadius: 28,

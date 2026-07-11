@@ -4,81 +4,61 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Linking, 
+    Platform,
 } from "react-native";
 import {
     Phone,
-    ShieldAlert,
     Wrench,
     HeartPulse,
     ChevronRight,
 } from "lucide-react-native";
 
 import {
-    colors,
-    radius,
-    spacing,
+    useTheme
 } from "@/theme";
 
 const EmergencyCard = () => {
+
+        const emergencyNumber = "7069795000";
+        const makeCall = async () => {
+            try {
+                await Linking.openURL(`tel:${emergencyNumber}`);
+            } catch (error) {
+                console.error("Could not open phone app:", error);
+            }
+        };
+
+        const theme = useTheme();
+        const { colors } = theme;
+        const styles = getStyles(theme);
     return (
+        
         <View style={styles.card}>
             <View style={styles.header}>
                 <View>
                     <Text style={styles.label}>
                         QUICK ACCESS
                     </Text>
-
                     <Text style={styles.title}>
                         Emergency Services
                     </Text>
                 </View>
-
+                <TouchableOpacity onPress={makeCall} style={styles.phoneCircle}>
                 <View style={styles.phoneCircle}>
+                    
                     <Phone
                         size={24}
-                        color={colors.primary}
+                        color={colors.danger}
                         strokeWidth={2.2}
-                    />
+                    />    
                 </View>
+                </TouchableOpacity>
             </View>
-
             <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.action}
-            >
-                <View style={styles.left}>
-                    <View
-                        style={[
-                            styles.iconBackground,
-                            { backgroundColor: "#FEE2E2" },
-                        ]}
-                    >
-                        <ShieldAlert
-                            size={20}
-                            color="#DC2626"
-                        />
-                    </View>
-
-                    <View>
-                        <Text style={styles.actionTitle}>
-                            Emergency
-                        </Text>
-
-                        <Text style={styles.actionSubtitle}>
-                            Security & immediate assistance
-                        </Text>
-                    </View>
-                </View>
-
-                <ChevronRight
-                    size={20}
-                    color="#94A3B8"
-                />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.action}
+                onPress={makeCall}
             >
                 <View style={styles.left}>
                     <View
@@ -149,7 +129,7 @@ const EmergencyCard = () => {
 
 export default EmergencyCard;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     card: {
         backgroundColor: colors.surface,
         borderRadius: 28,

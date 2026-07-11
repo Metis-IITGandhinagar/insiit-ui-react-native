@@ -5,12 +5,13 @@ import {
 } from "react-native";
 
 import {
-    colors,
-    radius,
-    spacing,
+   useTheme
 } from "@/theme";
 
 const MoreHeader = () => {
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
     return (
         <View style={styles.container}>
                 <View>
@@ -28,7 +29,7 @@ const MoreHeader = () => {
 
 export default MoreHeader;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     container: {
         paddingTop:spacing.lg,
         justifyContent: "space-between",

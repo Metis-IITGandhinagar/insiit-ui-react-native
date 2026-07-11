@@ -10,11 +10,8 @@ import {
 } from "lucide-react-native";
 
 import { useNavigation, useRoute, NavigationProp } from "@react-navigation/native";
-import { colors, radius, spacing } from "@/theme";
+import { useTheme } from "@/theme";
 import type { RootStackParamList } from "@/navigation/types";
-
-const PRIMARY = colors.primary;
-const INACTIVE = colors.inactive;
 
 type NavItemProps = {
     icon: LucideIcon;
@@ -26,6 +23,10 @@ const FloatingNavbar = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const route = useRoute();
 
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
+    
     const currentScreen = route.name;
 
     return (
@@ -70,6 +71,11 @@ const NavItem = ({
     active,
     onPress,
 }: NavItemProps) => {
+    
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
+
     return (
         <TouchableOpacity
             activeOpacity={0.8}
@@ -78,7 +84,7 @@ const NavItem = ({
         >
             <Icon
                 size={24}
-                color={active ? colors.surface : INACTIVE}
+                color={active ? colors.surface : colors.primary}
                 strokeWidth={2.2}
             />
         </TouchableOpacity>
@@ -87,12 +93,12 @@ const NavItem = ({
 
 export default FloatingNavbar;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     wrapper: {
         position: "absolute",
         left: spacing.lg,
         right: spacing.lg,
-        bottom: 70,
+        bottom: 60,
     },
 
     container: {
@@ -121,6 +127,6 @@ const styles = StyleSheet.create({
     },
 
     activeItem: {
-        backgroundColor: PRIMARY,
+        backgroundColor: colors.primary,
     },
 });

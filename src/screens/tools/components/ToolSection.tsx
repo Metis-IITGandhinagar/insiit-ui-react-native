@@ -11,7 +11,7 @@ import {
     LucideIcon,
 } from "lucide-react-native";
 
-import { colors, radius, spacing } from "@/theme";
+import { useTheme } from "@/theme";
 
 type Tool = {
     title: string;
@@ -28,6 +28,9 @@ const tools: Tool[] = [
 ];
 
 const ToolSection = () => {
+        const theme = useTheme();
+        const { colors } = theme;
+        const styles = getStyles(theme);
     return (
         <View>
             <Text style={styles.heading}>
@@ -80,7 +83,7 @@ const ToolSection = () => {
 
 export default ToolSection;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     heading: {
         fontSize: 20,
         fontWeight: "700",

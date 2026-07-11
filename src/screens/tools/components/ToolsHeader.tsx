@@ -5,12 +5,12 @@ import {
 } from "react-native";
 
 import {
-    colors,
-    radius,
-    spacing,
+   useTheme
 } from "@/theme";
 
 const ToolsHeader = () => {
+        const theme = useTheme();
+        const styles = getStyles(theme);
     return (
         <View style={styles.container}>
                 <View>
@@ -28,7 +28,7 @@ const ToolsHeader = () => {
 
 export default ToolsHeader;
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
     container: {
         paddingTop: spacing.lg,
         justifyContent: "space-between",
