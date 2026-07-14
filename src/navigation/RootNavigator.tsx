@@ -11,10 +11,12 @@ import SearchScreen from "@/screens/search/SearchScreen";
 import BusScreen from "@/screens/bus/BusScreen";
 import ToolsScreen from "@/screens/tools/ToolsScreen";
 import MoreScreen from "@/screens/more/MoreScreen";
+import { useAuth } from "@/hooks/useAuth";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
+    const { authenticated } = useAuth();
     return (
         <NavigationContainer>
             <Stack.Navigator
@@ -23,17 +25,26 @@ export default function RootNavigator() {
                     animation: "none",
                 }}
             >
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen name="Search" component={SearchScreen} />
-                <Stack.Screen name="Bus" component={BusScreen} />
-                <Stack.Screen name="Tools" component={ToolsScreen} />
-                <Stack.Screen name="More" component={MoreScreen} />
-                <Stack.Screen
-                    name="AdminDashboard"
-                    component={AdminDashboard}
-                    options={{ animation: 'slide_from_right' }}
-                />
+
+                {authenticated ? (
+                    <>
+                        <Stack.Screen name="Home" component={HomeScreen} />
+                        <Stack.Screen name="Search" component={SearchScreen} />
+                        <Stack.Screen name="Bus" component={BusScreen} />
+                        <Stack.Screen name="Tools" component={ToolsScreen} />
+                        <Stack.Screen name="More" component={MoreScreen} />
+                        <Stack.Screen
+                            name="AdminDashboard"
+                            component={AdminDashboard}
+                        />
+                    </>
+                ) : (
+                    <Stack.Screen
+                        name="Login"
+                        component={LoginScreen}
+                    />
+                )}
+
             </Stack.Navigator>
         </NavigationContainer>
     );

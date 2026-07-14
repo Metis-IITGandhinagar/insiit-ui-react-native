@@ -51,15 +51,14 @@ const EmergencyCard = () => {
                         size={24}
                         color={colors.danger}
                         strokeWidth={2.2}
-                    />    
+                    />
+
                 </View>
                 </TouchableOpacity>
             </View>
             <TouchableOpacity
                 activeOpacity={0.8}
-                style={styles.action}
-                onPress={makeCall}
-            >
+                style={styles.action}>
                 <View style={styles.left}>
                     <View
                         style={[

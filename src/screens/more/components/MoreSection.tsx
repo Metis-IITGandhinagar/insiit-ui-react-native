@@ -38,7 +38,6 @@ type Section = {
 };
 
 interface MoreSectionProps {
-    /** Provided by MoreScreen so toasts render in a portal above the FloatingNavbar */
     showToast: (message: string) => void;
 }
 

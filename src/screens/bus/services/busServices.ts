@@ -1,6 +1,6 @@
 import { ApiBusResponse } from "./busTypes";
 
-const BASE_URL = "https://insiit-backend-node.vercel.app/api";
+const BASE_URL = "https://insiit-api.metis-iitgn.tech/api";
 
 export const busService = {
     getAllBuses: async (): Promise<ApiBusResponse[]> => {

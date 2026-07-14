@@ -11,8 +11,10 @@ type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "
 
 const LoginScreen = () => {
     const navigation = useNavigation<LoginScreenNavigationProp>();
+    
 
-    const goHome = () => navigation.replace("Home");
+    const goHome = () => {
+    };
     const theme = useTheme();
     const styles = getStyles(theme);
 
@@ -24,7 +26,7 @@ const LoginScreen = () => {
                 <Text style={styles.title}>Welcome to INSIIT</Text>
                 <Text style={styles.subtitle}>Connecting IIT Gandhinagar</Text>
 
-                <TouchableOpacity activeOpacity={0.85} style={styles.button} onPress={goHome}>
+                <TouchableOpacity activeOpacity={0.85} style={styles.button}  onPress={goHome}>
                     <Text style={styles.buttonText}>Login with IITGN ID</Text>
                 </TouchableOpacity>
 

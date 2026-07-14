@@ -62,7 +62,7 @@ const HomeScreen = () => {
                 <WeeklyMenuSheet ref={menuSheetRef} data={menuData} />
             </SafeAreaView>
         </>
-    );
+    );  
 };
 
 export default HomeScreen;

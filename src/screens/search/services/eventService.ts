@@ -1,6 +1,6 @@
 import { ApiEventResponse, Event } from "../types";
 
-const BASE_URL = "https://insiit-backend-node.vercel.app/api";
+const BASE_URL = "https://insiit-api.metis-iitgn.tech/api";
 
 const METIS_API_KEY = "metis-at-insiit";
 
