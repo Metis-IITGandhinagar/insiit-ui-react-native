@@ -1,25 +1,28 @@
+import { apiClient } from '../../../services/api/apiClient';
 import { ApiBusResponse } from "./busTypes";
-
-const BASE_URL = "https://insiit-api.metis-iitgn.tech/api";
 
 export const busService = {
     getAllBuses: async (): Promise<ApiBusResponse[]> => {
         try {
-            const response = await fetch(`${BASE_URL}/buses`);
-            if (!response.ok) {
-                throw new Error("Failed to fetch bus schedules");
-            }
-            return await response.json();
+            const response = await apiClient.get<ApiBusResponse[]>('/buses');
+            return response.data;
         } catch (error) {
             console.error("Network Fetch Exception:", error);
+            throw error;
+        }
+    },
+
+    createBus: async (busData: Omit<ApiBusResponse, '_id' | '__v'>): Promise<ApiBusResponse> => {
+        try {
+            const response = await apiClient.post<ApiBusResponse>('/buses', busData);
+            return response.data;
+        } catch (error) {
+            console.error("Network POST Exception:", error);
             throw error;
         }
     }
 };
 
-/**
- * Calculates absolute delta minutes relative to current device time
- */
 export const calculateMinutesLeft = (timeStr: string): number => {
     try {
         const [time, modifier] = timeStr.split(" ");

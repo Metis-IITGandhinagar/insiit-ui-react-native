@@ -2,6 +2,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { nativeAuth } from '../services/auth/firebase';
 import { authService } from '../services/auth/authService';
+import { userService } from '../services/api/userService';
 import { UserSessionProfile, AppPermissions } from '../navigation/types';
 
 interface AuthContextType {
@@ -14,21 +15,23 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// TODO(backend): once the Rust backend has a /auth/verify (or similar) endpoint,
-// replace this with a real call — e.g. userService.verifySessionWithBackend() —
-// that sends the Firebase ID token and returns { role, permissions } from the server.
-// Until then, every allowed (@iitgn.ac.in) user gets this default local profile.
-const DEFAULT_PERMISSIONS: AppPermissions = {
-    post_event: false,
-    delete_event: false,
-    put_bus_schedule: false,
+const DEFAULT_STUDENT_PERMISSIONS: AppPermissions = {
+    get_admin: false, post_admin: false, put_admin: false,
+    post_bus_schedule: false, put_bus_schedule: false,
+    post_event: false, delete_event: false, put_event: false,
+    post_mess_menu: false, post_outlet: false, delete_outlet: false, put_outlet: false
 };
 
-function buildLocalProfile(email: string): UserSessionProfile {
+// Async function to build the profile using the Rust backend
+async function buildProfile(email: string): Promise<UserSessionProfile> {
+    const backendPermissions = await userService.fetchUserPermissions();
+
+    const isStudent = !backendPermissions;
+
     return {
         email,
-        role: 'student',
-        permissions: DEFAULT_PERMISSIONS,
+        role: isStudent ? 'student' : 'admin',
+        permissions: backendPermissions || DEFAULT_STUDENT_PERMISSIONS,
     };
 }
 
@@ -47,7 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         return;
                     }
 
-                    setUser(buildLocalProfile(email));
+                    const profile = await buildProfile(email);
+                    setUser(profile);
                 } else {
                     setUser(null);
                 }
@@ -69,19 +73,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const loggedInUser = await authService.login();
 
             if (!loggedInUser) {
-                // User cancelled the Google account picker — not a real error
                 setLoading(false);
                 return;
             }
 
             const email = loggedInUser.email || '';
-            // authService.login() already enforces this and signs out if it fails,
-            // but we still guard here in case that ever changes upstream.
             if (!email.toLowerCase().endsWith('@iitgn.ac.in')) {
                 throw new Error('Only official @iitgn.ac.in accounts are permitted to log in.');
             }
 
-            setUser(buildLocalProfile(email));
+            const profile = await buildProfile(email);
+            setUser(profile);
         } catch (error) {
             await authService.logout();
             setUser(null);

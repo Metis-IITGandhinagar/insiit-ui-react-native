@@ -1,25 +1,31 @@
 import React, { useMemo, useState } from "react";
-import { FlatList, StatusBar, StyleSheet, Text, View, RefreshControl, Alert } from "react-native";
+import { FlatList, StatusBar, StyleSheet, Text, View, RefreshControl, Alert, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SearchBar from "./components/SearchBar";
 import EventCard from "./components/EventCard";
 import EventDetailModal from "./components/EventDetailModal";
+import AddEventModal from "./components/AddEventModal"; 
 
 import { useEventData } from "./services/useEventData";
 import { eventService } from "./services/eventService";
 import { Event } from "./types";
 import FloatingNavbar from "../home/components/FloatingNavbar";
 import { useTheme } from "@/theme";
+import { useAuth } from "../../hooks/useAuth"; // <-- NEW IMPORT
 
 export default function SearchScreen() {
     const [search, setSearch] = useState("");
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [addModalVisible, setAddModalVisible] = useState(false); // <-- State for Admin Form
 
     const theme = useTheme();
-    const { colors } = theme;
+    const { colors, spacing } = theme;
     const styles = getStyles(theme);
+
+    // Grab the permissions from our Auth Context
+    const { hasPermission } = useAuth();
 
     const { eventsList, loading, refreshEvents } = useEventData();
 
@@ -36,6 +42,12 @@ export default function SearchScreen() {
     };
 
     const handleDeleteEvent = (event: Event) => {
+        // Double check permission before allowing delete
+        if (!hasPermission('delete_event')) {
+            Alert.alert("Unauthorized", "You do not have permission to delete events.");
+            return;
+        }
+
         Alert.alert(
             "Delete Event",
             `Remove "${event.title}" from campus feed?`,
@@ -46,7 +58,7 @@ export default function SearchScreen() {
                     style: "destructive",
                     onPress: async () => {
                         const success = await eventService.deleteEvent(event.id);
-                        if (success) refreshEvents(); // Triggers instant pull-down sync representation
+                        if (success) refreshEvents();
                     }
                 }
             ]
@@ -60,11 +72,25 @@ export default function SearchScreen() {
             <View style={styles.content}>
                 <View style={styles.header}>
                     <SearchBar value={search} onChangeText={setSearch} />
-                    <Text style={styles.heading}>
-                        {search.length === 0
-                            ? `Upcoming Events (${filteredEvents.length})`
-                            : `Results (${filteredEvents.length})`}
-                    </Text>
+
+                    {/* Header Row with conditional Add Button */}
+                    <View style={styles.headerRow}>
+                        <Text style={styles.heading}>
+                            {search.length === 0
+                                ? `Upcoming Events (${filteredEvents.length})`
+                                : `Results (${filteredEvents.length})`}
+                        </Text>
+
+                        {/* ONLY render if the user has 'post_event' permission */}
+                        {hasPermission('post_event') && (
+                            <TouchableOpacity
+                                style={[styles.addButton, { backgroundColor: colors.primary }]}
+                                onPress={() => setAddModalVisible(true)}
+                            >
+                                <Text style={styles.addButtonText}>+ Add</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
 
                 <FlatList
@@ -85,6 +111,7 @@ export default function SearchScreen() {
                             event={item}
                             onPress={() => handleOpenDetail(item)}
                             onBookmark={() => { }}
+                            // Only trigger delete if they are allowed
                             onDelete={() => handleDeleteEvent(item)}
                         />
                     )}
@@ -92,6 +119,17 @@ export default function SearchScreen() {
             </View>
 
             <EventDetailModal visible={modalVisible} event={selectedEvent} onClose={() => setModalVisible(false)} />
+
+            {/* The new Admin Form Modal */}
+            <AddEventModal
+                visible={addModalVisible}
+                onClose={() => setAddModalVisible(false)}
+                onSuccess={() => {
+                    setAddModalVisible(false);
+                    refreshEvents();
+                }}
+            />
+
             <FloatingNavbar />
         </SafeAreaView>
     );
@@ -102,6 +140,9 @@ const getStyles = ({ colors, spacing, typography }: any) =>
         container: { flex: 1, backgroundColor: colors.background },
         content: { flex: 1 },
         header: { backgroundColor: colors.background, paddingHorizontal: spacing.lg, paddingTop: 10, paddingBottom: spacing.md },
+        headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.lg },
         listContent: { paddingHorizontal: spacing.lg, paddingBottom: 120 },
-        heading: { ...typography.h2, color: colors.text, marginHorizontal: spacing.lg, marginBottom: 5, paddingTop: spacing.lg },
+        heading: { ...typography.h2, color: colors.text, marginBottom: 5 },
+        addButton: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+        addButtonText: { color: '#FFF', fontWeight: 'bold' }
     });

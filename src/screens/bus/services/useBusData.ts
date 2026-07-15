@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { BusType, ApiBusResponse, BusDeparture } from "./busTypes";
 import { busService, calculateMinutesLeft } from "./busServices";
 
@@ -8,17 +8,22 @@ export const useBusData = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        busService.getAllBuses()
-            .then(data => {
-                setRawBuses(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                setError(err.message || "Failed to load schedules");
-                setLoading(false);
-            });
+    const refreshBuses = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await busService.getAllBuses();
+            setRawBuses(data);
+        } catch (err: any) {
+            setError(err.message || "Failed to load schedules");
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        refreshBuses();
+    }, [refreshBuses]);
 
     const filteredBuses = useMemo(() => {
         return rawBuses.filter(bus =>
@@ -37,14 +42,12 @@ export const useBusData = () => {
             from: bus.Source,
             to: bus.Destination,
             minutesLeft: calculateMinutesLeft(bus.DepartureTime),
-            rawStops: bus.Stops // Already an array from Mongo
+            rawStops: bus.Stops
         }));
 
-        // Separate active upcoming schedules from historical ones that passed earlier today
         const upcoming = mapped.filter(b => b.minutesLeft >= 0).sort((a, b) => a.minutesLeft - b.minutesLeft);
         const passed = mapped.filter(b => b.minutesLeft < 0).sort((a, b) => a.minutesLeft - b.minutesLeft);
 
-        // Combine arrays to push past buses to the bottom of the list view
         const sortedSchedules = [...upcoming, ...passed];
         const nextBusItem = upcoming[0] || sortedSchedules[0];
 
@@ -55,7 +58,6 @@ export const useBusData = () => {
             isNext: nextBusItem ? bus.time === nextBusItem.time && bus.from === nextBusItem.from : false
         }));
 
-        // Premium feature: Synthesize a complete terminal-to-terminal stop list string array
         let stops: string[] = [];
         if (nextBusItem) {
             stops = [nextBusItem.from, ...nextBusItem.rawStops, nextBusItem.to];
@@ -93,6 +95,7 @@ export const useBusData = () => {
         setSelectedTab,
         loading,
         error,
+        refreshBuses, 
         ...scheduleData
     };
 };

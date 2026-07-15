@@ -32,8 +32,6 @@ export const authService = {
             const isAllowedDomain = email.toLowerCase().endsWith(`@${ALLOWED_EMAIL_DOMAIN.toLowerCase()}`);
 
             if (!isAllowedDomain) {
-                // Reject and sign back out immediately — do not let a non-institute
-                // account hold a valid Firebase session, even briefly.
                 await nativeAuth.signOut();
                 await GoogleSignin.signOut();
                 throw new Error(`Only @${ALLOWED_EMAIL_DOMAIN} accounts are allowed to sign in.`);
@@ -42,7 +40,6 @@ export const authService = {
             return userCredential.user;
         } catch (error) {
             if (isErrorWithCode(error) && error.code === statusCodes.SIGN_IN_CANCELLED) {
-                // User closed the account picker — not a real error, let the caller decide how to handle silently
                 return null;
             }
             console.error('Error during authService.login step:', error);
