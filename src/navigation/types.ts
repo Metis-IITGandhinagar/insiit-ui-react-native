@@ -6,6 +6,9 @@ export type RootStackParamList = {
     Bus: undefined;
     More: undefined;
     AdminDashboard: undefined;
+    Representatives: undefined;
+    TeamINSIIT: undefined; 
+    VersionNerd: undefined; 
 };
 export interface AppPermissions {
     post_event: boolean;
@@ -15,6 +18,6 @@ export interface AppPermissions {
 
 export interface UserSessionProfile {
     email: string;
-    role: 'student' | 'admin' | 'staff';
+    role: 'student' | 'admin' ;
     permissions: AppPermissions;
 }

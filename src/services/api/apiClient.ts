@@ -2,9 +2,7 @@
 import axios from 'axios';
 import { authService } from '../auth/authService';
 
-// REPLACE THIS with your actual local network machine IP address or deployed backend URL.
-// Note: Android emulators read your local machine localhost at http://10.0.2.2:8080
-const BASE_URL = 'http://10.0.2.2:8080/api';
+const BASE_URL = "https://insiit-api.metis-iitgn.tech/api";
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,
@@ -14,11 +12,9 @@ export const apiClient = axios.create({
     },
 });
 
-// Axios Request Interceptor automatically injects the live Firebase ID Token
 apiClient.interceptors.request.use(
     async (config) => {
         try {
-            // Fetch the active user's structural ID token string
             const token = await authService.getIdToken();
 
             if (token) {

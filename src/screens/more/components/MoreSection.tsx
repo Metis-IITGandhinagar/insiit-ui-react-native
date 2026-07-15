@@ -46,7 +46,7 @@ const sections: Section[] = [
         title: "Campus",
         items: [
             { title: "Campus Map", icon: Map },
-            { title: "Representatives", icon: Users },
+            { title: "Representatives", icon: Users, routeName: "Representatives" },
         ],
     },
     {
@@ -61,10 +61,10 @@ const sections: Section[] = [
         title: "About",
         items: [
             { title: "About INSIIT", icon: Info },
-            { title: "Team INSIIT", icon: Users },
+            { title: "Team INSIIT", icon: Users, routeName: "TeamINSIIT" },
             { title: "Privacy Policy", icon: Shield },
             { title: "Report Bug", icon: Bug },
-            { title: "Version", icon: BadgeInfo },
+            { title: "Version", icon: BadgeInfo, routeName: "VersionNerd" }, 
         ],
     },
 ];
@@ -113,7 +113,13 @@ const MoreSection = ({ showToast }: MoreSectionProps) => {
                                         </View>
                                         <Text style={styles.title}>{item.title}</Text>
                                     </View>
-                                    <ChevronRight size={20} color="#94A3B8" />
+                                    {item.title === "Version" ? (
+                                        <Text style={{ fontSize: 14, fontWeight: "600", color: "#94A3B8" }}>
+                                            v1.0.4
+                                        </Text>
+                                    ) : (
+                                        <ChevronRight size={20} color="#94A3B8" />
+                                    )}
                                 </TouchableOpacity>
                             );
                         })}

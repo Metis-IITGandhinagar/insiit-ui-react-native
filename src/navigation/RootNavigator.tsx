@@ -12,6 +12,11 @@ import SearchScreen from "@/screens/search/SearchScreen";
 import BusScreen from "@/screens/bus/BusScreen";
 import ToolsScreen from "@/screens/tools/ToolsScreen";
 import MoreScreen from "@/screens/more/MoreScreen";
+import RepresentativesScreen from "@/screens/more/RepresentativesScreen";
+import TeamScreen from "@/screens/more/TeamScreen";
+import VersionScreen from "@/screens/more/VersionNerdScreen";
+import VersionNerdScreen from "@/screens/more/VersionNerdScreen";
+  
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -45,6 +50,21 @@ export default function RootNavigator() {
                         <Stack.Screen
                             name="AdminDashboard"
                             component={AdminDashboard}
+                           />
+                        <Stack.Screen
+                            name="Representatives"
+                            component={RepresentativesScreen}
+                            options={{ animation: "slide_from_right" }}
+                        />
+                        <Stack.Screen
+                            name="TeamINSIIT"
+                            component={TeamScreen}
+                            options={{ animation: "slide_from_right" }}
+                        />
+                        <Stack.Screen
+                            name="VersionNerd"
+                            component={VersionNerdScreen}
+                            options={{ animation: "fade" }} 
                         />
                     </>
                 ) : (

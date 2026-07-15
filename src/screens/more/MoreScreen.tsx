@@ -114,11 +114,6 @@ const MoreScreen = () => {
                     <AppInfoCard />
                 </ScrollView>
 
-                {/*
-                  Toast portal lives outside the ScrollView so it's anchored to the
-                  screen viewport (not scroll content) and always renders just above
-                  the FloatingNavbar, regardless of scroll position.
-                */}
                 <View style={styles.toastContainer} pointerEvents="none">
                     {[...toasts].reverse().map((toast) => (
                         <Animated.View
