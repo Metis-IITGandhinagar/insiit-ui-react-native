@@ -1,8 +1,9 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
+import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "./types";
-
+import { useAuth } from '../hooks/useAuth';
 
 import AdminDashboard from '../screens/more/AdminDashboard';
 import LoginScreen from "@/screens/LoginScreen";
@@ -11,12 +12,20 @@ import SearchScreen from "@/screens/search/SearchScreen";
 import BusScreen from "@/screens/bus/BusScreen";
 import ToolsScreen from "@/screens/tools/ToolsScreen";
 import MoreScreen from "@/screens/more/MoreScreen";
-import { useAuth } from "@/hooks/useAuth";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
-    const { authenticated } = useAuth();
+    const {user, loading} = useAuth();
+
+    if (loading) {
+        return (
+            <View style={{flex:1 , justifyContent:'center',alignItems:'center'}}>
+                <ActivityIndicator size="large" color="#A52A2A"/>
+            </View>
+        )
+    }
+   
     return (
         <NavigationContainer>
             <Stack.Navigator
@@ -26,7 +35,7 @@ export default function RootNavigator() {
                 }}
             >
 
-                {authenticated ? (
+                {user ? (
                     <>
                         <Stack.Screen name="Home" component={HomeScreen} />
                         <Stack.Screen name="Search" component={SearchScreen} />

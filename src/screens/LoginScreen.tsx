@@ -1,23 +1,35 @@
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useAuth } from '../hooks/useAuth';
 
 import { useTheme } from "@/theme";
-import type { RootStackParamList } from "@/navigation/types";
-
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen = () => {
-    const navigation = useNavigation<LoginScreenNavigationProp>();
-    
+    const { signIn } = useAuth();
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-    const goHome = () => {
-    };
     const theme = useTheme();
     const styles = getStyles(theme);
 
+    const handleGoogleLogin = async () => {
+        if (isLoggingIn) return;
+
+        setIsLoggingIn(true);
+        try {
+            await signIn();
+        } catch (error: any) {
+            if (error.message && !error.message.includes('Sign in cancelled')) {
+                Alert.alert("Authentication Error", error.message || "Failed to log in with Google.");
+            }
+        } finally {
+            setIsLoggingIn(false);
+        }
+    };
+
+    const handleGuestLogin = () => {
+        Alert.alert("Guest Access", "Guest mode functionality can be customized here later.");
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -26,8 +38,17 @@ const LoginScreen = () => {
                 <Text style={styles.title}>Welcome to INSIIT</Text>
                 <Text style={styles.subtitle}>Connecting IIT Gandhinagar</Text>
 
-                <TouchableOpacity activeOpacity={0.85} style={styles.button}  onPress={goHome}>
-                    <Text style={styles.buttonText}>Login with IITGN ID</Text>
+                <TouchableOpacity
+                    activeOpacity={0.85}
+                    style={[styles.button, isLoggingIn && { opacity: 0.7 }]}
+                    onPress={handleGoogleLogin}
+                    disabled={isLoggingIn}
+                >
+                    {isLoggingIn ? (
+                        <ActivityIndicator color={theme.colors.surface} size="small" />
+                    ) : (
+                        <Text style={styles.buttonText}>Login with IITGN ID</Text>
+                    )}
                 </TouchableOpacity>
 
                 <Text style={styles.description}>
@@ -36,7 +57,11 @@ const LoginScreen = () => {
                     & community
                 </Text>
 
-                <TouchableOpacity activeOpacity={0.7} onPress={goHome}>
+                <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={handleGuestLogin}
+                    disabled={isLoggingIn}
+                >
                     <Text style={styles.guest}>Login as Guest</Text>
                 </TouchableOpacity>
             </View>
@@ -46,7 +71,7 @@ const LoginScreen = () => {
 
 export default LoginScreen;
 
-const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,
@@ -79,6 +104,8 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>Styl
         borderRadius: radius.round,
         paddingVertical: spacing.lg,
         alignItems: "center",
+        justifyContent: "center",
+        minHeight: 55, // Prevents layout shifts during loading states
         shadowColor: colors.accent,
         shadowOpacity: 0.25,
         shadowRadius: 10,

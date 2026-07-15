@@ -7,3 +7,14 @@ export type RootStackParamList = {
     More: undefined;
     AdminDashboard: undefined;
 };
+export interface AppPermissions {
+    post_event: boolean;
+    delete_event: boolean;
+    put_bus_schedule: boolean;
+}
+
+export interface UserSessionProfile {
+    email: string;
+    role: 'student' | 'admin' | 'staff';
+    permissions: AppPermissions;
+}
