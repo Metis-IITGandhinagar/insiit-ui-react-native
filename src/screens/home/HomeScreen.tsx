@@ -1,3 +1,4 @@
+// src/screens/home/HomeScreen.tsx
 import React, { useRef } from "react";
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
 import { RefreshCw } from "lucide-react-native";
@@ -7,12 +8,14 @@ import FloatingNavbar from "./components/FloatingNavbar";
 import QRBottomSheet from "./components/QRBottomSheet";
 import WeeklyMenuSheet from "./components/WeeklyMenuSheet";
 import GreetingSection from "./components/GreetingSection";
+import TimetableWidget from "./components/TimetableWidget";
 
 import { useTheme } from "@/theme";
 import { useMessData } from "./services/mess/useMessData";
 
 import type { QRBottomSheetRef } from "./components/QRBottomSheet";
 import type { WeeklyMenuSheetRef } from "./components/WeeklyMenuSheet";
+
 
 const HomeScreen = () => {
     const qrSheetRef = useRef<QRBottomSheetRef>(null);
@@ -51,18 +54,16 @@ const HomeScreen = () => {
                             onShowQR={() => qrSheetRef.current?.expand()}
                             onShowMenu={() => menuSheetRef.current?.expand()}
                         />
-
+                        <TimetableWidget />
 
                     </ScrollView>
                 )}
-
                 <FloatingNavbar />
-
                 <QRBottomSheet ref={qrSheetRef} />
                 <WeeklyMenuSheet ref={menuSheetRef} data={menuData} />
             </SafeAreaView>
         </>
-    );  
+    );
 };
 
 export default HomeScreen;
@@ -75,8 +76,8 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
     contentScroll: {
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.md,
-        paddingBottom: 120,
-        gap: spacing.lg,
+        paddingBottom: 120, 
+        gap: spacing.lg,    
     },
     centeredView: {
         flex: 1,

@@ -9,6 +9,7 @@ export type RootStackParamList = {
     Representatives: undefined;
     TeamINSIIT: undefined; 
     VersionNerd: undefined; 
+    CourseSearch:undefined;
 };
 export interface AppPermissions {
     get_admin: boolean;

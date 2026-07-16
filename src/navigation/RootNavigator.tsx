@@ -16,6 +16,7 @@ import RepresentativesScreen from "@/screens/more/RepresentativesScreen";
 import TeamScreen from "@/screens/more/TeamScreen";
 import VersionScreen from "@/screens/more/VersionNerdScreen";
 import VersionNerdScreen from "@/screens/more/VersionNerdScreen";
+import CourseSearchScreen from '@/screens/home/CourseSearchScreen';
   
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -73,8 +74,16 @@ export default function RootNavigator() {
                         component={LoginScreen}
                     />
                 )}
-
+                <Stack.Screen
+                    name="CourseSearch"
+                    component={CourseSearchScreen}
+                    options={{
+                        headerShown: false,
+                        animation: 'slide_from_right' 
+                    }}
+                />
             </Stack.Navigator>
+
         </NavigationContainer>
     );
 }
