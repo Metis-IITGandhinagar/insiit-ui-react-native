@@ -1,3 +1,4 @@
+// src/screens/tools/ToolsScreen.tsx
 import React from "react";
 import {
     SafeAreaView,
@@ -6,17 +7,16 @@ import {
     StyleSheet,
 } from "react-native";
 
-import FloatingNavbar from "../home/components/FloatingNavbar";
-
 import ToolsHeader from "./components/ToolsHeader";
 import EmergencyCard from "./components/EmergencyCard";
 import ToolSection from "./components/ToolSection";
-import {  useTheme } from "@/theme";
+import { useTheme } from "@/theme";
 import QuickActions from "./components/QuickActions";
 
 const ToolsScreen = () => {
-        const theme = useTheme();
-        const styles = getStyles(theme);
+    const theme = useTheme();
+    const styles = getStyles(theme);
+
     return (
         <>
             <SafeAreaView style={styles.container}>
@@ -32,8 +32,6 @@ const ToolsScreen = () => {
 
                     <ToolSection />
                 </ScrollView>
-
-                <FloatingNavbar />
             </SafeAreaView>
         </>
     );
@@ -41,12 +39,11 @@ const ToolsScreen = () => {
 
 export default ToolsScreen;
 
-const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
     },
-
     content: {
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.md,

@@ -4,7 +4,6 @@ import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, Vie
 import { RefreshCw } from "lucide-react-native";
 
 import MessCard from "./components/MessCard";
-import FloatingNavbar from "./components/FloatingNavbar";
 import QRBottomSheet from "./components/QRBottomSheet";
 import WeeklyMenuSheet from "./components/WeeklyMenuSheet";
 import GreetingSection from "./components/GreetingSection";
@@ -15,7 +14,6 @@ import { useMessData } from "./services/mess/useMessData";
 
 import type { QRBottomSheetRef } from "./components/QRBottomSheet";
 import type { WeeklyMenuSheetRef } from "./components/WeeklyMenuSheet";
-
 
 const HomeScreen = () => {
     const qrSheetRef = useRef<QRBottomSheetRef>(null);
@@ -58,7 +56,6 @@ const HomeScreen = () => {
 
                     </ScrollView>
                 )}
-                <FloatingNavbar />
                 <QRBottomSheet ref={qrSheetRef} />
                 <WeeklyMenuSheet ref={menuSheetRef} data={menuData} />
             </SafeAreaView>
@@ -76,8 +73,8 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
     contentScroll: {
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.md,
-        paddingBottom: 120, 
-        gap: spacing.lg,    
+        paddingBottom: 120,
+        gap: spacing.lg,
     },
     centeredView: {
         flex: 1,

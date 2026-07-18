@@ -1,17 +1,17 @@
+// src/screens/bus/BusScreen.tsx
 import React, { useState } from "react";
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, Text, View, TouchableOpacity, RefreshControl } from "react-native";
-import FloatingNavbar from "../home/components/FloatingNavbar";
 
 import BusHeader from "./components/BusHeader";
 import BusTypeTabs from "./components/BusTypeTabs";
 import NextBusHero from "./components/NextBusHero";
 import TodaySchedule from "./components/TodaySchedule";
 import RouteCard from "./components/RouteCard";
-import AddBusModal from "./components/AddBusModal"; 
+import AddBusModal from "./components/AddBusModal";
 
 import { useBusData } from "./services/useBusData";
 import { useTheme } from "@/theme";
-import { useAuth } from "../../hooks/useAuth"; 
+import { useAuth } from "../../hooks/useAuth";
 
 const BusScreen = () => {
     const { selectedTab, setSelectedTab, departures, nextBus, stops, loading, error, refreshBuses } = useBusData();
@@ -41,7 +41,6 @@ const BusScreen = () => {
                             <BusTypeTabs selected={selectedTab} onSelect={setSelectedTab} />
                         </View>
 
-                        {/* Admin Add Button */}
                         {hasPermission('post_bus_schedule') && (
                             <TouchableOpacity
                                 style={[styles.addButton, { backgroundColor: colors.primary }]}
@@ -69,7 +68,6 @@ const BusScreen = () => {
                     )}
                 </ScrollView>
 
-                {/* Admin Modal */}
                 <AddBusModal
                     visible={isAddModalOpen}
                     onClose={() => setAddModalOpen(false)}
@@ -78,8 +76,6 @@ const BusScreen = () => {
                         refreshBuses();
                     }}
                 />
-
-                <FloatingNavbar />
             </SafeAreaView>
         </>
     );

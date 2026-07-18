@@ -1,15 +1,12 @@
+// src/navigation/types.ts
 export type RootStackParamList = {
     Login: undefined;
-    Home: undefined;
-    Search: undefined;
-    Tools: undefined;
-    Bus: undefined;
-    More: undefined;
+    MainTabs: undefined;
     AdminDashboard: undefined;
     Representatives: undefined;
-    TeamINSIIT: undefined; 
-    VersionNerd: undefined; 
-    CourseSearch:undefined;
+    TeamINSIIT: undefined;
+    VersionNerd: undefined;
+    CourseSearch: undefined;
 };
 export interface AppPermissions {
     get_admin: boolean;

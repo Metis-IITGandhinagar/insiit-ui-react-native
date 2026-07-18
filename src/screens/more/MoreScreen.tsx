@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+// src/screens/more/MoreScreen.tsx
+import React, { useCallback, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
@@ -9,11 +10,9 @@ import {
     Text,
     View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 
 import { useTheme } from "@/theme";
-
-import FloatingNavbar from "../home/components/FloatingNavbar";
+import { useOnTabBlur } from "@/navigation/SwipeContext";
 
 import MoreHeader from "./components/MoreHeader";
 import MoreSection from "./components/MoreSection";
@@ -33,18 +32,13 @@ const MoreScreen = () => {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
-    const navigation = useNavigation();
 
     const [toasts, setToasts] = useState<CustomToast[]>([]);
     const toastCounter = useRef(0);
 
-    // Clear any pending toasts when the user navigates away from this screen.
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('blur', () => {
-            setToasts([]);
-        });
-        return unsubscribe;
-    }, [navigation]);
+    useOnTabBlur('More', useCallback(() => {
+        setToasts([]);
+    }, []));
 
     const showToast = useCallback((message: string) => {
         toastCounter.current++;
@@ -130,8 +124,6 @@ const MoreScreen = () => {
                         </Animated.View>
                     ))}
                 </View>
-
-                <FloatingNavbar />
             </SafeAreaView>
         </>
     );
@@ -145,14 +137,12 @@ const getStyles = ({ colors, radius, spacing }: any) =>
             flex: 1,
             backgroundColor: colors.background,
         },
-
         content: {
             paddingHorizontal: spacing.lg,
             paddingTop: spacing.md,
             paddingBottom: 120,
             gap: spacing.lg,
         },
-
         toastContainer: {
             position: "absolute",
             left: 20,
