@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Bus, Clock3, ArrowRight } from "lucide-react-native";
-import { useTheme } from "@/theme";
+import { useTheme } from "@/core/theme";
 
 interface NextBusProps {
     data: {

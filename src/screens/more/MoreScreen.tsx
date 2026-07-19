@@ -11,8 +11,8 @@ import {
     View,
 } from "react-native";
 
-import { useTheme } from "@/theme";
-import { useOnTabBlur } from "@/navigation/SwipeContext";
+import { useTheme } from "@/core/theme";
+import { useOnTabBlur } from "@/core/navigation/SwipeContext";
 
 import MoreHeader from "./components/MoreHeader";
 import MoreSection from "./components/MoreSection";

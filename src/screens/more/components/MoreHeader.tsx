@@ -6,7 +6,7 @@ import {
 
 import {
    useTheme
-} from "@/theme";
+} from "@/core/theme";
 
 const MoreHeader = () => {
     const theme = useTheme();

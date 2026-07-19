@@ -4,7 +4,7 @@ import {
     Text,
     View,
 } from "react-native";
-import { useTheme } from "@/theme";
+import { useTheme } from "@/core/theme";
 
 const BusHeader = () => {
     const theme = useTheme();

@@ -13,7 +13,7 @@ import {
 
 import {
  useTheme
-} from "@/theme";
+} from "@/core/theme";
 
 const UserCard = () => {
     const theme = useTheme();

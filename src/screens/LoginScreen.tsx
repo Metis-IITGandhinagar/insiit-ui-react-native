@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '@core/auth/useAuth';
 
-import { useTheme } from "@/theme";
+import { useTheme } from "@/core/theme";
 
 const LoginScreen = () => {
     const { signIn } = useAuth();

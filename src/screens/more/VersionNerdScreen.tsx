@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/navigation/types";
-import { useTheme } from "@/theme";
+import { RootStackParamList } from "@/core/navigation/types";
+import { useTheme } from "@/core/theme";
 import { ShieldAlert, Award, Smile } from "lucide-react-native";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "VersionNerd">;
@@ -26,7 +26,7 @@ const VersionNerdScreen = () => {
     const [stage, setStage] = useState<Stage>("haha_nerd");
 
     const goBackToSettings = () => {
-        navigation.navigate("More");
+        navigation.goBack();
     };
 
     return (

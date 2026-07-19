@@ -1,7 +1,7 @@
 import React from "react";
-import { ThemeProvider } from "@/theme"; 
-import RootNavigator from "./src/navigation/RootNavigator"; 
-import { AuthProvider } from './src/context/AuthProvider';
+import { ThemeProvider } from "@/core/theme"; 
+import RootNavigator from "./src/core/navigation/RootNavigator"; 
+import { AuthProvider } from './src/core/context/AuthProvider';
 
 export default function App() {
     return (

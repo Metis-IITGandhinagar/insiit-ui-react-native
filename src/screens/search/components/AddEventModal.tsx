@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { eventService } from '../services/eventService';
-import { useTheme } from '@/theme';
+import { useTheme } from '@/core/theme';
 
 interface Props {
     visible: boolean;

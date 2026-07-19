@@ -1,4 +1,4 @@
-import { apiClient } from '../../../services/api/apiClient';
+import { apiClient } from '@/core/api/apiClient';
 import { Event } from "../types";
 
 export const mapApiEventToUi = (event: any, fallbackIndex: number): Event => ({

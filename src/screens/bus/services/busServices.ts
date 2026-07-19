@@ -1,4 +1,4 @@
-import { apiClient } from '../../../services/api/apiClient';
+import { apiClient } from '@core/api/apiClient';
 import { ApiBusResponse } from "./busTypes";
 
 export const busService = {

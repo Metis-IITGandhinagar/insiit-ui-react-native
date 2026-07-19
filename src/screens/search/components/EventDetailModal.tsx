@@ -10,7 +10,7 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/theme';
+import { useTheme } from '@/core/theme';
 import { Event } from '../types';
 
 interface EventDetailModalProps {

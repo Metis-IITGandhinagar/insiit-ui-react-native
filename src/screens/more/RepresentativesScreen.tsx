@@ -12,10 +12,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/navigation/types";
+import { RootStackParamList } from "@core/navigation/types";
 import { ArrowLeft, Phone, Mail } from "lucide-react-native";
-import { useTheme } from "@/theme";
-import { representativeService, Representative } from "@/services/api/representativeService";
+import { useTheme } from "@/core/theme";
+import { representativeService, Representative } from "@/core/api/representativeService";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Representatives">;
 
@@ -101,7 +101,7 @@ const RepresentativesScreen = () => {
             {/* Custom Screen Header Layout */}
             <View style={styles.header}>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate("More")}
+                    onPress={() => navigation.goBack()}
                     style={styles.backButton}
                     activeOpacity={0.7}
                    

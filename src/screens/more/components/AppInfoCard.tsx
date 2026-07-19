@@ -9,7 +9,7 @@ import {
 
 import {
     useTheme
-} from "@/theme";
+} from "@/core/theme";
 
 const VERSION = "2.0.0";
 const BUILD = "24";

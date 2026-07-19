@@ -15,7 +15,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/theme';
+import { useTheme } from '@/core/theme';
 import { eventService } from '../search/services/eventService';
 
 export default function AdminDashboard() {

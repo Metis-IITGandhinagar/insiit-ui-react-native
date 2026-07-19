@@ -11,8 +11,8 @@ import AddEventModal from "./components/AddEventModal";
 import { useEventData } from "./services/useEventData";
 import { eventService } from "./services/eventService";
 import { Event } from "./types";
-import { useTheme } from "@/theme";
-import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "@/core/theme";
+import { useAuth } from "@core/auth/useAuth";
 
 export default function SearchScreen() {
     const [search, setSearch] = useState("");

@@ -7,7 +7,7 @@ import {
     View,
 } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/navigation/types";
+import { RootStackParamList } from "@/core/navigation/types";
 import {
     ChevronRight,
     LucideIcon,
@@ -22,7 +22,7 @@ import {
     BadgeInfo,
 } from "lucide-react-native";
 
-import { useTheme } from "@/theme";
+import { useTheme } from "@/core/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

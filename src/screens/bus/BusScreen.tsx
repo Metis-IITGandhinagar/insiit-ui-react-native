@@ -10,8 +10,8 @@ import RouteCard from "./components/RouteCard";
 import AddBusModal from "./components/AddBusModal";
 
 import { useBusData } from "./services/useBusData";
-import { useTheme } from "@/theme";
-import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "@/core/theme";
+import { useAuth } from "@/core/auth/useAuth";
 
 const BusScreen = () => {
     const { selectedTab, setSelectedTab, departures, nextBus, stops, loading, error, refreshBuses } = useBusData();

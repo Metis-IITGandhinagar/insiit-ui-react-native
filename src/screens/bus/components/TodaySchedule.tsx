@@ -2,20 +2,19 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Clock3, ArrowRight } from "lucide-react-native";
 import { BusDeparture } from "../services/busTypes";
-import { useTheme } from "@/theme";
-
+import { useTheme } from "@/core/theme";
+import { Card } from "@shared/components/Card"; 
 interface ScheduleProps {
     departures: BusDeparture[];
 }
 
 const TodaySchedule: React.FC<ScheduleProps> = ({ departures }) => {
-    
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
 
     return (
-        <View style={styles.card}>
+        <Card variant="surface" style={styles.cardOverrides}>
             <Text style={styles.heading}>
                 Today's Schedule
             </Text>
@@ -33,61 +32,33 @@ const TodaySchedule: React.FC<ScheduleProps> = ({ departures }) => {
                             size={16}
                             color={bus.isNext ? colors.primary : colors.textSecondary}
                         />
-
-                        <Text
-                            style={[
-                                styles.time,
-                                bus.isNext && styles.nextTime,
-                            ]}
-                        >
+                        <Text style={[styles.time, bus.isNext && styles.nextTime]}>
                             {bus.time}
                         </Text>
                     </View>
 
                     <View style={styles.route}>
-                        <Text style={styles.place}>
-                            {bus.from}
-                        </Text>
-
-                        <ArrowRight
-                            size={14}
-                            color={colors.textSecondary}
-                        />
-
-                        <Text style={styles.place}>
-                            {bus.to}
-                        </Text>
-                    </View>
-
-                    {bus.isNext && (
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>
-                                NEXT
-                            </Text>
-                        </View>
-                    )}
+                        <Text style={styles.place}>{bus.from}</Text>
+                        <ArrowRight size={14} color={colors.textSecondary} />
+                        <Text style={styles.place}>{bus.to}</Text>
+                    </View>    
                 </View>
             ))}
-        </View>
+        </Card>
     );
 };
 
 export default TodaySchedule;
 
-const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
-    card: {
-        backgroundColor: colors.surface,
-        borderRadius: radius.xl,
+const getStyles = ({ colors, radius, spacing, typography }: any) => StyleSheet.create({
+    cardOverrides: {
         padding: spacing.lg,
-        ...shadows.card,
     },
-
     heading: {
         ...typography.h3,
         color: colors.text,
         marginBottom: spacing.md,
     },
-
     row: {
         flexDirection: "row",
         alignItems: "center",
@@ -96,7 +67,6 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         borderBottomWidth: 1,
         borderBottomColor: colors.borderSoft,
     },
-
     nextRow: {
         backgroundColor: colors.surfaceAlt,
         borderRadius: radius.md,
@@ -106,25 +76,21 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         borderWidth: 1,
         borderColor: colors.border,
     },
-
     left: {
         flexDirection: "row",
         alignItems: "center",
         width: 100,
     },
-
     time: {
         ...typography.caption,
         marginLeft: spacing.sm,
         color: colors.textSecondary,
         fontWeight: "600",
     },
-
     nextTime: {
         color: colors.primary,
         fontWeight: "700",
     },
-
     route: {
         flex: 1,
         flexDirection: "row",
@@ -132,20 +98,17 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         alignItems: "center",
         gap: spacing.xs,
     },
-
     place: {
         ...typography.caption,
         fontWeight: "700",
         color: colors.text,
     },
-
     badge: {
         backgroundColor: colors.primary,
         paddingHorizontal: spacing.sm,
         paddingVertical: 4,
         borderRadius: radius.sm,
     },
-
     badgeText: {
         color: colors.surface,
         ...typography.label,
