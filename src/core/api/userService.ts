@@ -18,7 +18,7 @@ export const userService = {
             }
 
             console.error('Network or server error fetching permissions:', error);
-            return null; 
+            return null;
         }
     },
 };

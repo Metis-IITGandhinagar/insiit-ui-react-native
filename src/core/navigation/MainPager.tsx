@@ -13,6 +13,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { TABS, TAB_COUNT } from "./tabs";
 import { useSwipeAnimation } from "./SwipeContext";
+import { useTheme } from "@/core/theme";
 
 const SPRING_CONFIG = {
     damping: 22,
@@ -46,6 +47,7 @@ const TabPane = ({ index, width, progress, children }: TabPaneProps) => {
 const MainPager = () => {
     const { width } = useWindowDimensions();
     const { progress, activeIndex } = useSwipeAnimation();
+    const {colors} = useTheme();
 
     const startProgress = useSharedValue(0);
 
@@ -82,7 +84,7 @@ const MainPager = () => {
 
     return (
         <GestureDetector gesture={pan}>
-            <View style={styles.viewport}>
+            <View style={[styles.viewport, { backgroundColor: colors.background }]}>
                 <Animated.View
                     style={[
                         styles.row,

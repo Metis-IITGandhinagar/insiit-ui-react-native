@@ -1,4 +1,3 @@
-// src/context/AuthProvider.tsx
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { nativeAuth } from '../auth/firebase';
 import { authService } from '../auth/authService';
@@ -22,14 +21,19 @@ const DEFAULT_STUDENT_PERMISSIONS: AppPermissions = {
     post_mess_menu: false, post_outlet: false, delete_outlet: false, put_outlet: false
 };
 
-// Async function to build the profile using the Rust backend
-async function buildProfile(email: string): Promise<UserSessionProfile> {
+async function buildProfile(firebaseUser: any): Promise<UserSessionProfile> {
     const backendPermissions = await userService.fetchUserPermissions();
-
     const isStudent = !backendPermissions;
+
+    const providerData = firebaseUser.providerData?.[0] || {};
+    const email = firebaseUser.email || providerData.email || '';
+    const displayName = firebaseUser.displayName || providerData.displayName || 'IITGN Student';
+    const photoURL = firebaseUser.photoURL || providerData.photoURL || null;
 
     return {
         email,
+        displayName,
+        photoURL,
         role: isStudent ? 'student' : 'admin',
         permissions: backendPermissions || DEFAULT_STUDENT_PERMISSIONS,
     };
@@ -50,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         return;
                     }
 
-                    const profile = await buildProfile(email);
+                    const profile = await buildProfile(firebaseUser);
                     setUser(profile);
                 } else {
                     setUser(null);
@@ -82,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 throw new Error('Only official @iitgn.ac.in accounts are permitted to log in.');
             }
 
-            const profile = await buildProfile(email);
+            const profile = await buildProfile(loggedInUser);
             setUser(profile);
         } catch (error) {
             await authService.logout();

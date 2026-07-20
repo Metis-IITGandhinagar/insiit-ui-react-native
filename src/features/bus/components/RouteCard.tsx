@@ -1,8 +1,9 @@
+// src/features/bus/components/RouteCard.tsx
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { MapPinned, Circle } from "lucide-react-native";
-import { useTheme } from "@/core/theme";
-import { Card } from "@shared/components/Card"; // Shared Component Import
+import { useTheme } from "@core/theme";
+import { Card } from "@shared/components/Card";
 
 interface RouteProps {
     stops: string[];
@@ -16,7 +17,7 @@ const RouteCard: React.FC<RouteProps> = ({ stops }) => {
     const styles = getStyles(theme);
 
     return (
-        <Card variant="surface" style={styles.cardOverrides}>
+        <Card variant="surface">
             <View style={styles.header}>
                 <MapPinned size={22} color={colors.primary} />
                 <Text style={styles.title}>Route Timeline</Text>
@@ -40,9 +41,6 @@ const RouteCard: React.FC<RouteProps> = ({ stops }) => {
 export default RouteCard;
 
 const getStyles = ({ colors, spacing, typography }: any) => StyleSheet.create({
-    cardOverrides: {
-        padding: spacing.lg,
-    },
     header: {
         flexDirection: "row",
         alignItems: "center",

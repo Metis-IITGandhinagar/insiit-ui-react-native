@@ -2,14 +2,13 @@
 import React, { useState } from "react";
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, Text, View, TouchableOpacity, RefreshControl } from "react-native";
 
-import BusHeader from "./components/BusHeader";
-import BusTypeTabs from "./components/BusTypeTabs";
-import NextBusHero from "./components/NextBusHero";
-import TodaySchedule from "./components/TodaySchedule";
-import RouteCard from "./components/RouteCard";
-import AddBusModal from "./components/AddBusModal";
+import BusHeader from "../components/BusHeader";
+import BusTypeTabs from "../components/BusTypeTabs";
+import NextBusHero from "../components/NextBusHero";
+import TodaySchedule from "../components/TodaySchedule";
+import RouteCard from "../components/RouteCard";
 
-import { useBusData } from "./services/useBusData";
+import { useBusData } from "../hooks/useBusData";
 import { useTheme } from "@/core/theme";
 import { useAuth } from "@/core/auth/useAuth";
 
@@ -67,15 +66,6 @@ const BusScreen = () => {
                         </>
                     )}
                 </ScrollView>
-
-                <AddBusModal
-                    visible={isAddModalOpen}
-                    onClose={() => setAddModalOpen(false)}
-                    onSuccess={() => {
-                        setAddModalOpen(false);
-                        refreshBuses();
-                    }}
-                />
             </SafeAreaView>
         </>
     );

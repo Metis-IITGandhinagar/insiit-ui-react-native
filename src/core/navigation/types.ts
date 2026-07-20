@@ -8,6 +8,8 @@ export type RootStackParamList = {
     VersionNerd: undefined;
     CourseSearch: undefined;
     MessFeedback:undefined;
+    Profile:undefined;
+    Settings:undefined;
 };
 export interface AppPermissions {
     get_admin: boolean;
@@ -28,4 +30,6 @@ export interface UserSessionProfile {
     email: string;
     role: 'student' | 'admin';
     permissions: AppPermissions;
+    displayName?: string | null;
+    photoURL?: string | null;
 }

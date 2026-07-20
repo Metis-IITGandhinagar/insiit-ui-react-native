@@ -1,26 +1,37 @@
 // src/navigation/RootNavigator.tsx
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import type { RootStackParamList } from "./types";
 import { useAuth } from '@/core/auth/useAuth';
 
-import AdminDashboard from '@/screens/more/AdminDashboard';
 import LoginScreen from "@/screens/LoginScreen";
 import MainTabsScreen from "./MainTabsScreen";
-import RepresentativesScreen from "@/screens/more/RepresentativesScreen";
-import TeamScreen from "@/screens/more/TeamScreen";
-import VersionNerdScreen from "@/screens/more/VersionNerdScreen";
 import CourseSearchScreen from '@/features/home/screens/CourseSearchScreen';
 import MessFeedbackScreen from "@/features/tools/screens/MessFeedbackScreen";
-
+import ProfileScreen from "@/features/more/screens/ProfieScreen";
+import SettingsScreen from "@/features/more/screens/SettingsScreen";
+import { useTheme } from "@/core/theme";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
     const { user, loading } = useAuth();
+    const { colors, isDark } = useTheme();
+
+    const navigationTheme = {
+        ...DefaultTheme,
+        dark: isDark,
+        colors: {
+            ...DefaultTheme.colors,
+            background: colors.background,
+            card: colors.card,
+            text: colors.text,
+            border: colors.border,
+        },
+    };
 
     if (loading) {
         return (
@@ -42,12 +53,20 @@ export default function RootNavigator() {
                     {user ? (
                         <>
                             <Stack.Screen name="MainTabs" component={MainTabsScreen} />
-
                             <Stack.Screen
+                                name="Profile"
+                                component={ProfileScreen}
+                            /> 
+                            <Stack.Screen
+                                name="Settings"
+                                component={SettingsScreen}
+                            /> 
+
+                            {/* <Stack.Screen
                                 name="AdminDashboard"
                                 component={AdminDashboard}
-                            />
-                            <Stack.Screen
+                            /> */}
+                            {/* <Stack.Screen
                                 name="Representatives"
                                 component={RepresentativesScreen}
                                 options={{ animation: "slide_from_right" }}
@@ -61,7 +80,7 @@ export default function RootNavigator() {
                                 name="VersionNerd"
                                 component={VersionNerdScreen}
                                 options={{ animation: "fade" }}
-                            />
+                            /> */}
                         </>
                     ) : (
                         <Stack.Screen

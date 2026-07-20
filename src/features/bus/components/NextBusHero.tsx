@@ -1,7 +1,9 @@
+// src/features/bus/components/NextBusHero.tsx
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Bus, Clock3, ArrowRight } from "lucide-react-native";
-import { useTheme } from "@/core/theme";
+import { useTheme } from "@core/theme";
+import { Card } from "@shared/components/Card";
 
 interface NextBusProps {
     data: {
@@ -21,7 +23,7 @@ const NextBusHero: React.FC<NextBusProps> = ({ data }) => {
     const styles = getStyles(theme);
 
     return (
-        <View style={styles.card}>
+        <Card variant="primary">
             <View style={styles.topRow}>
                 <View style={styles.iconContainer}>
                     <Bus
@@ -42,17 +44,14 @@ const NextBusHero: React.FC<NextBusProps> = ({ data }) => {
                 </View>
             </View>
 
-
             <View style={styles.countdownSection}>
                 <Text style={styles.leavesIn}>
                     leaves in
                 </Text>
-                
+
                 <Text style={styles.countdown}>
                     {data.countdown}
                 </Text>
-
-                
             </View>
 
             <View style={styles.routeRow}>
@@ -81,19 +80,13 @@ const NextBusHero: React.FC<NextBusProps> = ({ data }) => {
                     Departure • {data.departure}
                 </Text>
             </View>
-        </View>
+        </Card>
     );
 };
 
 export default NextBusHero;
 
-const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
-    card: {
-        backgroundColor: colors.primary,
-        borderRadius: radius.xl,
-        padding: spacing.xl,
-    },
-
+const getStyles = ({ colors, radius, spacing, typography }: any) => StyleSheet.create({
     topRow: {
         flexDirection: "row",
         alignItems: "center",

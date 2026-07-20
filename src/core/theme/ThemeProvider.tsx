@@ -1,7 +1,6 @@
-// theme/ThemeProvider.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useColorScheme } from "react-native";
-import { lightColors, darkColors } from "./colors";
+import { themes, themeOptions, ThemeMode, ColorScheme } from "./colors";
 import radius from "./radius";
 import shadows from "./shadows";
 import spacing from "./spacing";
@@ -9,13 +8,15 @@ import typography from "./typography";
 import sizes from "./sizes";
 
 type ThemeContextType = {
+    themeKey: ThemeMode;
     isDark: boolean;
-    colors: typeof lightColors;
+    colors: ColorScheme;
     radius: typeof radius;
     shadows: typeof shadows;
     spacing: typeof spacing;
     typography: typeof typography;
     sizes: typeof sizes;
+    setThemeKey: (key: ThemeMode) => void;
     toggleTheme: () => void;
 };
 
@@ -23,22 +24,31 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const systemScheme = useColorScheme();
-    const [isDark, setIsDark] = useState(systemScheme === "dark");
+    const [themeKey, setThemeKey] = useState<ThemeMode>(systemScheme === "dark" ? "dark" : "light");
 
     useEffect(() => {
-        setIsDark(systemScheme === "dark");
+        if (systemScheme) {
+            setThemeKey(systemScheme === "dark" ? "dark" : "light");
+        }
     }, [systemScheme]);
 
-    const toggleTheme = () => setIsDark((prev) => !prev);
+    const activeColors = themes[themeKey] || themes.light;
+    const isDark = themes[themeKey] ? (themeKey === "dark" || themeKey === "midnight") : false;
+
+    const toggleTheme = () => {
+        setThemeKey((prev) => (prev === "dark" || prev === "midnight" ? "light" : "dark"));
+    };
 
     const value = {
+        themeKey,
         isDark,
-        colors: isDark ? darkColors : lightColors,
+        colors: activeColors,
         radius,
         shadows,
         spacing,
         typography,
         sizes,
+        setThemeKey,
         toggleTheme,
     };
 

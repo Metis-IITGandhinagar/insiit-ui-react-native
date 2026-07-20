@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { BusType, ApiBusResponse, BusDeparture } from "./busTypes";
-import { busService, calculateMinutesLeft } from "./busServices";
+import { BusType, ApiBusResponse, BusDeparture } from "../services/busTypes";
+import { busService, calculateMinutesLeft } from "../services/busServices";
 
 export const useBusData = () => {
     const [selectedTab, setSelectedTab] = useState<BusType>("56");
