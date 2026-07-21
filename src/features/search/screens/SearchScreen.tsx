@@ -1,17 +1,16 @@
-// src/screens/search/SearchScreen.tsx
 import React, { useMemo, useState } from "react";
 import { FlatList, StatusBar, StyleSheet, Text, View, RefreshControl, Alert, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import SearchBar from "./components/SearchBar";
-import EventCard from "./components/EventCard";
-import EventDetailModal from "./components/EventDetailModal";
-import AddEventModal from "./components/AddEventModal";
+import SearchBar from "../components/SearchBar";
+import EventCard from "../components/EventCard";
+import EventDetailModal from "../components/EventDetailModal";
+import AddEventModal from "../components/AddEventModal";
 
-import { useEventData } from "./services/useEventData";
-import { eventService } from "./services/eventService";
-import { Event } from "./types";
-import { useTheme } from "@/core/theme";
+import { useEventData } from "../hooks/useEventData";
+import { eventService } from "../services/eventService";
+import { Event } from "../services/searchTypes";
+import { useTheme } from "@core/theme";
 import { useAuth } from "@core/auth/useAuth";
 
 export default function SearchScreen() {
@@ -19,12 +18,12 @@ export default function SearchScreen() {
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
+
     const theme = useTheme();
     const { colors, spacing } = theme;
     const styles = getStyles(theme);
 
     const { hasPermission } = useAuth();
-
     const { eventsList, loading, refreshEvents } = useEventData();
 
     const filteredEvents = useMemo(() => {

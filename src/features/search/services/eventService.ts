@@ -1,5 +1,5 @@
 import { apiClient } from '@/core/api/apiClient';
-import { Event } from "../types";
+import { Event } from "./searchTypes";
 
 export const mapApiEventToUi = (event: any, fallbackIndex: number): Event => ({
     id: String(event.id || event._id || `fallback-key-${fallbackIndex}`),

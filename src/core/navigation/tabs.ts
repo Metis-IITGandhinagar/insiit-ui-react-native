@@ -4,7 +4,7 @@ import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react-native";
 
 import HomeScreen from "@/features/home/screens/HomeScreen";
-import SearchScreen from "@/screens/search/SearchScreen";
+import SearchScreen from "@/features/search/screens/SearchScreen";
 import ToolsScreen from "@/features/tools/screens/ToolsScreen";
 import BusScreen from "@/features/bus/screens/BusScreen";
 import MoreScreen from "@/features/more/screens/MoreScreen";

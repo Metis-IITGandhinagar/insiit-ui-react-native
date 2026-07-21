@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { eventService } from '../services/eventService';
-import { useTheme } from '@/core/theme';
+import { useTheme } from '@core/theme';
 
 interface Props {
     visible: boolean;
@@ -38,7 +38,6 @@ export default function AddEventModal({ visible, onClose, onSuccess }: Props) {
         try {
             await eventService.addEvent(formData);
             Alert.alert("Success", "Event created successfully!");
-            // Reset form
             setFormData({ title: '', venue: '', date: '', time: '', image: '', description: '' });
             onSuccess();
         } catch (error) {

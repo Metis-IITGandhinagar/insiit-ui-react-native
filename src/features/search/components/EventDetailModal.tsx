@@ -10,8 +10,8 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/core/theme';
-import { Event } from '../types';
+import { useTheme } from '@core/theme';
+import { Event } from '../services/searchTypes';
 
 interface EventDetailModalProps {
     visible: boolean;
@@ -33,7 +33,6 @@ const EventDetailModal = ({ visible, event, onClose }: EventDetailModalProps) =>
             visible={visible}
             onRequestClose={onClose}
         >
-            {/* Semi-transparent blur background dismissal layer */}
             <TouchableOpacity
                 style={styles.modalOverlay}
                 activeOpacity={1}
@@ -41,7 +40,6 @@ const EventDetailModal = ({ visible, event, onClose }: EventDetailModalProps) =>
             >
                 <TouchableWithoutFeedback>
                     <View style={styles.modalContent}>
-                        {/* Close Button Pin */}
                         <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
                             <Ionicons name="close" size={24} color={colors.text} />
                         </TouchableOpacity>

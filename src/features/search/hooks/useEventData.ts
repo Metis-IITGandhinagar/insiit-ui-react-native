@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Event } from "../types";
-import { eventService } from "./eventService";
+import { Event } from "../services/searchTypes";
+import { eventService } from "../services/eventService";
 
 export const useEventData = () => {
     const [eventsList, setEventsList] = useState<Event[]>([]);

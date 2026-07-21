@@ -7,7 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import type { RootStackParamList } from "./types";
 import { useAuth } from '@/core/auth/useAuth';
 
-import LoginScreen from "@/screens/LoginScreen";
+import LoginScreen from "@/core/auth/screens/LoginScreen";
 import MainTabsScreen from "./MainTabsScreen";
 import CourseSearchScreen from '@/features/home/screens/CourseSearchScreen';
 import MessFeedbackScreen from "@/features/tools/screens/MessFeedbackScreen";

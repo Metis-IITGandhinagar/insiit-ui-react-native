@@ -6,7 +6,7 @@ import {
     StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@/core/theme";
+import { useTheme } from "@core/theme";
 
 interface Props {
     value: string;
@@ -14,22 +14,23 @@ interface Props {
 }
 
 const SearchBar = ({ value, onChangeText }: Props) => {
-        const theme = useTheme();
-        const { colors } = theme;
-        const styles = getStyles(theme);
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <Ionicons
                 name="search"
                 size={20}
-                color={colors.inactive}
+                color={colors.text}
                 style={styles.icon}
             />
 
             <TextInput
                 style={styles.input}
                 placeholder="Search events..."
-                placeholderTextColor={colors.inactive}
+                placeholderTextColor={colors.text}
                 value={value}
                 onChangeText={onChangeText}
                 autoCorrect={false}
@@ -44,7 +45,7 @@ const SearchBar = ({ value, onChangeText }: Props) => {
                     <Ionicons
                         name="close-circle"
                         size={20}
-                        color={colors.inactive}
+                        color={colors.text}
                     />
                 </TouchableOpacity>
             )}
@@ -54,24 +55,23 @@ const SearchBar = ({ value, onChangeText }: Props) => {
 
 export default SearchBar;
 
-const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: colors.surface,
-        borderRadius: radius.lg,
-        height: 56,
-        paddingHorizontal: spacing.md,
-        ...shadows.card,
-    },
-
-    icon: {
-        marginRight: 10,
-    },
-
-    input: {
-        flex: 1,
-        fontSize: 16,
-        color: colors.text,
-    },
-});
+const getStyles = ({ colors, radius, shadows, spacing }: any) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: colors.surface,
+            borderRadius: radius.lg,
+            height: 56,
+            paddingHorizontal: spacing.md,
+            ...shadows.card,
+        },
+        icon: {
+            marginRight: 10,
+        },
+        input: {
+            flex: 1,
+            fontSize: 16,
+            color: colors.text,
+        },
+    });
