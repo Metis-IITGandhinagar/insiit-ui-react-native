@@ -14,6 +14,8 @@ import MessFeedbackScreen from "@/features/tools/screens/MessFeedbackScreen";
 import ProfileScreen from "@/features/more/screens/ProfieScreen";
 import SettingsScreen from "@/features/more/screens/SettingsScreen";
 import { useTheme } from "@/core/theme";
+import { AdminDashboardScreen } from "@/features/admin/screens/AdminDashboardScreen";
+
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -62,10 +64,10 @@ export default function RootNavigator() {
                                 component={SettingsScreen}
                             /> 
 
-                            {/* <Stack.Screen
+                            <Stack.Screen
                                 name="AdminDashboard"
-                                component={AdminDashboard}
-                            /> */}
+                                component={AdminDashboardScreen}
+                            /> 
                             {/* <Stack.Screen
                                 name="Representatives"
                                 component={RepresentativesScreen}
