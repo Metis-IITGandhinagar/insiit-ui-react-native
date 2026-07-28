@@ -1,3 +1,4 @@
+// src/features/admin/screens/AdminDashboardScreen.tsx
 import React, { useCallback, useMemo } from 'react';
 import {
     StyleSheet,
@@ -20,17 +21,20 @@ import { AdminStackParamList } from '@/core/navigation/AdminNavigator';
 type AdminDashboardNavigationProp = StackNavigationProp<AdminStackParamList, 'AdminDashboard'>;
 
 export const AdminDashboardScreen: React.FC = () => {
-    const { colors, spacing, typography } = useTheme();
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
+
     const navigation = useNavigation<AdminDashboardNavigationProp>();
 
     const {
+        permissions,
         isLoading,
         error,
         refetch,
         canManageEvents,
         canManageAnnouncements,
         canManageMessMenu,
-        canManageUsers,
         hasAnyAdminPermission,
     } = useAdminPermissions();
 
@@ -83,7 +87,7 @@ export const AdminDashboardScreen: React.FC = () => {
             });
         }
 
-        if (canManageUsers) {
+        if (permissions?.get_admin) {
             items.push({
                 id: 'users',
                 title: 'User Permissions',
@@ -98,17 +102,17 @@ export const AdminDashboardScreen: React.FC = () => {
         canManageEvents,
         canManageAnnouncements,
         canManageMessMenu,
-        canManageUsers,
         colors.primary,
         handleNavigateEvents,
         handleNavigateAnnouncements,
         handleNavigateMessMenu,
         handleNavigateUsers,
+        permissions?.get_admin,
     ]);
 
     if (isLoading && !sections.length) {
         return (
-            <View style={[styles.centered, { backgroundColor: colors.background }]}>
+            <View style={styles.centeredView}>
                 <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
@@ -116,55 +120,20 @@ export const AdminDashboardScreen: React.FC = () => {
 
     if (error && !sections.length) {
         return (
-            <View style={[styles.centered, { backgroundColor: colors.background, padding: spacing.xl }]}>
-                <Text
-                    style={[
-                        styles.errorTitle,
-                        {
-                            color: colors.text,
-                            fontSize: typography.h3?.fontSize || 20,
-                            fontWeight: typography.h3?.fontWeight || '700',
-                            marginBottom: spacing.xs,
-                        },
-                    ]}
-                >
+            <View style={styles.errorContainer}>
+                <Text style={styles.errorTitle}>
                     Failed to Load
                 </Text>
-                <Text
-                    style={[
-                        styles.errorText,
-                        {
-                            color: colors.textSecondary,
-                            fontSize: typography.h2?.fontSize || 14,
-                            marginBottom: spacing.lg,
-                        },
-                    ]}
-                >
+                <Text style={styles.errorSubtitle}>
                     {error.message}
                 </Text>
                 <TouchableOpacity
                     onPress={refetch}
                     activeOpacity={0.8}
-                    style={[
-                        styles.retryButton,
-                        {
-                            backgroundColor: colors.primary,
-                            paddingHorizontal: spacing.lg,
-                            paddingVertical: spacing.md,
-                            borderRadius: spacing.sm,
-                        },
-                    ]}
+                    style={styles.retryBtn}
                 >
-                    <RefreshCw size={16} color={colors.primary || '#FFFFFF'} style={styles.retryIcon} />
-                    <Text
-                        style={[
-                            styles.retryText,
-                            {
-                                color: colors.primary || '#FFFFFF',
-                                fontWeight: typography.button?.fontWeight || '600',
-                            },
-                        ]}
-                    >
+                    <RefreshCw size={16} color="#FFFFFF" />
+                    <Text style={styles.retryText}>
                         Retry
                     </Text>
                 </TouchableOpacity>
@@ -178,34 +147,15 @@ export const AdminDashboardScreen: React.FC = () => {
 
     return (
         <ScrollView
-            style={[styles.container, { backgroundColor: colors.background }]}
-            contentContainerStyle={[styles.contentContainer, { padding: spacing.lg }]}
+            style={styles.container}
+            contentContainerStyle={styles.contentScroll}
             refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={colors.primary} />}
             showsVerticalScrollIndicator={false}
         >
-            <Text
-                style={[
-                    styles.headerTitle,
-                    {
-                        color: colors.text,
-                        fontSize: typography.h1?.fontSize || 28,
-                        fontWeight: typography.h1?.fontWeight || '800',
-                        marginBottom: spacing.xs,
-                    },
-                ]}
-            >
+            <Text style={styles.headerTitle}>
                 Admin Console
             </Text>
-            <Text
-                style={[
-                    styles.headerSubtitle,
-                    {
-                        color: colors.textSecondary,
-                        fontSize: typography.h1?.fontSize || 16,
-                        marginBottom: spacing.xl,
-                    },
-                ]}
-            >
+            <Text style={styles.headerSubtitle}>
                 Manage IIT Gandhinagar portal operations
             </Text>
 
@@ -224,42 +174,69 @@ export const AdminDashboardScreen: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, spacing, typography }: any) => StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
-    contentContainer: {
+    contentScroll: {
         flexGrow: 1,
+        padding: spacing.lg,
     },
-    centered: {
+    centeredView: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: colors.background,
     },
-    headerTitle: {
-        letterSpacing: -0.5,
-    },
-    headerSubtitle: {
-        letterSpacing: -0.2,
-    },
-    sectionList: {
-        width: '100%',
+    errorContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.background,
+        padding: spacing.xl,
     },
     errorTitle: {
+        color: colors.text,
+        fontSize: typography.h3?.fontSize || 20,
+        fontWeight: typography.h3?.fontWeight || '700',
+        marginBottom: spacing.xs,
         textAlign: 'center',
     },
-    errorText: {
+    errorSubtitle: {
+        color: colors.textSecondary,
+        fontSize: typography.h2?.fontSize || 14,
+        marginBottom: spacing.lg,
         textAlign: 'center',
     },
-    retryButton: {
+    retryBtn: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    retryIcon: {
-        marginRight: 8,
+        backgroundColor: colors.primary,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.md,
+        borderRadius: radius?.sm || spacing.sm,
+        gap: 8,
     },
     retryText: {
         fontSize: 14,
+        color: '#FFFFFF',
+        fontWeight: typography.button?.fontWeight || '600',
+    },
+    headerTitle: {
+        letterSpacing: -0.5,
+        color: colors.text,
+        fontSize: typography.h2?.fontSize || 24,
+        fontWeight: typography.h2?.fontWeight || 'bold',
+    },
+    headerSubtitle: {
+        letterSpacing: -0.2,
+        color: colors.textSecondary,
+        fontSize: typography.h3?.fontSize || 16,
+        marginBottom: spacing.xl,
+    },
+    sectionList: {
+        width: '100%',
     },
 });

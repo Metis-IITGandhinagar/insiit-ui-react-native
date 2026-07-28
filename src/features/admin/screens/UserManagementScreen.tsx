@@ -14,7 +14,7 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
-import { UserPlus, Trash2, Edit2, RefreshCw, X, Shield, User as UserIcon } from 'lucide-react-native';
+import { UserPlus, RefreshCw, X, Shield, User as UserIcon } from 'lucide-react-native';
 import { useTheme } from '@core/theme';
 import { Card } from '@shared/components/Card';
 import { PermissionGate } from '../components/PermissionGate';
@@ -31,20 +31,15 @@ export const UserManagementScreen: React.FC = () => {
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-    const [editingAdmin, setEditingAdmin] = useState<AdminUser | null>(null);
-    const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [permissionsState, setPermissionsState] = useState<AdminPermissions>({
+        get_admin: false,
+        post_admin: false,
+        put_admin: false,
         post_event: false,
-        edit_event: false,
-        delete_event: false,
-        post_announcement: false,
-        edit_announcement: false,
-        delete_announcement: false,
         post_mess_menu: false,
-        manage_users: false,
+        post_announcement: false,
     });
 
     const fetchAdmins = useCallback(async () => {
@@ -65,18 +60,14 @@ export const UserManagementScreen: React.FC = () => {
     }, [fetchAdmins]);
 
     const resetForm = useCallback(() => {
-        setEditingAdmin(null);
-        setName('');
         setEmail('');
         setPermissionsState({
+            get_admin: false,
+            post_admin: false,
+            put_admin: false,
             post_event: false,
-            edit_event: false,
-            delete_event: false,
-            post_announcement: false,
-            edit_announcement: false,
-            delete_announcement: false,
             post_mess_menu: false,
-            manage_users: false,
+            post_announcement: false,
         });
     }, []);
 
@@ -85,9 +76,7 @@ export const UserManagementScreen: React.FC = () => {
         setIsModalOpen(true);
     }, [resetForm]);
 
-    const handleOpenEditModal = useCallback((admin: AdminUser) => {
-        setEditingAdmin(admin);
-        setName(admin.name);
+    const handleSelectAdminForUpsert = useCallback((admin: AdminUser) => {
         setEmail(admin.email);
         setPermissionsState(admin.permissions);
         setIsModalOpen(true);
@@ -107,24 +96,17 @@ export const UserManagementScreen: React.FC = () => {
     }, []);
 
     const handleSubmit = useCallback(async () => {
-        if (!name.trim() || !email.trim()) {
-            Alert.alert('Validation Error', 'Name and Email are required.');
+        if (!email.trim()) {
+            Alert.alert('Validation Error', 'Email address is required.');
             return;
         }
 
         setIsSubmitting(true);
         try {
-            if (editingAdmin) {
-                await adminService.updatePermissions(editingAdmin.id, {
-                    permissions: permissionsState,
-                });
-            } else {
-                await adminService.createAdmin({
-                    name: name.trim(),
-                    email: email.trim(),
-                    permissions: permissionsState,
-                });
-            }
+            await adminService.createAdmin({
+                email: email.trim(),
+                permissions: permissionsState,
+            });
             handleCloseModal();
             await fetchAdmins();
         } catch (err: any) {
@@ -132,97 +114,46 @@ export const UserManagementScreen: React.FC = () => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [name, email, editingAdmin, permissionsState, handleCloseModal, fetchAdmins]);
-
-    const handleDelete = useCallback((id: string) => {
-        Alert.alert(
-            'Delete Admin',
-            'Are you sure you want to revoke all administrative access for this user?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Revoke Access',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            setIsDeleting(id);
-                            await adminService.deleteAdmin(id);
-                            await fetchAdmins();
-                        } catch (err: any) {
-                            Alert.alert('Error', 'Failed to delete administrative user.');
-                        } finally {
-                            setIsDeleting(null);
-                        }
-                    },
-                },
-            ]
-        );
-    }, [fetchAdmins]);
+    }, [email, permissionsState, handleCloseModal, fetchAdmins]);
 
     const renderAdminItem = useCallback(({ item }: { item: AdminUser }) => {
         const activeCount = Object.values(item.permissions || {}).filter(Boolean).length;
 
         return (
-            <Card variant="surface" style={styles.cardOverride}>
-                <View style={styles.userHeader}>
-                    <View
-                        style={[
-                            styles.avatarContainer,
-                            { backgroundColor: colors.primary ? `${colors.primary}15` : 'rgba(0,0,0,0.05)', borderRadius: radius.xl ?? 9999 },
-                        ]}
-                    >
-                        <UserIcon size={20} color={colors.primary} />
+            <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleSelectAdminForUpsert(item)}
+            >
+                <Card variant="surface" style={styles.cardOverride}>
+                    <View style={styles.userHeader}>
+                        <View
+                            style={[
+                                styles.avatarContainer,
+                                {
+                                    backgroundColor: colors.primary ? `${colors.primary}15` : 'rgba(0,0,0,0.05)',
+                                    borderRadius: radius.xl ?? 9999
+                                },
+                            ]}
+                        >
+                            <UserIcon size={20} color={colors.primary} />
+                        </View>
+                        <View style={styles.userInfo}>
+                            <Text style={[styles.userEmail, { color: colors.text, fontSize: typography.h1?.fontSize || 16, fontWeight: '600' }]}>
+                                {item.email}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={styles.userInfo}>
-                        <Text style={[styles.userName, { color: colors.text, fontSize: typography.h3?.fontSize || 16, fontWeight: '700' }]}>
-                            {item.name}
-                        </Text>
-                        <Text style={[styles.userEmail, { color: colors.textSecondary, fontSize: typography.h2?.fontSize || 13 }]}>
-                            {item.email}
+
+                    <View style={styles.permissionBadgeContainer}>
+                        <Shield size={14} color={colors.primary} style={{ marginRight: 6 }} />
+                        <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '500' }}>
+                            {activeCount} Permissions Granted
                         </Text>
                     </View>
-                </View>
-
-                <View style={styles.permissionBadgeContainer}>
-                    <Shield size={14} color={colors.primary} style={{ marginRight: 6 }} />
-                    <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '500' }}>
-                        {activeCount} Permissions Granted
-                    </Text>
-                </View>
-
-                <View style={[styles.actionRow, { borderTopColor: colors.border || '#E5E7EB' }]}>
-                    <TouchableOpacity
-                        style={[styles.actionButton, { backgroundColor: colors.surface }]}
-                        onPress={() => handleOpenEditModal(item)}
-                        activeOpacity={0.7}
-                    >
-                        <Edit2 size={16} color={colors.primary} />
-                        <Text style={[styles.actionText, { color: colors.primary, fontSize: 12, fontWeight: '600' }]}>
-                            Edit Permissions
-                        </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.actionButton, { backgroundColor: colors.surface }]}
-                        onPress={() => handleDelete(item.id)}
-                        disabled={isDeleting === item.id}
-                        activeOpacity={0.7}
-                    >
-                        {isDeleting === item.id ? (
-                            <ActivityIndicator size="small" color={colors.danger || '#EF4444'} />
-                        ) : (
-                            <>
-                                <Trash2 size={16} color={colors.danger || '#EF4444'} />
-                                <Text style={[styles.actionText, { color: colors.danger || '#EF4444', fontSize: 12, fontWeight: '600' }]}>
-                                    Revoke
-                                </Text>
-                            </>
-                        )}
-                    </TouchableOpacity>
-                </View>
-            </Card>
+                </Card>
+            </TouchableOpacity>
         );
-    }, [colors, typography, radius, handleOpenEditModal, handleDelete, isDeleting]);
+    }, [colors, typography, radius, handleSelectAdminForUpsert]);
 
     return (
         <PermissionGate hasPermission={canManageUsers}>
@@ -250,7 +181,7 @@ export const UserManagementScreen: React.FC = () => {
                 ) : (
                     <FlatList
                         data={admins}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item) => item.email}
                         renderItem={renderAdminItem}
                         contentContainerStyle={[styles.listContent, { padding: spacing.lg }]}
                         refreshing={isLoading}
@@ -296,7 +227,7 @@ export const UserManagementScreen: React.FC = () => {
                                 <X size={24} color={colors.text} />
                             </TouchableOpacity>
                             <Text style={[{ color: colors.text, fontSize: typography.h3?.fontSize || 18, fontWeight: '700' }]}>
-                                {editingAdmin ? 'Edit Admin Permissions' : 'New Admin User'}
+                                Configure Admin User
                             </Text>
                             <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
                                 {isSubmitting ? (
@@ -310,26 +241,24 @@ export const UserManagementScreen: React.FC = () => {
                         </View>
 
                         <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
-                            {!editingAdmin && (
-                                <>
-                                    <TextInput
-                                        style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.md }]}
-                                        placeholder="Full Name"
-                                        placeholderTextColor={colors.textSecondary || '#999'}
-                                        value={name}
-                                        onChangeText={setName}
-                                    />
-                                    <TextInput
-                                        style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.lg }]}
-                                        placeholder="IITGN Email Address"
-                                        placeholderTextColor={colors.textSecondary || '#999'}
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                        value={email}
-                                        onChangeText={setEmail}
-                                    />
-                                </>
-                            )}
+                            <TextInput
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor: colors.surface,
+                                        color: colors.text,
+                                        borderRadius: radius.md,
+                                        padding: spacing.md,
+                                        marginBottom: spacing.lg
+                                    }
+                                ]}
+                                placeholder="IITGN Email Address"
+                                placeholderTextColor={colors.textSecondary || '#999'}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                value={email}
+                                onChangeText={setEmail}
+                            />
 
                             <Text style={{ color: colors.text, fontSize: typography.h3?.fontSize || 16, fontWeight: '700', marginBottom: spacing.md }}>
                                 Assign Permissions
@@ -360,18 +289,25 @@ const styles = StyleSheet.create({
     container: { flex: 1 },
     centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     listContent: { flexGrow: 1 },
-    cardOverride: { marginBottom: 16 },
+    cardOverride: { marginBottom: 12 },
     userHeader: { flexDirection: 'row', alignItems: 'center' },
     avatarContainer: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
     userInfo: { flex: 1 },
-    userName: {},
-    userEmail: { marginTop: 2 },
+    userEmail: {},
     permissionBadgeContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
-    actionRow: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8, marginTop: 12, gap: 8 },
-    actionButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-    actionText: { marginLeft: 4 },
     retryButton: { flexDirection: 'row', alignItems: 'center' },
-    fab: { position: 'absolute', width: 56, height: 56, alignItems: 'center', justifyContent: 'center', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.27, shadowRadius: 4.65 },
+    fab: {
+        position: 'absolute',
+        width: 56,
+        height: 56,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 6,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.27,
+        shadowRadius: 4.65
+    },
     modalContainer: { flex: 1 },
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1 },
     input: { fontSize: 16 },

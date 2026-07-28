@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { authService } from '../auth/authService';
 
-const BASE_URL = "https://insiit-api.metis-iitgn.tech/api";
+const BASE_URL = "https://insiit-api-rust.metis-iitgn.tech";
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,

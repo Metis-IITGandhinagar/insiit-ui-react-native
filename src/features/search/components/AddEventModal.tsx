@@ -100,7 +100,7 @@ export default function AddEventModal({ visible, onClose, onSuccess }: Props) {
                     </View>
                     <TextInput
                         style={styles.input}
-                        placeholder="Poster Image URL (Optional)"
+                        placeholder="Poster Image (Base64) (Optional)"
                         placeholderTextColor="#999"
                         value={formData.image}
                         onChangeText={(val) => handleChange('image', val)}

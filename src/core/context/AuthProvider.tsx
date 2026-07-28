@@ -15,15 +15,20 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const DEFAULT_STUDENT_PERMISSIONS: AppPermissions = {
-    get_admin: false, post_admin: false, put_admin: false,
-    post_bus_schedule: false, put_bus_schedule: false,
-    post_event: false, delete_event: false, put_event: false,
-    post_mess_menu: false, post_outlet: false, delete_outlet: false, put_outlet: false
+    get_admin: false,
+    post_admin: false,
+    put_admin: false,
+
+    post_event: false,
+    put_event: false,
+
+    post_mess_menu: false,
+
+    post_announcement: false,
 };
 
 async function buildProfile(firebaseUser: any): Promise<UserSessionProfile> {
     const backendPermissions = await userService.fetchUserPermissions();
-    const isStudent = !backendPermissions;
 
     const providerData = firebaseUser.providerData?.[0] || {};
     const email = firebaseUser.email || providerData.email || '';
@@ -34,7 +39,6 @@ async function buildProfile(firebaseUser: any): Promise<UserSessionProfile> {
         email,
         displayName,
         photoURL,
-        role: isStudent ? 'student' : 'admin',
         permissions: backendPermissions || DEFAULT_STUDENT_PERMISSIONS,
     };
 }

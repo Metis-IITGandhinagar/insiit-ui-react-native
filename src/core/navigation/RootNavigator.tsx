@@ -14,8 +14,7 @@ import MessFeedbackScreen from "@/features/tools/screens/MessFeedbackScreen";
 import ProfileScreen from "@/features/more/screens/ProfieScreen";
 import SettingsScreen from "@/features/more/screens/SettingsScreen";
 import { useTheme } from "@/core/theme";
-import { AdminDashboardScreen } from "@/features/admin/screens/AdminDashboardScreen";
-
+import { AdminNavigator } from "@/core/navigation/AdminNavigator";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -58,31 +57,15 @@ export default function RootNavigator() {
                             <Stack.Screen
                                 name="Profile"
                                 component={ProfileScreen}
-                            /> 
+                            />
                             <Stack.Screen
                                 name="Settings"
                                 component={SettingsScreen}
-                            /> 
-
-                            <Stack.Screen
-                                name="AdminDashboard"
-                                component={AdminDashboardScreen}
-                            /> 
-                            {/* <Stack.Screen
-                                name="Representatives"
-                                component={RepresentativesScreen}
-                                options={{ animation: "slide_from_right" }}
                             />
                             <Stack.Screen
-                                name="TeamINSIIT"
-                                component={TeamScreen}
-                                options={{ animation: "slide_from_right" }}
+                                name="AdminNavigator"
+                                component={AdminNavigator}
                             />
-                            <Stack.Screen
-                                name="VersionNerd"
-                                component={VersionNerdScreen}
-                                options={{ animation: "fade" }}
-                            /> */}
                         </>
                     ) : (
                         <Stack.Screen

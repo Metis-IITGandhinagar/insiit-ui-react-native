@@ -37,12 +37,14 @@ export const useAdminPermissions = (): UseAdminPermissionsResult => {
 
     const canManageEvents = useMemo(() => {
         if (!permissions) return false;
-        return Boolean(permissions.post_event || permissions.edit_event || permissions.delete_event);
+        return Boolean(
+            permissions.post_event 
+        );
     }, [permissions]);
 
     const canManageAnnouncements = useMemo(() => {
         if (!permissions) return false;
-        return Boolean(permissions.post_announcement || permissions.edit_announcement || permissions.delete_announcement);
+        return Boolean(permissions.post_announcement);
     }, [permissions]);
 
     const canManageMessMenu = useMemo(() => {
@@ -52,7 +54,11 @@ export const useAdminPermissions = (): UseAdminPermissionsResult => {
 
     const canManageUsers = useMemo(() => {
         if (!permissions) return false;
-        return Boolean(permissions.manage_users);
+        return Boolean(
+            permissions.get_admin ||
+            permissions.post_admin ||
+            permissions.put_admin
+        );
     }, [permissions]);
 
     const hasAnyAdminPermission = useMemo(() => {

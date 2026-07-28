@@ -1,16 +1,25 @@
 import { apiClient } from '@/core/api/apiClient';
 import { Event } from "./searchTypes";
 
-export const mapApiEventToUi = (event: any, fallbackIndex: number): Event => ({
-    id: String(event.id || event._id || `fallback-key-${fallbackIndex}`),
-    title: event.event_name || "",
-    venue: event.location || "",
-    date: event.date || "",
-    time: event.start_time || "",
-    image: event.poster_image_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500",
-    description: event.description || "",
-    isBookmarked: false,
-});
+export const mapApiEventToUi = (event: any, fallbackIndex: number): Event => {
+    const start = new Date(event.start_datetime);
+
+    return {
+        id: String(event.id ?? `fallback-${fallbackIndex}`),
+        title: event.name ?? "",
+        venue: event.address ?? "",
+        date: start.toLocaleDateString(),
+        time: start.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+        }),
+        image:
+            event.poster_url ??
+            "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500",
+        description: event.description ?? "",
+        isBookmarked: false,
+    };
+};
 
 export const eventService = {
     getAllEvents: async (): Promise<Event[]> => {
@@ -26,12 +35,13 @@ export const eventService = {
     addEvent: async (eventData: Omit<Event, 'id' | 'isBookmarked'>): Promise<Event> => {
         try {
             const payload = {
-                event_name: eventData.title,
-                location: eventData.venue,
-                date: eventData.date,
-                start_time: eventData.time,
-                poster_image_url: eventData.image,
-                description: eventData.description,
+                name: eventData.title,
+                description: eventData.description || null,
+                poster_base64: eventData.image || null,
+                address: eventData.venue || null,
+                start_datetime: new Date(
+                    `${eventData.date} ${eventData.time}`
+                ).toISOString(),
             };
 
             const response = await apiClient.post('/events', payload);

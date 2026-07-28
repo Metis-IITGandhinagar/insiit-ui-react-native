@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Plus, Trash2, Edit2, RefreshCw, Megaphone, X } from 'lucide-react-native';
 import { useTheme } from '@core/theme';
+import { useAuth } from '@core/auth/useAuth';
 import { Card } from '@shared/components/Card';
 import { PermissionGate } from '../components/PermissionGate';
 import { useAdminPermissions } from '../hooks/useAdminPermissions';
@@ -24,13 +25,15 @@ import { apiClient } from '@core/api/apiClient';
 export interface Announcement {
     id: string;
     title: string;
-    content: string;
-    createdAt: string;
-    author?: string;
+    description: string;
+    added_on_timestamp: string;
+    added_by_email: string;
+    img_url: string;
 }
 
 export const AnnouncementManagementScreen: React.FC = () => {
     const { colors, spacing, typography, radius } = useTheme();
+    const { user } = useAuth();
     const { permissions, canManageAnnouncements } = useAdminPermissions();
 
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -72,7 +75,7 @@ export const AnnouncementManagementScreen: React.FC = () => {
     const handleOpenEditModal = useCallback((announcement: Announcement) => {
         setEditingAnnouncement(announcement);
         setFormTitle(announcement.title);
-        setFormContent(announcement.content);
+        setFormContent(announcement.description);
         setIsModalOpen(true);
     }, []);
 
@@ -93,7 +96,7 @@ export const AnnouncementManagementScreen: React.FC = () => {
         setIsSubmitting(true);
         try {
             if (editingAnnouncement) {
-                await apiClient.patch(`/announcements/${editingAnnouncement.id}`, {
+                await apiClient.put(`/announcements/${editingAnnouncement.id}`, {
                     title: formTitle.trim(),
                     content: formContent.trim(),
                 });
@@ -138,6 +141,8 @@ export const AnnouncementManagementScreen: React.FC = () => {
     }, [fetchAnnouncements]);
 
     const renderAnnouncementItem = useCallback(({ item }: { item: Announcement }) => {
+        const isAuthor = user?.email === item.added_by_email;
+
         return (
             <Card variant="surface" style={styles.cardOverride}>
                 <View style={styles.announcementHeader}>
@@ -166,11 +171,11 @@ export const AnnouncementManagementScreen: React.FC = () => {
                         },
                     ]}
                 >
-                    {item.content}
+                    {item.description}
                 </Text>
 
-                <View style={[styles.actionRow, { borderTopColor: colors.border || '#E5E7EB' }]}>
-                    {permissions?.edit_announcement && (
+                {isAuthor && (
+                    <View style={[styles.actionRow, { borderTopColor: colors.border || '#E5E7EB' }]}>
                         <TouchableOpacity
                             style={[styles.actionButton, { backgroundColor: colors.surface }]}
                             onPress={() => handleOpenEditModal(item)}
@@ -190,9 +195,7 @@ export const AnnouncementManagementScreen: React.FC = () => {
                                 Edit
                             </Text>
                         </TouchableOpacity>
-                    )}
 
-                    {permissions?.delete_announcement && (
                         <TouchableOpacity
                             style={[styles.actionButton, { backgroundColor: colors.surface }]}
                             onPress={() => handleDelete(item.id)}
@@ -219,11 +222,11 @@ export const AnnouncementManagementScreen: React.FC = () => {
                                 </>
                             )}
                         </TouchableOpacity>
-                    )}
-                </View>
+                    </View>
+                )}
             </Card>
         );
-    }, [colors, typography, spacing, permissions, handleOpenEditModal, handleDelete, isDeleting]);
+    }, [colors, typography, spacing, user, handleOpenEditModal, handleDelete, isDeleting]);
 
     return (
         <PermissionGate hasPermission={canManageAnnouncements}>

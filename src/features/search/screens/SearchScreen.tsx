@@ -39,11 +39,6 @@ export default function SearchScreen() {
     };
 
     const handleDeleteEvent = (event: Event) => {
-        if (!hasPermission('delete_event')) {
-            Alert.alert("Unauthorized", "You do not have permission to delete events.");
-            return;
-        }
-
         Alert.alert(
             "Delete Event",
             `Remove "${event.title}" from campus feed?`,
@@ -53,10 +48,17 @@ export default function SearchScreen() {
                     text: "Delete",
                     style: "destructive",
                     onPress: async () => {
-                        const success = await eventService.deleteEvent(event.id);
-                        if (success) refreshEvents();
-                    }
-                }
+                        try {
+                            await eventService.deleteEvent(event.id);
+                            refreshEvents();
+                        } catch {
+                            Alert.alert(
+                                "Error",
+                                "You can only delete events that you created."
+                            );
+                        }
+                    },
+                },
             ]
         );
     };

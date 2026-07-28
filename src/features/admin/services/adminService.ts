@@ -1,28 +1,16 @@
 import { apiClient } from '@core/api/apiClient';
+import { AppPermissions } from '@/core/navigation/types';
+import { AdminEntryResponse } from '@/core/api/userService';
 
-export interface AdminPermissions {
-    post_event: boolean;
-    edit_event: boolean;
-    delete_event: boolean;
-    post_announcement: boolean;
-    edit_announcement: boolean;
-    delete_announcement: boolean;
-    post_mess_menu: boolean;
-    manage_users: boolean;
-}
+export type AdminPermissions = AppPermissions;
 
 export interface AdminUser {
-    id: string;
     email: string;
-    name: string;
-    role?: string;
     permissions: AdminPermissions;
-    createdAt: string;
 }
 
 export interface CreateAdminPayload {
     email: string;
-    name: string;
     permissions: Partial<AdminPermissions>;
 }
 
@@ -32,22 +20,17 @@ export interface UpdatePermissionsPayload {
 
 class AdminService {
     async fetchPermissions(): Promise<AdminPermissions> {
-        const response = await apiClient.get<AdminPermissions>('/admin/permissions');
-        return response.data;
+        const response = await apiClient.get<AdminEntryResponse>('/admin/permissions');
+        return response.data.permissions;
     }
 
     async fetchAdmins(): Promise<AdminUser[]> {
-        const response = await apiClient.get<AdminUser[]>('/admin/users');
+        const response = await apiClient.get<AdminUser[]>('/admin');
         return response.data;
     }
 
     async createAdmin(payload: CreateAdminPayload): Promise<AdminUser> {
-        const response = await apiClient.post<AdminUser>('/admin/users', payload);
-        return response.data;
-    }
-
-    async updatePermissions(adminId: string, payload: UpdatePermissionsPayload): Promise<AdminUser> {
-        const response = await apiClient.patch<AdminUser>(`/admin/users/${adminId}/permissions`, payload);
+        const response = await apiClient.post<AdminUser>('/admin', payload);
         return response.data;
     }
 
@@ -59,9 +42,6 @@ class AdminService {
         await apiClient.delete(`/announcements/${announcementId}`);
     }
 
-    async deleteAdmin(adminId: string): Promise<void> {
-        await apiClient.delete(`/admin/users/${adminId}`);
-    }
 }
 
 export const adminService = new AdminService();

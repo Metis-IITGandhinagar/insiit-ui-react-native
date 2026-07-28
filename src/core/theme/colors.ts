@@ -1,4 +1,4 @@
-export type ThemeMode = 'light' | 'dark' | 'midnight' | 'emerald' | 'ocean' | 'sunset';
+export type ThemeMode = 'light' | 'dark' | 'midnight' | 'emerald' | 'ocean' | 'sunshine';
 
 export interface ColorScheme {
     primary: string;
@@ -65,9 +65,9 @@ export const themeOptions: ThemeOption[] = [
         isDark: false,
     },
     {
-        id: 'sunset',
-        label: 'Sunset Amber',
-        description: 'Warm terracotta & amber tones',
+        id: 'sunshine',
+        label: 'Sunshine Rise',
+        description: 'Beauty of beginnings last forever',
         primaryColor: '#EA580C',
         previewBg: '#FAFAF9',
         isDark: false,
@@ -140,7 +140,7 @@ export const themes: Record<ThemeMode, ColorScheme> = {
         success: '#10B981',
         warning: '#F59E0B',
     },
-    sunset: {
+    sunshine: {
         primary: '#EA580C',
         primaryLight: '#FFF7ED',
         background: '#FAFAF9',

@@ -84,8 +84,8 @@ export const EventManagementScreen: React.FC = () => {
                 <EventCard
                     event={item}
                     onPress={() => handleOpenDetailModal(item)}
-                    onEdit={permissions?.edit_event ? () => handleOpenAddModal() : undefined}
-                    onDelete={permissions?.delete_event ? () => handleDeleteEvent(item.id) : undefined}
+                    onEdit={permissions?.put_event ? () => handleOpenAddModal() : undefined}
+                    onDelete={() => handleDeleteEvent(item.id)}
                 />
             </View>
         );
