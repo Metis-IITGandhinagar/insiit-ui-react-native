@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { MapPinned, Circle } from "lucide-react-native";
 import { useTheme } from "@/theme";
+import Card from "@/components/Card";
 
 interface RouteProps {
     stops: string[];
@@ -15,7 +16,7 @@ const RouteCard: React.FC<RouteProps> = ({ stops }) => {
     const styles = getStyles(theme);
 
     return (
-        <View style={styles.card}>
+        <Card>
             <View style={styles.header}>
                 <MapPinned
                     size={22}
@@ -51,20 +52,13 @@ const RouteCard: React.FC<RouteProps> = ({ stops }) => {
                     </View>
                 ))}
             </View>
-        </View>
+        </Card>
     );
 };
 
 export default RouteCard;
 
 const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
-    card: {
-        backgroundColor: colors.surface,
-        borderRadius: radius.xl,
-        padding: spacing.lg,
-        ...shadows.card,
-    },
-
     header: {
         flexDirection: "row",
         alignItems: "center",

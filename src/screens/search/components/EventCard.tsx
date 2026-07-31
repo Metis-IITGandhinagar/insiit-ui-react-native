@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/theme";
+import Card from "@/components/Card";
 import { Event } from "../types";
 
 interface Props {
@@ -24,11 +25,7 @@ const EventCard = ({ event, onPress, onBookmark, onEdit, onDelete }: Props) => {
     const styles = getStyles(theme);
 
     return (
-        <TouchableOpacity
-            activeOpacity={0.92}
-            style={styles.card}
-            onPress={onPress}
-        >
+        <Card padding={0} onPress={onPress} style={styles.card}>
             <View style={styles.imageContainer}>
                 <Image
                     source={{ uri: event.image }}
@@ -82,18 +79,15 @@ const EventCard = ({ event, onPress, onBookmark, onEdit, onDelete }: Props) => {
                     )}
                 </View>
             </View>
-        </TouchableOpacity>
+        </Card>
     );
 };
 
 export default EventCard;
 
-const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
+const getStyles = ({ colors, spacing, typography, layout }: any) => StyleSheet.create({
     card: {
-        backgroundColor: colors.surface,
-        borderRadius: radius.xl,
-        marginBottom: spacing.xl,
-        ...shadows.card,
+        marginBottom: layout.listItemGap,
         overflow: "hidden",
     },
     imageContainer: {

@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { UtensilsCrossed, Clock3, QrCode, ChevronDown } from "lucide-react-native";
 import { useTheme } from "@/theme";
+import Card from "@/components/Card";
 import { ActiveMealState } from "../services/mess/messTypes";
 
 // 1. Keep your existing Props definition
@@ -79,7 +80,7 @@ const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
     const highlights = getMealHighlights(meal.mealName, meal.itemsList);
 
     return (
-        <View style={styles.card}>
+        <Card>
             {/* Top Layout Track */}
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
@@ -170,20 +171,13 @@ const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
                     <ChevronDown size={16} color={colors.primary} />
                 </TouchableOpacity>
             </View>
-        </View>
+        </Card>
     );
 };
 
 export default MessCard;
 
 const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
-    card: {
-        backgroundColor: colors.surface,
-        borderRadius: radius.xl,
-        padding: spacing.xl,
-        ...shadows.card,
-        width: "100%",
-    },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",

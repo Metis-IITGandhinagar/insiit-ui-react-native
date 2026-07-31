@@ -17,6 +17,7 @@ import {
 import {
     useTheme
 } from "@/theme";
+import Card from "@/components/Card";
 
 const EmergencyCard = () => {
 
@@ -33,8 +34,7 @@ const EmergencyCard = () => {
         const { colors } = theme;
         const styles = getStyles(theme);
     return (
-        
-        <View style={styles.card}>
+        <Card>
             <View style={styles.header}>
                 <View>
                     <Text style={styles.label}>
@@ -122,29 +122,13 @@ const EmergencyCard = () => {
                     color="#94A3B8"
                 />
             </TouchableOpacity>
-        </View>
+        </Card>
     );
 };
 
 export default EmergencyCard;
 
 const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
-    card: {
-        backgroundColor: colors.surface,
-        borderRadius: 28,
-        padding: 20,
-
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 18,
-        shadowOffset: {
-            width: 0,
-            height: 8,
-        },
-
-        elevation: 5,
-    },
-
     header: {
         flexDirection: "row",
         justifyContent: "space-between",

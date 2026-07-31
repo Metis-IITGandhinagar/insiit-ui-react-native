@@ -1,8 +1,8 @@
 // src/screens/search/SearchScreen.tsx
 import React, { useMemo, useState } from "react";
-import { FlatList, StatusBar, StyleSheet, Text, View, RefreshControl, Alert, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { FlatList, StyleSheet, Text, View, RefreshControl, Alert, TouchableOpacity } from "react-native";
 
+import Screen from "@/components/Screen";
 import SearchBar from "./components/SearchBar";
 import EventCard from "./components/EventCard";
 import EventDetailModal from "./components/EventDetailModal";
@@ -20,7 +20,7 @@ export default function SearchScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
     const theme = useTheme();
-    const { colors, spacing } = theme;
+    const { colors } = theme;
     const styles = getStyles(theme);
 
     const { hasPermission } = useAuth();
@@ -62,10 +62,23 @@ export default function SearchScreen() {
         );
     };
 
-    return (
-        <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-            <StatusBar barStyle="dark-content" />
+    const modals = (
+        <>
+            <EventDetailModal visible={modalVisible} event={selectedEvent} onClose={() => setModalVisible(false)} />
 
+            <AddEventModal
+                visible={addModalVisible}
+                onClose={() => setAddModalVisible(false)}
+                onSuccess={() => {
+                    setAddModalVisible(false);
+                    refreshEvents();
+                }}
+            />
+        </>
+    );
+
+    return (
+        <Screen scroll={false} overlay={modals}>
             <View style={styles.content}>
                 <View style={styles.header}>
                     <SearchBar value={search} onChangeText={setSearch} />
@@ -111,28 +124,16 @@ export default function SearchScreen() {
                     )}
                 />
             </View>
-
-            <EventDetailModal visible={modalVisible} event={selectedEvent} onClose={() => setModalVisible(false)} />
-
-            <AddEventModal
-                visible={addModalVisible}
-                onClose={() => setAddModalVisible(false)}
-                onSuccess={() => {
-                    setAddModalVisible(false);
-                    refreshEvents();
-                }}
-            />
-        </SafeAreaView>
+        </Screen>
     );
 }
 
-const getStyles = ({ colors, spacing, typography }: any) =>
+const getStyles = ({ colors, spacing, typography, layout }: any) =>
     StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background },
         content: { flex: 1 },
-        header: { backgroundColor: colors.background, paddingHorizontal: spacing.lg, paddingTop: 10, paddingBottom: spacing.md },
+        header: { backgroundColor: colors.background, paddingHorizontal: layout.screenPaddingX, paddingTop: layout.screenPaddingTop, paddingBottom: spacing.md },
         headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.lg },
-        listContent: { paddingHorizontal: spacing.lg, paddingBottom: 120 },
+        listContent: { paddingHorizontal: layout.screenPaddingX, paddingBottom: layout.screenPaddingBottom },
         heading: { ...typography.h2, color: colors.text, marginBottom: 5 },
         addButton: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
         addButtonText: { color: '#FFF', fontWeight: 'bold' }
