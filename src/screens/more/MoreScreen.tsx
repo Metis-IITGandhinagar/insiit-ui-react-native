@@ -3,6 +3,9 @@ import React, { useCallback, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
     StyleSheet,
     Text,
     View,
@@ -11,7 +14,6 @@ import {
 import { useTheme } from "@/theme";
 import { useOnTabBlur } from "@/navigation/SwipeContext";
 
-import Screen from "@/components/Screen";
 import MoreHeader from "./components/MoreHeader";
 import MoreSection from "./components/MoreSection";
 import AppInfoCard from "./components/AppInfoCard";
@@ -28,6 +30,7 @@ interface CustomToast {
 
 const MoreScreen = () => {
     const theme = useTheme();
+    const { colors } = theme;
     const styles = getStyles(theme);
 
     const [toasts, setToasts] = useState<CustomToast[]>([]);
@@ -84,42 +87,62 @@ const MoreScreen = () => {
         }, 3000);
     }, []);
 
-    const toastOverlay = (
-        <View style={styles.toastContainer} pointerEvents="none">
-            {[...toasts].reverse().map((toast) => (
-                <Animated.View
-                    key={toast.id}
-                    style={[
-                        styles.toastCard,
-                        {
-                            opacity: toast.opacity,
-                            transform: [{ translateY: toast.translateY }]
-                        }
-                    ]}
-                >
-                    <Text style={styles.toastText}>{toast.message}</Text>
-                </Animated.View>
-            ))}
-        </View>
-    );
-
     return (
-        <Screen overlay={toastOverlay}>
-            <MoreHeader />
+        <>
+            <StatusBar
+                barStyle="dark-content"
+                backgroundColor={colors.background}
+            />
 
-            <UserCard />
+            <SafeAreaView style={styles.container}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.content}
+                >
+                    <MoreHeader />
 
-            <MoreSection showToast={showToast} />
+                    <UserCard />
 
-            <AppInfoCard />
-        </Screen>
+                    <MoreSection showToast={showToast} />
+
+                    <AppInfoCard />
+                </ScrollView>
+
+                <View style={styles.toastContainer} pointerEvents="none">
+                    {[...toasts].reverse().map((toast) => (
+                        <Animated.View
+                            key={toast.id}
+                            style={[
+                                styles.toastCard,
+                                {
+                                    opacity: toast.opacity,
+                                    transform: [{ translateY: toast.translateY }]
+                                }
+                            ]}
+                        >
+                            <Text style={styles.toastText}>{toast.message}</Text>
+                        </Animated.View>
+                    ))}
+                </View>
+            </SafeAreaView>
+        </>
     );
 };
 
 export default MoreScreen;
 
-const getStyles = ({ radius, spacing }: any) =>
+const getStyles = ({ colors, radius, spacing }: any) =>
     StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        content: {
+            paddingHorizontal: spacing.lg,
+            paddingTop: spacing.md,
+            paddingBottom: 120,
+            gap: spacing.lg,
+        },
         toastContainer: {
             position: "absolute",
             left: 20,

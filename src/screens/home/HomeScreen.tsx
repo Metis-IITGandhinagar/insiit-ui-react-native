@@ -1,9 +1,8 @@
 // src/screens/home/HomeScreen.tsx
 import React, { useRef } from "react";
-import { StyleSheet, ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
 import { RefreshCw } from "lucide-react-native";
 
-import Screen from "@/components/Screen";
 import MessCard from "./components/MessCard";
 import QRBottomSheet from "./components/QRBottomSheet";
 import WeeklyMenuSheet from "./components/WeeklyMenuSheet";
@@ -26,55 +25,57 @@ const HomeScreen = () => {
     const { colors } = theme;
     const styles = getStyles(theme);
 
-    const sheets = (
-        <>
-            <QRBottomSheet ref={qrSheetRef} />
-            <WeeklyMenuSheet ref={menuSheetRef} data={menuData} />
-        </>
-    );
-
-    if (loading && !menuData) {
-        return (
-            <Screen scroll={false} overlay={sheets}>
-                <View style={styles.centeredView}>
-                    <ActivityIndicator size="large" color={colors.primary} />
-                </View>
-            </Screen>
-        );
-    }
-
-    if (error && !menuData) {
-        return (
-            <Screen scroll={false} overlay={sheets}>
-                <View style={styles.centeredView}>
-                    <Text style={styles.errTitle}>Connectivity Error</Text>
-                    <Text style={styles.errSubtitle}>Could not resolve menu sync tracking files over IITGN infrastructure lanes.</Text>
-                    <TouchableOpacity style={styles.retryBtn} onPress={manualRefresh}>
-                        <RefreshCw size={16} color="white" />
-                        <Text style={styles.retryText}>Retry Connection</Text>
-                    </TouchableOpacity>
-                </View>
-            </Screen>
-        );
-    }
-
     return (
-        <Screen overlay={sheets}>
-            <GreetingSection />
+        <>
+            <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
-            <MessCard
-                meal={currentMeal}
-                onShowQR={() => qrSheetRef.current?.expand()}
-                onShowMenu={() => menuSheetRef.current?.expand()}
-            />
-            <TimetableWidget />
-        </Screen>
+            <SafeAreaView style={styles.container}>
+                {loading && !menuData ? (
+                    <View style={styles.centeredView}>
+                        <ActivityIndicator size="large" color={colors.primary} />
+                    </View>
+                ) : error && !menuData ? (
+                    <View style={styles.centeredView}>
+                        <Text style={styles.errTitle}>Connectivity Error</Text>
+                        <Text style={styles.errSubtitle}>Could not resolve menu sync tracking files over IITGN infrastructure lanes.</Text>
+                        <TouchableOpacity style={styles.retryBtn} onPress={manualRefresh}>
+                            <RefreshCw size={16} color="white" />
+                            <Text style={styles.retryText}>Retry Connection</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
+                        <GreetingSection />
+
+                        <MessCard
+                            meal={currentMeal}
+                            onShowQR={() => qrSheetRef.current?.expand()}
+                            onShowMenu={() => menuSheetRef.current?.expand()}
+                        />
+                        <TimetableWidget />
+
+                    </ScrollView>
+                )}
+                <QRBottomSheet ref={qrSheetRef} />
+                <WeeklyMenuSheet ref={menuSheetRef} data={menuData} />
+            </SafeAreaView>
+        </>
     );
 };
 
 export default HomeScreen;
 
-const getStyles = ({ colors, radius, spacing }: any) => StyleSheet.create({
+const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    contentScroll: {
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
+        paddingBottom: 120,
+        gap: spacing.lg,
+    },
     centeredView: {
         flex: 1,
         justifyContent: "center",
