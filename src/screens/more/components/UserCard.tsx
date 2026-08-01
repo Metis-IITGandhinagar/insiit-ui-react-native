@@ -14,14 +14,13 @@ import {
 import {
  useTheme
 } from "@/theme";
-import Card from "@/components/Card";
 
 const UserCard = () => {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
     return (
-        <Card>
+        <View style={styles.card}>
             <View style={styles.top}>
                 <View style={styles.logoCircle}>
                     <Sparkles
@@ -74,13 +73,29 @@ const UserCard = () => {
                     </Text>
                 </TouchableOpacity>
             </View>
-        </Card>
+        </View>
     );
 };
 
 export default UserCard;
 
 const getStyles = ({ colors, radius, shadows, spacing, typography }: any) =>StyleSheet.create({
+    card: {
+        backgroundColor: colors.surface,
+        borderRadius: 28,
+        padding: 22,
+
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 18,
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+
+        elevation: 5,
+    },
+
     top: {
         flexDirection: "row",
         alignItems: "center",

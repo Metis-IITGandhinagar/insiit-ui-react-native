@@ -7,7 +7,6 @@ import shadows from "./shadows";
 import spacing from "./spacing";
 import typography from "./typography";
 import sizes from "./sizes";
-import layout from "./layout";
 
 type ThemeContextType = {
     isDark: boolean;
@@ -17,7 +16,6 @@ type ThemeContextType = {
     spacing: typeof spacing;
     typography: typeof typography;
     sizes: typeof sizes;
-    layout: typeof layout;
     toggleTheme: () => void;
 };
 
@@ -41,7 +39,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         spacing,
         typography,
         sizes,
-        layout,
         toggleTheme,
     };
 
