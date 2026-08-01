@@ -1,7 +1,8 @@
 // src/screens/bus/BusScreen.tsx
 import React, { useState } from "react";
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, Text, View, TouchableOpacity, RefreshControl } from "react-native";
+import { StyleSheet, ActivityIndicator, Text, View, TouchableOpacity, RefreshControl } from "react-native";
 
+import Screen from "@/components/Screen";
 import BusHeader from "./components/BusHeader";
 import BusTypeTabs from "./components/BusTypeTabs";
 import NextBusHero from "./components/NextBusHero";
@@ -22,70 +23,63 @@ const BusScreen = () => {
     const { colors, spacing } = theme;
     const styles = getStyles(theme);
 
+    const addModal = (
+        <AddBusModal
+            visible={isAddModalOpen}
+            onClose={() => setAddModalOpen(false)}
+            onSuccess={() => {
+                setAddModalOpen(false);
+                refreshBuses();
+            }}
+        />
+    );
+
     return (
-        <>
-            <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+        <Screen
+            overlay={addModal}
+            refreshControl={
+                <RefreshControl refreshing={loading} onRefresh={refreshBuses} tintColor={colors.primary} />
+            }
+        >
+            <BusHeader />
 
-            <SafeAreaView style={styles.container}>
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.content}
-                    refreshControl={
-                        <RefreshControl refreshing={loading} onRefresh={refreshBuses} tintColor={colors.primary} />
-                    }
-                >
-                    <BusHeader />
+            <View style={styles.tabRow}>
+                <View style={{ flex: 1 }}>
+                    <BusTypeTabs selected={selectedTab} onSelect={setSelectedTab} />
+                </View>
 
-                    <View style={styles.tabRow}>
-                        <View style={{ flex: 1 }}>
-                            <BusTypeTabs selected={selectedTab} onSelect={setSelectedTab} />
-                        </View>
+                {hasPermission('post_bus_schedule') && (
+                    <TouchableOpacity
+                        style={[styles.addButton, { backgroundColor: colors.primary }]}
+                        onPress={() => setAddModalOpen(true)}
+                    >
+                        <Text style={styles.addButtonText}>+ Add</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
 
-                        {hasPermission('post_bus_schedule') && (
-                            <TouchableOpacity
-                                style={[styles.addButton, { backgroundColor: colors.primary }]}
-                                onPress={() => setAddModalOpen(true)}
-                            >
-                                <Text style={styles.addButtonText}>+ Add</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-
-                    {loading && departures.length === 0 ? (
-                        <View style={styles.centered}>
-                            <ActivityIndicator size="large" color={colors.primary} />
-                        </View>
-                    ) : error ? (
-                        <View style={styles.centered}>
-                            <Text style={styles.errorText}>{error}</Text>
-                        </View>
-                    ) : (
-                        <>
-                            <NextBusHero data={nextBus} />
-                            <TodaySchedule departures={departures} />
-                            <RouteCard stops={stops} />
-                        </>
-                    )}
-                </ScrollView>
-
-                <AddBusModal
-                    visible={isAddModalOpen}
-                    onClose={() => setAddModalOpen(false)}
-                    onSuccess={() => {
-                        setAddModalOpen(false);
-                        refreshBuses();
-                    }}
-                />
-            </SafeAreaView>
-        </>
+            {loading && departures.length === 0 ? (
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                </View>
+            ) : error ? (
+                <View style={styles.centered}>
+                    <Text style={styles.errorText}>{error}</Text>
+                </View>
+            ) : (
+                <>
+                    <NextBusHero data={nextBus} />
+                    <TodaySchedule departures={departures} />
+                    <RouteCard stops={stops} />
+                </>
+            )}
+        </Screen>
     );
 };
 
 export default BusScreen;
 
 const getStyles = ({ colors, spacing }: any) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: 130, gap: spacing.lg },
     tabRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
     addButton: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, justifyContent: 'center' },
     addButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },

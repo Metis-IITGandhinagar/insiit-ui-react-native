@@ -50,7 +50,6 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         marginBottom: spacing.xs,
     },
     settingsButton: {
-        marginTop: 30,
         width: 48,
         height: 48,
         borderRadius: radius.round,
@@ -63,7 +62,6 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         alignItems: "flex-start",
     },
     greeting: {
-        marginTop: 30,
         ...typography.h3,
         color: colors.textSecondary,
     },
