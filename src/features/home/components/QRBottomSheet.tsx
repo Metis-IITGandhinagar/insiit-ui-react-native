@@ -1,7 +1,17 @@
 import React, { forwardRef, useImperativeHandle, useState, useEffect } from "react";
-import { Modal, Pressable, StyleSheet, Text, View, TextInput, ActivityIndicator } from "react-native";
+import {
+    Modal,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+    TextInput,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform
+} from "react-native";
 import { BlurView } from "expo-blur";
-import { QrCode,LogOut, X, KeyRound, User } from "lucide-react-native";
+import { QrCode, LogOut, X, KeyRound, User, Eye, EyeOff } from "lucide-react-native";
 import { useTheme } from "@/core/theme";
 import QRCode from "react-native-qrcode-svg";
 import { qrService } from "../services/qrService";
@@ -16,6 +26,7 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
     const [visible, setVisible] = useState(false);
     const [session, setSession] = useState<QRSession | null>(null);
     const [uiLoading, setUiLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const [email, setEmail] = useState("");
     const [campusPassword, setCampusPassword] = useState("");
@@ -76,7 +87,10 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
-            <View style={styles.absoluteViewContainer}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={styles.absoluteViewContainer}
+            >
                 <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill}>
                     <Pressable style={styles.dismissalCatch} onPress={() => setVisible(false)} />
                 </BlurView>
@@ -85,7 +99,7 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                     <View style={styles.headerRow}>
                         <View style={styles.titleGroup}>
                             <QrCode size={22} color={colors.primary} />
-                            <Text style={styles.titleText}>{session ? "Gate Access Pass" : "IITGN Login"}</Text>
+                            <Text style={styles.titleText}>{session ? "Mess Pass" : "IITGN Login"}</Text>
                         </View>
                         <Pressable onPress={() => setVisible(false)}>
                             <X size={22} color={colors.textSecondary} />
@@ -95,7 +109,7 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                     {!session ? (
                         <View style={styles.innerForm}>
                             <Text style={styles.descParagraph}>
-                                Log in with your campus identity account to access your rolling tracking pass.
+                                Log in with your mess portal credentials
                             </Text>
 
                             {validationMessage && <Text style={styles.errBanner}>{validationMessage}</Text>}
@@ -105,9 +119,11 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                                 <TextInput
                                     style={styles.fieldStyle}
                                     placeholder="Email ID"
-                                    placeholderTextColor={colors.inactive}
                                     value={email}
                                     onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                    autoCorrect={false}
                                 />
                             </View>
 
@@ -116,11 +132,25 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                                 <TextInput
                                     style={styles.fieldStyle}
                                     placeholder="Password"
-                                    placeholderTextColor={colors.inactive}
-                                    secureTextEntry
+                                    secureTextEntry={!showPassword}
                                     value={campusPassword}
                                     onChangeText={setCampusPassword}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    textContentType="password"
+                                    autoComplete="password"
                                 />
+                                <Pressable
+                                    onPress={() => setShowPassword(!showPassword)}
+                                    style={styles.eyeIconContainer}
+                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff size={18} color={colors.textSecondary} />
+                                    ) : (
+                                        <Eye size={18} color={colors.textSecondary} />
+                                    )}
+                                </Pressable>
                             </View>
 
                             <Pressable style={styles.submitCta} onPress={runInstituteSignInFlow} disabled={uiLoading}>
@@ -130,18 +160,15 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                     ) : (
                         <View style={styles.activeInterface}>
                             <Text style={styles.descParagraph}>
-                                Account: {session.email}. Scan this barcode token at the mess terminal. 
+                                Scan this barcode token at your mess entrance
                             </Text>
 
                             <View style={styles.qrCenteredWrapper}>
                                 <View style={styles.barcodeFrameBox}>
-                                        <QRCode
-                                            value={session.qrData}
-                                            size={180}
-                                        />
-                                        <Text style={styles.tokenFooterString}>
-                                            QR Ready
-                                        </Text>
+                                    <QRCode
+                                        value={session.qrData}
+                                        size={180}
+                                    />
                                 </View>
                             </View>
 
@@ -152,7 +179,7 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                         </View>
                     )}
                 </View>
-            </View>
+            </KeyboardAvoidingView>
         </Modal>
     );
 });
@@ -172,13 +199,13 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         borderTopLeftRadius: radius.xl,
         borderTopRightRadius: radius.xl,
         padding: spacing.xl,
-        paddingBottom: 44,
+        paddingBottom: 64,
     },
     headerRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
     },
     titleGroup: {
         flexDirection: "row",
@@ -192,9 +219,10 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
     },
     descParagraph: {
         color: colors.textSecondary,
-        fontSize: 14,
+        fontSize: 16,
         lineHeight: 20,
         marginBottom: spacing.lg,
+        textAlign:"center",
     },
     innerForm: {
         marginTop: spacing.xs,
@@ -226,6 +254,11 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         flex: 1,
         color: colors.text,
         fontSize: 15,
+    },
+    eyeIconContainer: {
+        paddingLeft: spacing.sm,
+        justifyContent: "center",
+        alignItems: "center",
     },
     submitCta: {
         backgroundColor: colors.primary,

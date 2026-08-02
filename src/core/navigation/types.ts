@@ -9,6 +9,7 @@ export type RootStackParamList = {
     MessFeedback:undefined;
     Profile:undefined;
     Settings:undefined;
+    Outlets:undefined;
 };
 export interface AppPermissions {
     get_admin: boolean;

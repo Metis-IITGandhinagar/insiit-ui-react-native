@@ -89,6 +89,7 @@ export default function RootNavigator() {
                             animation: 'slide_from_right'
                         }}
                     />
+                    
                 </Stack.Navigator>
             </NavigationContainer>
         </GestureHandlerRootView>

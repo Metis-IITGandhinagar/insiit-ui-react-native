@@ -1,4 +1,4 @@
-export type ThemeMode = 'light' | 'dark' | 'midnight' | 'emerald' | 'ocean' | 'sunshine';
+export type ThemeMode = 'light' | 'dark' | 'emerald' | 'sunshine';
 
 export interface ColorScheme {
     primary: string;
@@ -41,27 +41,11 @@ export const themeOptions: ThemeOption[] = [
         isDark: true,
     },
     {
-        id: 'midnight',
-        label: 'Midnight OLED',
-        description: 'True pitch black with indigo highlights',
-        primaryColor: '#6366F1',
-        previewBg: '#000000',
-        isDark: true,
-    },
-    {
         id: 'emerald',
         label: 'Emerald Campus',
         description: 'Refreshing campus green aesthetic',
         primaryColor: '#059669',
         previewBg: '#F0FDF4',
-        isDark: false,
-    },
-    {
-        id: 'ocean',
-        label: 'Ocean Breeze',
-        description: 'Cool cyan tone for high contrast',
-        primaryColor: '#0284C7',
-        previewBg: '#F0F9FF',
         isDark: false,
     },
     {
@@ -101,19 +85,6 @@ export const themes: Record<ThemeMode, ColorScheme> = {
         success: '#34D399',
         warning: '#FBBF24',
     },
-    midnight: {
-        primary: '#6366F1',
-        primaryLight: '#111827',
-        background: '#000000',
-        surface: '#111827',
-        card: '#111827',
-        text: '#F9FAFB',
-        textSecondary: '#9CA3AF',
-        border: '#1F2937',
-        danger: '#F87171',
-        success: '#34D399',
-        warning: '#FBBF24',
-    },
     emerald: {
         primary: '#059669',
         primaryLight: '#ECFDF5',
@@ -123,19 +94,6 @@ export const themes: Record<ThemeMode, ColorScheme> = {
         text: '#064E3B',
         textSecondary: '#047857',
         border: '#A7F3D0',
-        danger: '#EF4444',
-        success: '#10B981',
-        warning: '#F59E0B',
-    },
-    ocean: {
-        primary: '#0284C7',
-        primaryLight: '#E0F2FE',
-        background: '#F0F9FF',
-        surface: '#FFFFFF',
-        card: '#FFFFFF',
-        text: '#0C4A6E',
-        textSecondary: '#0369A1',
-        border: '#BAE6FD',
         danger: '#EF4444',
         success: '#10B981',
         warning: '#F59E0B',
