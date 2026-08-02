@@ -49,9 +49,15 @@ export const useMessData = () => {
         } else {
             const nextDayIndex = jsDay === 6 ? 7 : (jsDay + 1 === 0 ? 7 : jsDay + 1);
             const tomorrowMenu = data.mess.find(m => m.day === nextDayIndex) || data.mess[0];
-            const cleanItems = tomorrowMenu.breakfast.split("\n")
-                .map(item => item.trim())
-                .filter(item => item !== "" && item !== "–");
+
+            const rawTomorrow = tomorrowMenu.breakfast || [];
+            let cleanItems: string[] = [];
+            if (Array.isArray(rawTomorrow)) {
+                cleanItems = rawTomorrow;
+            } else if (typeof rawTomorrow === 'string') {
+                cleanItems = rawTomorrow.split("\n").map(item => item.trim());
+            }
+            cleanItems = cleanItems.filter(item => item !== "" && item !== "–");
 
             setCurrentMeal({
                 mealName: "Breakfast (Tomorrow)",
@@ -65,12 +71,16 @@ export const useMessData = () => {
         const delta = closingMinutes - totalMinutes;
         const hrs = Math.floor(delta / 60);
         const mins = delta % 60;
-        const countdownString = delta <= 0 ? "Serving Now" : hrs > 0 ? `${hrs}h ${mins}m to close`: `${mins}m to close`;
+        const countdownString = delta <= 0 ? "Serving Now" : hrs > 0 ? `${hrs}h ${mins}m to close` : `${mins}m to close`;
 
-        const rawString = dailyMenu[selectedKey] || "";
-        const processedItems = rawString.split("\n")
-            .map(item => item.trim())
-            .filter(item => item !== "" && item !== "–");
+        const rawData = dailyMenu[selectedKey] || [];
+        let processedItems: string[] = [];
+        if (Array.isArray(rawData)) {
+            processedItems = rawData;
+        } else if (typeof rawData === 'string') {
+            processedItems = rawData.split("\n").map(item => item.trim());
+        }
+        processedItems = processedItems.filter(item => item !== "" && item !== "–");
 
         setCurrentMeal({
             mealName: displayTitle,
@@ -94,6 +104,7 @@ export const useMessData = () => {
             setMenuData(freshData);
             computeActiveMealState(freshData);
         } catch (err) {
+            console.error("Data Sync Error:", err);
             if (!menuData) setError(true);
         } finally {
             setLoading(false);

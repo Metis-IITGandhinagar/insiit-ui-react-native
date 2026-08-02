@@ -152,9 +152,6 @@ export const AdminDashboardScreen: React.FC = () => {
             refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={colors.primary} />}
             showsVerticalScrollIndicator={false}
         >
-            <Text style={styles.headerTitle}>
-                Admin Console
-            </Text>
             <Text style={styles.headerSubtitle}>
                 Manage IIT Gandhinagar portal operations
             </Text>

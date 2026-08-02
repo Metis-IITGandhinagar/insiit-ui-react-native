@@ -21,7 +21,19 @@ export const messService = {
 
             if (!response.ok) throw new Error("Backend server error");
 
-            const serverData: MessMenuResponse = await response.json();
+            const rawArray = await response.json();
+
+            const serverData: MessMenuResponse = {
+                id: new Date().toDateString(), 
+                mess_name: "Hostel Mess",
+                mess: rawArray.map((entry: any) => ({
+                    day: entry.day,
+                    breakfast: entry.breakfast.join("\n"),
+                    lunch: entry.lunch.join("\n"),
+                    snacks: entry.snacks.join("\n"),
+                    dinner: entry.dinner.join("\n")
+                }))
+            };
 
             if (!currentCachedId || serverData.id !== currentCachedId) {
                 await AsyncStorage.setItem(CACHE_KEY_MENU, JSON.stringify(serverData));

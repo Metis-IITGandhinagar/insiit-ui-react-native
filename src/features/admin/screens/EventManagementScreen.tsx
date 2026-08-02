@@ -22,8 +22,10 @@ import { useEventData } from '@features/search/hooks/useEventData';
 import { Event } from '@features/search/services/searchTypes';
 
 export const EventManagementScreen: React.FC = () => {
-    const { colors, spacing, typography, radius } = useTheme();
     const { permissions, canManageEvents } = useAdminPermissions();
+    const theme = useTheme();
+    const { colors } = theme;
+    const styles = getStyles(theme);
 
     const { eventsList, loading: isLoading, error, refreshEvents: refetch } = useEventData();
 
@@ -84,7 +86,7 @@ export const EventManagementScreen: React.FC = () => {
                 <EventCard
                     event={item}
                     onPress={() => handleOpenDetailModal(item)}
-                    onEdit={permissions?.put_event ? () => handleOpenAddModal() : undefined}
+                    onEdit={permissions?.post_event ? () => handleOpenAddModal() : undefined}
                     onDelete={() => handleDeleteEvent(item.id)}
                 />
             </View>
@@ -94,7 +96,7 @@ export const EventManagementScreen: React.FC = () => {
     return (
         <PermissionGate hasPermission={canManageEvents}>
             <View style={[styles.container, { backgroundColor: colors.background }]}>
-                <View style={[styles.headerContainer, { paddingHorizontal: spacing.lg, paddingTop: spacing.md }]}>
+                <View style={[styles.headerContainer]}>
                     <SearchBar
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -106,40 +108,16 @@ export const EventManagementScreen: React.FC = () => {
                         <ActivityIndicator size="large" color={colors.primary} />
                     </View>
                 ) : error && !eventsList.length ? (
-                    <View style={[styles.centered, { padding: spacing.xl }]}>
-                        <Text
-                            style={{
-                                color: colors.text,
-                                fontSize: typography.h3?.fontSize || 20,
-                                fontWeight: typography.h3?.fontWeight || '700',
-                                marginBottom: spacing.xs,
-                                textAlign: 'center',
-                            }}
-                        >
+                    <View style={[styles.centered]}>
+                            <Text style={styles.errorTitle}>
                             Failed to Load Events
                         </Text>
-                        <Text
-                            style={{
-                                color: colors.textSecondary,
-                                fontSize: typography.h2?.fontSize || 14,
-                                marginBottom: spacing.lg,
-                                textAlign: 'center',
-                            }}
-                        >
+                        <Text style={styles.errorSubtitle}>
                             {error}
                         </Text>
                         <TouchableOpacity
                             onPress={refetch}
-                            style={[
-                                styles.retryButton,
-                                {
-                                    backgroundColor: colors.primary,
-                                    paddingHorizontal: spacing.lg,
-                                    paddingVertical: spacing.md,
-                                    borderRadius: radius.md,
-                                },
-                            ]}
-                        >
+                            style={[styles.retryButton]}>
                             <RefreshCw size={16} color={colors.primary || '#FFFFFF'} style={{ marginRight: 8 }} />
                             <Text style={{ color: colors.primary || '#FFFFFF', fontWeight: '600' }}>Retry</Text>
                         </TouchableOpacity>
@@ -149,12 +127,12 @@ export const EventManagementScreen: React.FC = () => {
                         data={filteredEvents}
                         keyExtractor={(item) => item.id}
                         renderItem={renderEventItem}
-                        contentContainerStyle={[styles.listContent, { padding: spacing.lg }]}
+                        contentContainerStyle={[styles.listContent,]}
                         refreshing={isLoading}
                         onRefresh={refetch}
                         ListEmptyComponent={
-                            <View style={[styles.centered, { paddingVertical: spacing.xxl }]}>
-                                <Text style={{ color: colors.textSecondary, fontSize: typography.h1?.fontSize || 16 }}>
+                            <View style={[styles.centered]}>
+                                <Text style={[ styles.emptyText]}>
                                     No events found.
                                 </Text>
                             </View>
@@ -164,19 +142,11 @@ export const EventManagementScreen: React.FC = () => {
 
                 {permissions?.post_event && (
                     <TouchableOpacity
-                        style={[
-                            styles.fab,
-                            {
-                                backgroundColor: colors.primary,
-                                borderRadius: radius.xl ?? 9999,
-                                bottom: spacing.xl,
-                                right: spacing.xl,
-                            },
-                        ]}
+                        style={[styles.fab]}
                         onPress={handleOpenAddModal}
                         activeOpacity={0.8}
                     >
-                        <Plus size={24} color={colors.primary || '#FFFFFF'} />
+                        <Plus size={24} color={'#FFFFFF'} />
                     </TouchableOpacity>
                 )}
 
@@ -204,20 +174,25 @@ export const EventManagementScreen: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const getStyles = ({ colors, radius, spacing, typography }: any) =>  StyleSheet.create({
     container: {
         flex: 1,
     },
     headerContainer: {
         marginBottom: 8,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
     },
     centered: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        padding: spacing.xl,
+        paddingVertical: spacing.xxl
     },
     listContent: {
         flexGrow: 1,
+        padding: spacing.lg,
     },
     cardContainer: {
         marginBottom: 16,
@@ -225,6 +200,10 @@ const styles = StyleSheet.create({
     retryButton: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: colors.primary,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.md,
+        borderRadius: radius.md,
     },
     fab: {
         position: 'absolute',
@@ -237,6 +216,26 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.27,
         shadowRadius: 4.65,
+        backgroundColor: colors.primary,
+        borderRadius: radius.xl ?? 9999,
+        bottom: spacing.xl,
+        right: spacing.xl,
     },
+    errorTitle:{
+        color: colors.text,
+        fontSize: typography.h3?.fontSize || 20,
+        fontWeight: typography.h3?.fontWeight || '700',
+        marginBottom: spacing.xs,
+        textAlign: 'center',
+    },
+    errorSubtitle:{
+        color: colors.textSecondary,
+        fontSize: typography.h2?.fontSize || 14,
+        marginBottom: spacing.lg,
+        textAlign: 'center',
+    },
+    emptyText:{
+
+    }
 });
 
