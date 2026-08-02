@@ -9,8 +9,14 @@
       "@/*": [
         "src/*"
       ],
-      "@assets/*": [
-        "assets/*"
+      "@core/*": [
+        "src/core/*"
+      ],
+      "@features/*": [
+        "src/features/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
       ]
     }
   }
