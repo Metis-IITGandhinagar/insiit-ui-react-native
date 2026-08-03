@@ -6,10 +6,13 @@ export type RootStackParamList = {
     Representatives: undefined;
     TeamINSIIT: undefined;
     CourseSearch: undefined;
-    MessFeedback:undefined;
-    Profile:undefined;
-    Settings:undefined;
-    Outlets:undefined;
+    MessFeedback: undefined;
+    Outlets: undefined;
+    LostFound: undefined;
+    Cabshare: undefined;
+    BuySell: undefined;
+    Profile: undefined;
+    Settings: undefined;
 };
 export interface AppPermissions {
     get_admin: boolean;

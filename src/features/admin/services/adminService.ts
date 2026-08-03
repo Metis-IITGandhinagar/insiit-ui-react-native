@@ -20,8 +20,16 @@ export interface UpdatePermissionsPayload {
 
 class AdminService {
     async fetchPermissions(): Promise<AdminPermissions> {
-        const response = await apiClient.get<AdminEntryResponse>('/admin/permissions');
-        return response.data.permissions;
+        try {
+            const response = await apiClient.get<AdminEntryResponse>('/admin/permissions');
+            return response.data.permissions;
+        } catch (error: any) {
+            // Handle non-admin users gracefully (403/404) or server errors (500)
+            if (error.response && (error.response.status === 403 || error.response.status === 404 || error.response.status === 500)) {
+                return {} as AdminPermissions;
+            }
+            throw error;
+        }
     }
 
     async fetchAdmins(): Promise<AdminUser[]> {

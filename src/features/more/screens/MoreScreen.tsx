@@ -116,7 +116,7 @@ const MoreScreen = () => {
                     {/* Footer */}
                     <View style={styles.footerContainer}>
                         <Text style={styles.footerText}>
-                            Made with <Text style={{ color: 'red' }}>❤️</Text> by Team INSIIT
+                            Made with <Text style={{ color: 'red' }}>❤</Text> by Team INSIIT
                         </Text>
                     </View>
 

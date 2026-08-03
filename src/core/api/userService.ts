@@ -13,7 +13,8 @@ import { AppPermissions } from '../navigation/types';
                 const response = await apiClient.get<AdminEntryResponse>('/admin/permissions');
                 return response.data.permissions;
             } catch (error: any) {
-                if (error.response && (error.response.status === 403 || error.response.status === 404)) {
+                if (error.response && (error.response.status === 403 || error.response.status === 404 || error.response.status === 500)) {
+                    // User is not an admin or server error - this is expected
                     return null;
                 }
 
