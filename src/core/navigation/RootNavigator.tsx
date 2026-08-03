@@ -13,6 +13,10 @@ import CourseSearchScreen from '@/features/home/screens/CourseSearchScreen';
 import MessFeedbackScreen from "@/features/tools/screens/MessFeedbackScreen";
 import ProfileScreen from "@/features/more/screens/ProfieScreen";
 import SettingsScreen from "@/features/more/screens/SettingsScreen";
+import OutletsScreen from "@/features/outlets/screens/OutletsScreen";
+import LostFoundScreen from "@/features/lostfound/screens/LostFoundScreen";
+import CabshareScreen from "@/features/cabshare/screens/CabshareScreen";
+import BuySellScreen from "@/features/buysell/screens/BuySellScreen";
 import { useTheme } from "@/core/theme";
 import { AdminNavigator } from "@/core/navigation/AdminNavigator";
 
@@ -84,6 +88,38 @@ export default function RootNavigator() {
                     <Stack.Screen
                         name="MessFeedback"
                         component={MessFeedbackScreen}
+                        options={{
+                            headerShown: false,
+                            animation: 'slide_from_right'
+                        }}
+                    />
+                    <Stack.Screen
+                        name="Outlets"
+                        component={OutletsScreen}
+                        options={{
+                            headerShown: false,
+                            animation: 'slide_from_right'
+                        }}
+                    />
+                    <Stack.Screen
+                        name="LostFound"
+                        component={LostFoundScreen}
+                        options={{
+                            headerShown: false,
+                            animation: 'slide_from_right'
+                        }}
+                    />
+                    <Stack.Screen
+                        name="Cabshare"
+                        component={CabshareScreen}
+                        options={{
+                            headerShown: false,
+                            animation: 'slide_from_right'
+                        }}
+                    />
+                    <Stack.Screen
+                        name="BuySell"
+                        component={BuySellScreen}
                         options={{
                             headerShown: false,
                             animation: 'slide_from_right'

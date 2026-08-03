@@ -1,13 +1,16 @@
 // src/screens/home/HomeScreen.tsx
 import React, { useRef } from "react";
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
+import { ScrollView, StatusBar, StyleSheet, ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { RefreshCw } from "lucide-react-native";
+import { useNavigation } from "@react-navigation/native";
 
 import MessCard from "../components/MessCard";
 import QRBottomSheet from "../components/QRBottomSheet";
 import WeeklyMenuSheet from "../components/WeeklyMenuSheet";
 import GreetingSection from "../components/GreetingSection";
 import TimetableWidget from "../components/TimetableWidget";
+import ServicesGrid from "../components/ServicesGrid";
 
 import { useTheme } from "@core/theme"; 
 
@@ -18,6 +21,7 @@ import type { WeeklyMenuSheetRef } from "../components/WeeklyMenuSheet";
 const HomeScreen = () => {
     const qrSheetRef = useRef<QRBottomSheetRef>(null);
     const menuSheetRef = useRef<WeeklyMenuSheetRef>(null);
+    const navigation = useNavigation<any>();
 
     const { menuData, currentMeal, loading, error, manualRefresh } = useMessData();
 
@@ -29,7 +33,7 @@ const HomeScreen = () => {
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
                 {loading && !menuData ? (
                     <View style={styles.centeredView}>
                         <ActivityIndicator size="large" color={colors.primary} />
@@ -52,7 +56,10 @@ const HomeScreen = () => {
                             onShowQR={() => qrSheetRef.current?.expand()}
                             onShowMenu={() => menuSheetRef.current?.expand()}
                         />
+
                         <TimetableWidget />
+
+                        <ServicesGrid />
 
                     </ScrollView>
                 )}
