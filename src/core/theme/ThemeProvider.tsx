@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useColorScheme } from "react-native";
-import { themes, themeOptions, ThemeMode, ColorScheme } from "./colors";
+import { themes, ThemeMode, ColorScheme } from "./colors";
 import radius from "./radius";
 import shadows from "./shadows";
 import spacing from "./spacing";
@@ -33,10 +33,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [systemScheme]);
 
     const activeColors = themes[themeKey] || themes.light;
-    const isDark = themes[themeKey] ? (themeKey === "dark" || themeKey === "midnight") : false;
+    const isDark = themes[themeKey] ? (themeKey === "dark") : false;
 
     const toggleTheme = () => {
-        setThemeKey((prev) => (prev === "dark" || prev === "midnight" ? "light" : "dark"));
+        setThemeKey((prev) => (prev === "dark" ? "light" : "dark"));
     };
 
     const value = {
