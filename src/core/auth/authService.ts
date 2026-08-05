@@ -5,8 +5,17 @@ import { nativeAuth } from './firebase';
 
 const ALLOWED_EMAIL_DOMAIN = 'iitgn.ac.in';
 
+// Must be referenced as a static `process.env.X` property so Expo can inline it at bundle time.
+const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+
+if (!WEB_CLIENT_ID) {
+  throw new Error(
+    'Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID. Add it to your .env file and restart the dev server (env vars are inlined at bundle time).'
+  );
+}
+
 GoogleSignin.configure({
-  webClientId: '799004821779-mpv0sue4pjuhg3e2jld70htmbk3nfc2i.apps.googleusercontent.com',
+  webClientId: WEB_CLIENT_ID,
   hostedDomain: ALLOWED_EMAIL_DOMAIN,
   offlineAccess: false,
 });
