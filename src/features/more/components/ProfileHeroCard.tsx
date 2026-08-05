@@ -1,119 +1,88 @@
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import { Sparkles, User, Settings } from "lucide-react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ChevronRight, User } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "@/core/navigation/types";
 import { Card } from "@/shared/components/Card";
 import { useTheme } from "@/core/theme";
+import { useAuth } from "@/core/auth/useAuth";
 
 const ProfileHeroCard = () => {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    const { user } = useAuth();
+
+    const email = user?.email || "";
+    const photoURL = user?.photoURL;
 
     return (
         <Card style={styles.cardContainer}>
-            <View style={styles.headerRow}>
-                <View style={styles.iconWrapper}>
-                    <Sparkles size={28} color={colors.primary} />
+            <TouchableOpacity
+                style={styles.profileButton}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate("Profile")}
+            >
+                {photoURL ? (
+                    <Image source={{ uri: photoURL }} style={styles.avatar} />
+                ) : (
+                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                        <User size={24} color={colors.textSecondary} />
+                    </View>
+                )}
+
+                <View style={styles.textContainer}>
+                    <Text style={styles.label}>Profile</Text>
+                    {!!email && (
+                        <Text style={styles.email} numberOfLines={1}>{email}</Text>
+                    )}
                 </View>
-                <View style={styles.headerTextContainer}>
-                    <Text style={styles.title}>INSIIT</Text>
-                    <Text style={styles.subtitle}>Connecting IIT Gandhinagar</Text>
-                </View>
-            </View>
 
-            <Text style={styles.description}>
-                Everything you need on campus in one place.
-            </Text>
-
-            <View style={styles.actionRow}>
-                <TouchableOpacity
-                    style={[styles.button, styles.primaryButton]}
-                    activeOpacity={0.8}
-                    onPress={() => navigation.navigate("Profile")}
-                >
-                    <User size={18} color="#FFFFFF" />
-                    <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>Profile</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.button, styles.secondaryButton]}
-                    activeOpacity={0.8}
-                    onPress={() => navigation.navigate("Settings")}
-                >
-                    <Settings size={18} color={colors.primary} />
-                    <Text style={[styles.buttonText, { color: colors.primary }]}>Settings</Text>
-                </TouchableOpacity>
-            </View>
+                <ChevronRight size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
         </Card>
     );
 };
 
 export default ProfileHeroCard;
 
-const getStyles = ({ colors, radius, spacing }: any) => StyleSheet.create({
+const getStyles = ({ colors, spacing }: any) => StyleSheet.create({
     cardContainer: {
         marginBottom: spacing.md,
+        padding: 0,
     },
-    headerRow: {
+    profileButton: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: spacing.md,
-    },
-    iconWrapper: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: `${colors.primary}15`, // Light primary background
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: spacing.md,
-    },
-    headerTextContainer: {
-        flex: 1,
-        justifyContent: "center",
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: "bold",
-        color: colors.text,
-        marginBottom: 2,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    description: {
-        fontSize: 15,
-        color: colors.textSecondary,
-        marginBottom: spacing.lg,
-    },
-    actionRow: {
-        flexDirection: "row",
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg,
         gap: spacing.md,
     },
-    button: {
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "center",
+    avatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    avatarPlaceholder: {
         justifyContent: "center",
-        paddingVertical: 12,
-        borderRadius: radius.md,
-        gap: spacing.sm,
+        alignItems: "center",
     },
-    primaryButton: {
-        backgroundColor: colors.primary,
+    textContainer: {
+        flex: 1,
     },
-    secondaryButton: {
-        backgroundColor: "transparent",
-        borderWidth: 1.5,
-        borderColor: `${colors.primary}30`,
-    },
-    buttonText: {
-        fontSize: 15,
+    label: {
+        fontSize: 16,
         fontWeight: "600",
-    }
+        color: colors.text,
+    },
+    email: {
+        fontSize: 13,
+        color: colors.textSecondary,
+        marginTop: 2,
+    },
 });

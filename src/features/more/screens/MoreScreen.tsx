@@ -1,6 +1,6 @@
 import React from "react";
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
-import { Map, Users, User, Settings, Info, ShieldCheck, Bug } from "lucide-react-native";
+import { Map, Users, Settings, Info, ShieldCheck, Bug } from "lucide-react-native";
 
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -58,12 +58,6 @@ const MoreScreen = () => {
                     {/* Account Section */}
                     <SectionTitle title="Account" />
                     <Card style={styles.listCard}>
-                        <ListItem
-                            leadingIcon={<User size={22} color={colors.primary} />}
-                            title="Profile"
-                            onPress={() => navigation.navigate("Profile")}
-                            showDivider={true}
-                        />
                         <ListItem
                             leadingIcon={<Settings size={22} color={colors.primary} />}
                             title="Settings"
