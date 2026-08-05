@@ -15,6 +15,7 @@ const ProfileHeroCard = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { user } = useAuth();
 
+    const displayName = user?.displayName || "IITGN Student";
     const email = user?.email || "";
     const photoURL = user?.photoURL;
 
@@ -34,7 +35,7 @@ const ProfileHeroCard = () => {
                 )}
 
                 <View style={styles.textContainer}>
-                    <Text style={styles.label}>Profile</Text>
+                    <Text style={styles.name} numberOfLines={1}>{displayName}</Text>
                     {!!email && (
                         <Text style={styles.email} numberOfLines={1}>{email}</Text>
                     )}
@@ -75,7 +76,7 @@ const getStyles = ({ colors, spacing }: any) => StyleSheet.create({
     textContainer: {
         flex: 1,
     },
-    label: {
+    name: {
         fontSize: 16,
         fontWeight: "600",
         color: colors.text,
