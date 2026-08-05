@@ -12,17 +12,12 @@ const GreetingSection = () => {
     if (hour < 12) greeting = "Good Morning";
     else if (hour < 17) greeting = "Good Afternoon";
 
-    const userName = "Janil";
     const styles = getStyles(theme);
     return (
         <View style={styles.container}>
             <View style={styles.textContainer}>
                 <Text style={styles.greeting}>
-                    {greeting},
-                </Text>
-
-                <Text style={styles.name}>
-                    {userName} 👋
+                    {greeting}
                 </Text>
             </View>
             
@@ -32,7 +27,7 @@ const GreetingSection = () => {
             >
                 <Settings2
                     size={22}
-                    color={colors.textStrong}
+                    color={colors.primary}
                     strokeWidth={2}
                 />
             </TouchableOpacity>
@@ -50,7 +45,6 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         marginBottom: spacing.xs,
     },
     settingsButton: {
-        marginTop: 30,
         width: 48,
         height: 48,
         borderRadius: radius.round,
@@ -64,8 +58,8 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
     },
     greeting: {
         marginTop: 30,
-        ...typography.h3,
-        color: colors.textSecondary,
+        ...typography.h2,
+        color: "#00000",
     },
     name: {
         marginTop: 2,

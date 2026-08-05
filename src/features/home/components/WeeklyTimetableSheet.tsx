@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { X } from 'lucide-react-native'; 
 import { useTheme } from '@/core/theme';
 import { TimetableSession } from '../services/timetableService';
 
@@ -33,9 +34,24 @@ export default function WeeklyTimetableSheet({ visible, onClose, schedule }: Pro
             groups[session.day].push(session);
         }
 
-        for (const day of Object.keys(groups)) {
-            groups[day].sort((a, b) => a.time.localeCompare(b.time));
-        }
+        const parseTime = (time: string) => {
+    const start = time.split('-')[0].trim();
+
+    const match = start.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (!match) return Number.MAX_SAFE_INTEGER;
+
+    let [, hour, minute, period] = match;
+
+    let h = parseInt(hour, 10);
+    const m = parseInt(minute, 10);
+
+    period = period.toUpperCase();
+
+    if (period === 'PM' && h !== 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+
+    return h * 60 + m;
+};
 
         return groups;
     }, [schedule]);
@@ -55,8 +71,12 @@ export default function WeeklyTimetableSheet({ visible, onClose, schedule }: Pro
                 <View style={styles.sheet}>
                     <View style={styles.header}>
                         <Text style={styles.title}>Weekly Schedule</Text>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                            <Text style={styles.closeText}>Close</Text>
+                        <TouchableOpacity
+                            onPress={onClose}
+                            style={styles.closeButton}
+                            activeOpacity={0.7}
+                        >
+                            <X size={22} color={theme.colors.textSecondary} />
                         </TouchableOpacity>
                     </View>
 
@@ -124,8 +144,12 @@ const getStyles = ({ colors, spacing, typography }: any) => StyleSheet.create({
         marginBottom: spacing.lg
     },
     title: { ...typography.h2, color: colors.text },
-    closeButton: { padding: 4 },
-    closeText: { color: colors.danger || 'red', fontWeight: '600' },
+    closeButton: {
+        width: 36,
+        height: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     content: { flex: 1 },
     emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 100 },
     emptyText: { color: '#999', fontSize: 16 },
