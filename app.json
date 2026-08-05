@@ -36,7 +36,13 @@
       ],
       "@react-native-firebase/auth",
       "@react-native-google-signin/google-signin",
-      "./plugins/withAndroidSigning"
+      "./plugins/withAndroidSigning",
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsVersion": "11.20.1"
+        }
+      ]
     ]
   }
 }

@@ -13,6 +13,7 @@ import CourseSearchScreen from '@/features/home/screens/CourseSearchScreen';
 import MessFeedbackScreen from "@/features/tools/screens/MessFeedbackScreen";
 import ProfileScreen from "@/features/more/screens/ProfileScreen";
 import SettingsScreen from "@/features/more/screens/SettingsScreen";
+import CampusMapScreen from "@/features/map/screens/CampusMapScreen";
 import OutletsScreen from "@/features/outlets/screens/OutletsScreen";
 import LostFoundScreen from "@/features/lostfound/screens/LostFoundScreen";
 import CabshareScreen from "@/features/cabshare/screens/CabshareScreen";
@@ -91,6 +92,14 @@ export default function RootNavigator() {
                     <Stack.Screen
                         name="MessFeedback"
                         component={MessFeedbackScreen}
+                        options={{
+                            headerShown: false,
+                            animation: 'slide_from_right'
+                        }}
+                    />
+                    <Stack.Screen
+                        name="CampusMap"
+                        component={CampusMapScreen}
                         options={{
                             headerShown: false,
                             animation: 'slide_from_right'

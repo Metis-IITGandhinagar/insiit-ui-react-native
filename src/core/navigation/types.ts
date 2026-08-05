@@ -13,6 +13,7 @@ export type RootStackParamList = {
     BuySell: undefined;
     Profile: undefined;
     Settings: undefined;
+    CampusMap: undefined;
 };
 export interface AppPermissions {
     get_admin: boolean;

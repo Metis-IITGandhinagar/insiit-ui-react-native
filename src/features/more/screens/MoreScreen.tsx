@@ -44,7 +44,7 @@ const MoreScreen = () => {
                         <ListItem
                             leadingIcon={<Map size={22} color={colors.primary} />}
                             title="Campus Map"
-                            onPress={() => { }}
+                            onPress={() => navigation.navigate("CampusMap")}
                             showDivider={true}
                         />
                         <ListItem
