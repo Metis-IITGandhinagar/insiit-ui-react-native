@@ -67,7 +67,7 @@ const MoreScreen = () => {
                         <ListItem
                             leadingIcon={<Settings size={22} color={colors.primary} />}
                             title="Admin Dashboard"
-                            onPress={() => navigation.navigate("AdminNavigator")}
+                            onPress={() => navigation.navigate("AdminDashboard")}
                             showDivider={false}
                         />
                     </Card>

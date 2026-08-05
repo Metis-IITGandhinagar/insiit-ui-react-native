@@ -4,12 +4,10 @@ import {
     StatusBar,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft, Clock3, MapPin } from 'lucide-react-native';
+import { Clock3, MapPin } from 'lucide-react-native';
 
 import { useTheme } from '@/core/theme';
 
@@ -35,7 +33,6 @@ const outletData = [
 ];
 
 export default function OutletsScreen() {
-    const navigation = useNavigation<any>();
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
@@ -46,18 +43,7 @@ export default function OutletsScreen() {
                 barStyle={theme.isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={colors.background}
             />
-            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-                <View style={styles.header}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                        <ArrowLeft size={18} color={colors.text} />
-                    </TouchableOpacity>
-
-                    <View style={styles.headerTextWrap}>
-                        <Text style={styles.title}>Outlets</Text>
-                        <Text style={styles.subtitle}>Browse campus favourites without leaving the app.</Text>
-                    </View>
-                </View>
-
+            <SafeAreaView style={styles.container} edges={["left", "right"]}>
                 <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                     <View style={styles.heroCard}>
                         <Text style={styles.heroTitle}>Campus favourites</Text>
@@ -95,40 +81,10 @@ export default function OutletsScreen() {
     );
 }
 
-const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.create({
+const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTextWrap: {
-        flex: 1,
-        marginLeft: spacing.md,
-    },
-    title: {
-        ...typography.h2,
-        color: colors.text,
-    },
-    subtitle: {
-        color: colors.textSecondary,
-        fontSize: 13,
-        marginTop: 2,
     },
     content: {
         paddingHorizontal: spacing.lg,

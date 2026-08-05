@@ -10,15 +10,15 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Calendar, Megaphone, Utensils, Users, RefreshCw } from 'lucide-react-native';
 import { useTheme } from '@core/theme';
 import { useAdminPermissions } from '../hooks/useAdminPermissions';
 import { AdminSectionCard } from '../components/AdminSectionCard';
 import { EmptyPermission } from '../components/EmptyPermission';
-import { AdminStackParamList } from '@/core/navigation/AdminNavigator';
+import { RootStackParamList } from '@/core/navigation/types';
 
-type AdminDashboardNavigationProp = StackNavigationProp<AdminStackParamList, 'AdminDashboard'>;
+type AdminDashboardNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AdminDashboard'>;
 
 export const AdminDashboardScreen: React.FC = () => {
     const theme = useTheme();

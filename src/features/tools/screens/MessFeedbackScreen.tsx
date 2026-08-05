@@ -1,5 +1,6 @@
 import React from "react";
-import { StyleSheet, Text, View, SafeAreaView } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Utensils } from "lucide-react-native";
 
 import { useTheme } from "@/core/theme";
@@ -33,9 +34,8 @@ const MessFeedbackScreen = () => {
     const styles = getStyles(theme);
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["left", "right"]}>
             <View style={styles.headerContainer}>
-                <Text style={styles.title}>Mess Feedback</Text>
                 <Text style={styles.subtitle}>
                     Select your dining hall to open the institutional feedback forms
                 </Text>
@@ -72,16 +72,9 @@ const getStyles = ({ colors, radius, spacing }: any) => StyleSheet.create({
     },
     headerContainer: {
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
+        paddingTop: spacing.md,
         paddingBottom: spacing.md,
         alignItems: "center",
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "700",
-        color: colors.text,
-        textAlign: "center",
-        paddingTop:20,
     },
     subtitle: {
         fontSize: 14,

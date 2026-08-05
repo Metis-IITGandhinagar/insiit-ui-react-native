@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useColorScheme } from "react-native";
+import * as SystemUI from "expo-system-ui";
 import { themes, ThemeMode, ColorScheme } from "./colors";
 import radius from "./radius";
 import shadows from "./shadows";
@@ -34,6 +35,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const activeColors = themes[themeKey] || themes.light;
     const isDark = themes[themeKey] ? (themeKey === "dark") : false;
+
+    // The native root view lives outside the React tree, so it keeps its own
+    // background. Without this it shows through during screen transitions.
+    useEffect(() => {
+        SystemUI.setBackgroundColorAsync(activeColors.background);
+    }, [activeColors.background]);
 
     const toggleTheme = () => {
         setThemeKey((prev) => (prev === "dark" ? "light" : "dark"));

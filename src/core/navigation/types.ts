@@ -2,7 +2,11 @@
 export type RootStackParamList = {
     Login: undefined;
     MainTabs: undefined;
-    AdminNavigator: undefined;
+    AdminDashboard: undefined;
+    EventManagement: undefined;
+    AnnouncementManagement: undefined;
+    MessMenuManagement: undefined;
+    UserManagement: undefined;
     Representatives: undefined;
     TeamINSIIT: undefined;
     CourseSearch: undefined;

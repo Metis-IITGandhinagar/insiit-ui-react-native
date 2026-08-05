@@ -1,9 +1,7 @@
 // src/features/map/screens/CampusMapScreen.tsx
 import React from 'react';
-import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft } from 'lucide-react-native';
 import Mapbox, { Camera, MapView } from '@rnmapbox/maps';
 
 import { useTheme } from '@/core/theme';
@@ -20,7 +18,6 @@ const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
 Mapbox.setAccessToken(MAPBOX_TOKEN ?? null);
 
 export default function CampusMapScreen() {
-    const navigation = useNavigation<any>();
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
@@ -31,18 +28,7 @@ export default function CampusMapScreen() {
                 barStyle={theme.isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={colors.background}
             />
-            <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-                <View style={styles.header}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                        <ArrowLeft size={18} color={colors.text} />
-                    </TouchableOpacity>
-
-                    <View style={styles.headerTextWrap}>
-                        <Text style={styles.title}>Campus Map</Text>
-                        <Text style={styles.subtitle}>Find your way around IITGN.</Text>
-                    </View>
-                </View>
-
+            <SafeAreaView style={styles.container} edges={['left', 'right']}>
                 <View style={styles.mapWrapper}>
                     {MAPBOX_TOKEN ? (
                         <MapView
@@ -78,40 +64,10 @@ export default function CampusMapScreen() {
     );
 }
 
-const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.create({
+const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTextWrap: {
-        flex: 1,
-        marginLeft: spacing.md,
-    },
-    title: {
-        ...typography.h2,
-        color: colors.text,
-    },
-    subtitle: {
-        color: colors.textSecondary,
-        fontSize: 13,
-        marginTop: 2,
     },
     mapWrapper: {
         flex: 1,

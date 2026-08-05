@@ -1,16 +1,14 @@
 // src/features/more/screens/ProfileScreen.tsx
 import React from "react";
-import { Image, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import { ArrowLeft, Info, Lock, Mail, User as UserIcon } from "lucide-react-native";
+import { Info, Lock, Mail, User as UserIcon } from "lucide-react-native";
 
 import { useTheme } from "@/core/theme";
 import { Card } from "@/shared/components/Card";
 import { useAuth } from "@/core/auth/useAuth";
 
 const ProfileScreen = () => {
-    const navigation = useNavigation<any>();
     const { user } = useAuth();
     const theme = useTheme();
     const { colors } = theme;
@@ -26,18 +24,7 @@ const ProfileScreen = () => {
                 barStyle={theme.isDark ? "light-content" : "dark-content"}
                 backgroundColor={colors.background}
             />
-            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-                <View style={styles.header}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                        <ArrowLeft size={18} color={colors.text} />
-                    </TouchableOpacity>
-
-                    <View style={styles.headerTextWrap}>
-                        <Text style={styles.title}>Profile</Text>
-                        <Text style={styles.subtitle}>Your INSIIT account details</Text>
-                    </View>
-                </View>
-
+            <SafeAreaView style={styles.container} edges={["left", "right"]}>
                 <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
 
                     {/* Avatar + identity */}
@@ -95,36 +82,6 @@ const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.c
     container: {
         flex: 1,
         backgroundColor: colors.background,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTextWrap: {
-        flex: 1,
-        marginLeft: spacing.md,
-    },
-    title: {
-        ...typography.h2,
-        color: colors.text,
-    },
-    subtitle: {
-        color: colors.textSecondary,
-        fontSize: 13,
-        marginTop: 2,
     },
     contentScroll: {
         paddingHorizontal: spacing.lg,

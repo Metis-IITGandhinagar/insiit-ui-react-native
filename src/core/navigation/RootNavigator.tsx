@@ -19,19 +19,24 @@ import LostFoundScreen from "@/features/lostfound/screens/LostFoundScreen";
 import CabshareScreen from "@/features/cabshare/screens/CabshareScreen";
 import BuySellScreen from "@/features/buysell/screens/BuySellScreen";
 import { useTheme } from "@/core/theme";
-import { AdminNavigator } from "@/core/navigation/AdminNavigator";
+import { AdminDashboardScreen } from "@/features/admin/screens/AdminDashboardScreen";
+import { EventManagementScreen } from "@/features/admin/screens/EventManagementScreen";
+import { AnnouncementManagementScreen } from "@/features/admin/screens/AnnouncementManagementScreen";
+import { MessMenuManagementScreen } from "@/features/admin/screens/MessMenuManagementScreen";
+import { UserManagementScreen } from "@/features/admin/screens/UserManagementScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
     const { user, loading } = useAuth();
-    const { colors, isDark } = useTheme();
+    const { colors, isDark, typography } = useTheme();
 
     const navigationTheme = {
         ...DefaultTheme,
         dark: isDark,
         colors: {
             ...DefaultTheme.colors,
+            primary: colors.primary,
             background: colors.background,
             card: colors.card,
             text: colors.text,
@@ -41,101 +46,136 @@ export default function RootNavigator() {
 
     if (loading) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#A52A2A" />
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: colors.background,
+                }}
+            >
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <NavigationContainer>
+        <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+            {/* Without this the container falls back to react-navigation's DefaultTheme,
+                whose background is a light grey that flashes during transitions. */}
+            <NavigationContainer theme={navigationTheme}>
                 <Stack.Navigator
                     screenOptions={{
-                        headerShown: false,
-                        animation: "none",
+                        // Pushed screens use the built-in header, so every one of them
+                        // gets a back button without each screen rolling its own.
+                        headerShown: true,
+                        headerTitleAlign: "left",
+                        headerShadowVisible: false,
+                        headerStyle: { backgroundColor: colors.background },
+                        headerTintColor: colors.text,
+                        headerTitleStyle: {
+                            fontSize: typography.h3.fontSize,
+                            fontWeight: typography.h3.fontWeight,
+                            color: colors.text,
+                        },
+                        contentStyle: { backgroundColor: colors.background },
+                        // One transition for the whole stack, tuned to feel as quick as
+                        // the tab pager. animationDuration only affects iOS; Android uses
+                        // its own (already brisk) push timing.
+                        animation: "simple_push",
+                        animationDuration: 200,
                     }}
                 >
                     {user ? (
                         <>
-                            <Stack.Screen name="MainTabs" component={MainTabsScreen} />
+                            {/* The tab host draws its own floating navbar and pages. */}
+                            <Stack.Screen
+                                name="MainTabs"
+                                component={MainTabsScreen}
+                                options={{ headerShown: false }}
+                            />
                             <Stack.Screen
                                 name="Profile"
                                 component={ProfileScreen}
-                                options={{
-                                    animation: 'slide_from_right'
-                                }}
+                                options={{ title: "Profile" }}
                             />
                             <Stack.Screen
                                 name="Settings"
                                 component={SettingsScreen}
+                                options={{ title: "Settings" }}
                             />
-                            <Stack.Screen
-                                name="AdminNavigator"
-                                component={AdminNavigator}
-                            />
+                            {/* Grouped rather than nested: a child stack would only be
+                                organising code, and would cost a hidden parent header
+                                plus a hand-rolled back button on its first screen. */}
+                            <Stack.Group>
+                                <Stack.Screen
+                                    name="AdminDashboard"
+                                    component={AdminDashboardScreen}
+                                    options={{ title: "Admin Console" }}
+                                />
+                                <Stack.Screen
+                                    name="EventManagement"
+                                    component={EventManagementScreen}
+                                    options={{ title: "Event Management" }}
+                                />
+                                <Stack.Screen
+                                    name="AnnouncementManagement"
+                                    component={AnnouncementManagementScreen}
+                                    options={{ title: "Announcements" }}
+                                />
+                                <Stack.Screen
+                                    name="MessMenuManagement"
+                                    component={MessMenuManagementScreen}
+                                    options={{ title: "Mess Schedule" }}
+                                />
+                                <Stack.Screen
+                                    name="UserManagement"
+                                    component={UserManagementScreen}
+                                    options={{ title: "User Permissions" }}
+                                />
+                            </Stack.Group>
                         </>
                     ) : (
                         <Stack.Screen
                             name="Login"
                             component={LoginScreen}
+                            options={{ headerShown: false }}
                         />
                     )}
                     <Stack.Screen
                         name="CourseSearch"
                         component={CourseSearchScreen}
-                        options={{
-                            headerShown: false,
-                            animation: 'slide_from_right'
-                        }}
+                        options={{ title: "Course Search" }}
                     />
                     <Stack.Screen
                         name="MessFeedback"
                         component={MessFeedbackScreen}
-                        options={{
-                            headerShown: false,
-                            animation: 'slide_from_right'
-                        }}
+                        options={{ title: "Mess Feedback" }}
                     />
                     <Stack.Screen
                         name="CampusMap"
                         component={CampusMapScreen}
-                        options={{
-                            headerShown: false,
-                            animation: 'slide_from_right'
-                        }}
+                        options={{ title: "Campus Map" }}
                     />
                     <Stack.Screen
                         name="Outlets"
                         component={OutletsScreen}
-                        options={{
-                            headerShown: false,
-                            animation: 'slide_from_right'
-                        }}
+                        options={{ title: "Outlets" }}
                     />
                     <Stack.Screen
                         name="LostFound"
                         component={LostFoundScreen}
-                        options={{
-                            headerShown: false,
-                            animation: 'slide_from_right'
-                        }}
+                        options={{ title: "Lost & Found" }}
                     />
                     <Stack.Screen
                         name="Cabshare"
                         component={CabshareScreen}
-                        options={{
-                            headerShown: false,
-                            animation: 'slide_from_right'
-                        }}
+                        options={{ title: "Cabshare" }}
                     />
                     <Stack.Screen
                         name="BuySell"
                         component={BuySellScreen}
-                        options={{
-                            headerShown: false,
-                            animation: 'slide_from_right'
-                        }}
+                        options={{ title: "Buy & Sell" }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

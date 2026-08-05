@@ -85,7 +85,7 @@ export default function CourseSearchScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["left", "right"]}>
             <View style={styles.header}>
                 <TextInput
                     style={styles.searchInput}

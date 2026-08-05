@@ -50,7 +50,6 @@ const SettingsScreen = () => {
             <StatusBar
                 barStyle={theme.isDark ? "light-content" : "dark-content"}
                 backgroundColor={colors.background}
-                translucent
             />
 
             <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
@@ -168,8 +167,8 @@ const getStyles = ({ colors, spacing, radius }: any, insets: any) => StyleSheet.
     },
     contentScroll: {
         paddingHorizontal: spacing.lg,
-        // Calculate safe top padding (accommodates notches and status bars)
-        paddingTop: Math.max(insets.top, spacing.lg),
+        // The stack header already clears the notch/status bar.
+        paddingTop: spacing.lg,
         // Calculate safe bottom padding (accommodates home bars and floating navs)
         paddingBottom: insets.bottom + spacing.xxxl + 60,
     },
