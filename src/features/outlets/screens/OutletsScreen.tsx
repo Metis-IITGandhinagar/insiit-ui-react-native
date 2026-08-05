@@ -103,19 +103,6 @@ export default function OutletsScreen() {
                                 onRefresh={refresh}
                             />
                         }
-                        ListHeaderComponent={
-                            <View style={styles.heroCard}>
-                                <Text style={styles.heroTitle}>
-                                    Campus favourites
-                                </Text>
-
-                                <Text style={styles.heroSubtitle}>
-                                    Discover cafés, food outlets,
-                                    snacks and beverages across
-                                    IITGN.
-                                </Text>
-                            </View>
-                        }
                         renderItem={({ item }) => (
                             <OutletCard
                                 outlet={item}

@@ -28,7 +28,7 @@ export const EmergencyCard = () => {
                     showChevron={false}
                     showDivider={true}
                     trailingElement={
-                    <TouchableOpacity
+                        <TouchableOpacity
                             style={styles.callButton}
                             onPress={() => makecall("07923952000")}
                             activeOpacity={0.7}

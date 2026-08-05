@@ -57,9 +57,9 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         alignItems: "flex-start",
     },
     greeting: {
-        marginTop: 30,
-        ...typography.h2,
-        color: "#00000",
+        marginRight:10,
+        ...typography.h1,
+        color: colors.text,
     },
     name: {
         marginTop: 2,

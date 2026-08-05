@@ -39,15 +39,6 @@ const BusScreen = () => {
                         <View style={{ flex: 1 }}>
                             <BusTypeTabs selected={selectedTab} onSelect={setSelectedTab} />
                         </View>
-
-                        {hasPermission('post_bus_schedule') && (
-                            <TouchableOpacity
-                                style={[styles.addButton, { backgroundColor: colors.primary }]}
-                                onPress={() => setAddModalOpen(true)}
-                            >
-                                <Text style={styles.addButtonText}>+ Add</Text>
-                            </TouchableOpacity>
-                        )}
                     </View>
 
                     {loading && departures.length === 0 ? (

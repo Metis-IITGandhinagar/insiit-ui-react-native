@@ -77,15 +77,6 @@ export default function SearchScreen() {
                                 ? `Upcoming Events (${filteredEvents.length})`
                                 : `Results (${filteredEvents.length})`}
                         </Text>
-
-                        {hasPermission('post_event') && (
-                            <TouchableOpacity
-                                style={[styles.addButton, { backgroundColor: colors.primary }]}
-                                onPress={() => setAddModalVisible(true)}
-                            >
-                                <Text style={styles.addButtonText}>+ Add</Text>
-                            </TouchableOpacity>
-                        )}
                     </View>
                 </View>
 
