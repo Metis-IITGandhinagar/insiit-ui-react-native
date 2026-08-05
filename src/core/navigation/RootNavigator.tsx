@@ -11,7 +11,7 @@ import LoginScreen from "@/core/auth/screens/LoginScreen";
 import MainTabsScreen from "./MainTabsScreen";
 import CourseSearchScreen from '@/features/home/screens/CourseSearchScreen';
 import MessFeedbackScreen from "@/features/tools/screens/MessFeedbackScreen";
-import ProfileScreen from "@/features/more/screens/ProfieScreen";
+import ProfileScreen from "@/features/more/screens/ProfileScreen";
 import SettingsScreen from "@/features/more/screens/SettingsScreen";
 import OutletsScreen from "@/features/outlets/screens/OutletsScreen";
 import LostFoundScreen from "@/features/lostfound/screens/LostFoundScreen";
@@ -61,6 +61,9 @@ export default function RootNavigator() {
                             <Stack.Screen
                                 name="Profile"
                                 component={ProfileScreen}
+                                options={{
+                                    animation: 'slide_from_right'
+                                }}
                             />
                             <Stack.Screen
                                 name="Settings"

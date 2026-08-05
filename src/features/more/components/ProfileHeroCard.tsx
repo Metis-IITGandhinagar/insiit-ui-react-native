@@ -1,6 +1,9 @@
 import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Sparkles, User, Settings } from "lucide-react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/core/navigation/types";
 import { Card } from "@/shared/components/Card";
 import { useTheme } from "@/core/theme";
 
@@ -8,6 +11,7 @@ const ProfileHeroCard = () => {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     return (
         <Card style={styles.cardContainer}>
@@ -26,12 +30,20 @@ const ProfileHeroCard = () => {
             </Text>
 
             <View style={styles.actionRow}>
-                <TouchableOpacity style={[styles.button, styles.primaryButton]} activeOpacity={0.8}>
+                <TouchableOpacity
+                    style={[styles.button, styles.primaryButton]}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("Profile")}
+                >
                     <User size={18} color="#FFFFFF" />
                     <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>Profile</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.button, styles.secondaryButton]} activeOpacity={0.8}>
+                <TouchableOpacity
+                    style={[styles.button, styles.secondaryButton]}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("Settings")}
+                >
                     <Settings size={18} color={colors.primary} />
                     <Text style={[styles.buttonText, { color: colors.primary }]}>Settings</Text>
                 </TouchableOpacity>
