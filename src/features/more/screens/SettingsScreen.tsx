@@ -48,7 +48,7 @@ const SettingsScreen = () => {
     return (
         <View style={styles.container}>
             <StatusBar
-                barStyle={themeKey === "dark" || themeKey === "midnight" ? "light-content" : "dark-content"}
+                barStyle={theme.isDark ? "light-content" : "dark-content"}
                 backgroundColor={colors.background}
                 translucent
             />

@@ -23,7 +23,7 @@ const BusScreen = () => {
 
     return (
         <>
-            <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+            <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
 
             <SafeAreaView style={styles.container}>
                 <ScrollView
