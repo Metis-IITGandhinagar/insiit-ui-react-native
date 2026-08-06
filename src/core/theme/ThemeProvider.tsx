@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useColorScheme } from "react-native";
 import * as SystemUI from "expo-system-ui";
+import { createMMKV } from "react-native-mmkv";
 import { themes, ThemeMode, ColorScheme } from "./colors";
 import radius from "./radius";
 import shadows from "./shadows";
@@ -23,15 +24,34 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// MMKV rather than AsyncStorage because reads are synchronous: the stored theme is
+// available for the very first render, so there's no flash of the wrong theme.
+const storage = createMMKV({ id: "insiit.theme" });
+const THEME_KEY = "themeKey";
+
+const readStoredTheme = (): ThemeMode | null => {
+    const stored = storage.getString(THEME_KEY);
+    return stored && stored in themes ? (stored as ThemeMode) : null;
+};
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const systemScheme = useColorScheme();
-    const [themeKey, setThemeKey] = useState<ThemeMode>(systemScheme === "dark" ? "dark" : "light");
+    const [themeKey, setThemeKeyState] = useState<ThemeMode>(
+        () => readStoredTheme() ?? (systemScheme === "dark" ? "dark" : "light")
+    );
 
+    // The system scheme is only a default for someone who has never chosen a theme.
+    // Once they have, an OS light/dark switch must not clobber it — that used to wipe
+    // out Emerald and Sunshine entirely.
     useEffect(() => {
-        if (systemScheme) {
-            setThemeKey(systemScheme === "dark" ? "dark" : "light");
-        }
+        if (!systemScheme || readStoredTheme()) return;
+        setThemeKeyState(systemScheme === "dark" ? "dark" : "light");
     }, [systemScheme]);
+
+    const setThemeKey = useCallback((key: ThemeMode) => {
+        setThemeKeyState(key);
+        storage.set(THEME_KEY, key);
+    }, []);
 
     const activeColors = themes[themeKey] || themes.light;
     const isDark = themes[themeKey] ? (themeKey === "dark") : false;
@@ -42,9 +62,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         SystemUI.setBackgroundColorAsync(activeColors.background);
     }, [activeColors.background]);
 
-    const toggleTheme = () => {
-        setThemeKey((prev) => (prev === "dark" ? "light" : "dark"));
-    };
+    const toggleTheme = useCallback(() => {
+        setThemeKey(themeKey === "dark" ? "light" : "dark");
+    }, [themeKey, setThemeKey]);
 
     const value = {
         themeKey,

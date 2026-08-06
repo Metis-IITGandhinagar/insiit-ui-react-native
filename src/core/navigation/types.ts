@@ -3,7 +3,6 @@ export type RootStackParamList = {
     Login: undefined;
     MainTabs: undefined;
     AdminDashboard: undefined;
-    EventManagement: undefined;
     AnnouncementManagement: undefined;
     MessMenuManagement: undefined;
     UserManagement: undefined;

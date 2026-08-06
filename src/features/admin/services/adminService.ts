@@ -9,16 +9,6 @@ export interface AdminUser {
     permissions: AdminPermissions;
 }
 
-// Not Partial: the backend deserializes into a struct where every permission is a
-// required field, so a partial object is rejected with 422.
-export interface CreateAdminPayload {
-    email: string;
-    permissions: AdminPermissions;
-}
-
-export interface UpdatePermissionsPayload {
-    permissions: AdminPermissions;
-}
 
 class AdminService {
     async fetchPermissions(): Promise<AdminPermissions> {
@@ -37,15 +27,6 @@ class AdminService {
     async fetchAdmins(): Promise<AdminUser[]> {
         const response = await apiClient.get<AdminUser[]>('/admin');
         return response.data;
-    }
-
-    async createAdmin(payload: CreateAdminPayload): Promise<AdminUser> {
-        const response = await apiClient.post<AdminUser>('/admin', payload);
-        return response.data;
-    }
-
-    async deleteEvent(eventId: string): Promise<void> {
-        await apiClient.delete(`/events/${eventId}`);
     }
 
     async deleteAnnouncement(announcementId: string): Promise<void> {

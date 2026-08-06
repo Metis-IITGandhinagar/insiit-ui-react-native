@@ -13,9 +13,9 @@ export interface Outlet {
     description: string | null;
     location: { latitude: number; longitude: number };
     landmark: string | null;
-    /** See backendTime.ts — currently unannotated server-side. */
-    open_time: string | number | number[];
-    close_time: string | number | number[];
+    /** RFC 3339 string — see backendTime.ts. */
+    open_time: string;
+    close_time: string;
     menu: OutletMenuEntry[];
     image_url: string | null;
 }

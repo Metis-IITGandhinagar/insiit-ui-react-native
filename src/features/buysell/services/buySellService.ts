@@ -10,8 +10,8 @@ export interface BidEntry {
     bid_by_email: string;
     bid_amount_in_rs: number;
     remarks: string;
-    /** Unix seconds — see backendTime.ts. */
-    bid_timestamp: number;
+    /** RFC 3339 string — see backendTime.ts. */
+    bid_timestamp: string;
 }
 
 /** Mirrors `BuySellEntry` in the backend (src/schemas/buy_sell_schemas.rs). */
@@ -19,7 +19,7 @@ export interface BuySellEntry {
     id: number;
     item_name: string;
     description: string;
-    added_on_timestamp: number;
+    added_on_timestamp: string;
     added_by_email: string;
     status: BuySellStatus;
     bids: BidEntry[];

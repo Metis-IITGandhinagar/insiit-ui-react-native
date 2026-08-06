@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { backendInstantMs } from '@/core/api/backendTime';
 import { LostFoundEntry, lostFoundService } from '../services/lostFoundService';
 
 export const useLostFound = () => {
@@ -14,7 +15,9 @@ export const useLostFound = () => {
             // Newest first; the backend returns table order.
             setEntries(
                 [...data].sort(
-                    (a, b) => (b.added_on_timestamp ?? 0) - (a.added_on_timestamp ?? 0)
+                    (a, b) =>
+                        backendInstantMs(b.added_on_timestamp) -
+                        backendInstantMs(a.added_on_timestamp)
                 )
             );
         } catch (err: any) {

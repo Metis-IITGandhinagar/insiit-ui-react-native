@@ -28,8 +28,8 @@ export interface Announcement {
     id: string;
     title: string;
     description: string;
-    /** Unix seconds — the backend serializes this with `time::serde::timestamp`. */
-    added_on_timestamp: number;
+    /** RFC 3339 string — the backend serializes this with `time::serde::rfc3339`. */
+    added_on_timestamp: string;
     added_by_email: string;
     img_url: string;
 }

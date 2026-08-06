@@ -1,43 +1,33 @@
 // src/core/api/backendTime.ts
 //
-// The Rust backend does not encode datetimes consistently — see notes.md
-// ("Backend datetime encoding"). Depending on the field you get:
+// Every datetime the Rust backend sends is an RFC 3339 string
+// (`#[serde(with = "time::serde::rfc3339")]`), e.g. "2026-08-06T12:30:00Z".
 //
-//   * an RFC 3339 string      e.g. "2026-08-06T12:30:00Z"   (events)
-//   * unix SECONDS as number  e.g. 1786018200               (*_timestamp fields)
-//   * a 9-element array       [y, ordinal, h, m, s, ns, ...] (fields the backend
-//                                                             forgot to annotate)
-//
-// These helpers accept all three so a single unannotated field cannot crash a
-// screen. Delete the array branch once the backend annotates everything.
+// Numbers are still tolerated on the way in so a field that predates the convention
+// can't blank out a screen — but they're read as unix SECONDS, matching what the
+// backend used to send.
 
-type BackendTime = string | number | number[] | null | undefined;
+type BackendTime = string | number | null | undefined;
 
-/** Parses any of the three encodings into a Date, or null if unusable. */
+/** Parses a backend timestamp into a Date, or null if unusable. */
 export const parseBackendInstant = (value: BackendTime): Date | null => {
     if (value === null || value === undefined) return null;
 
-    // Unix seconds — note JS Date wants milliseconds.
-    if (typeof value === 'number') {
-        const date = new Date(value * 1000);
-        return isNaN(date.getTime()) ? null : date;
-    }
-
-    if (typeof value === 'string') {
-        const date = new Date(value);
-        return isNaN(date.getTime()) ? null : date;
-    }
-
-    // time crate's non-human-readable form: [year, dayOfYear, hour, min, sec, nanos, ...]
-    if (Array.isArray(value) && value.length >= 6) {
-        const [year, ordinal, hour, minute, second] = value;
-        const date = new Date(Date.UTC(year, 0, 1, hour, minute, second));
-        date.setUTCDate(ordinal);
-        return isNaN(date.getTime()) ? null : date;
-    }
-
-    return null;
+    // Legacy unix seconds; JS Date takes milliseconds.
+    const date = typeof value === 'number' ? new Date(value * 1000) : new Date(value);
+    return isNaN(date.getTime()) ? null : date;
 };
+
+/** Date -> the RFC 3339 string the API expects on writes. */
+export const toBackendTimestamp = (date: Date): string => date.toISOString();
+
+/**
+ * Milliseconds since epoch, or 0 when unparseable — for sorting.
+ * Don't subtract the raw values: they're strings, and `"2026-…" - "2026-…"` is NaN,
+ * which makes Array.sort silently do nothing.
+ */
+export const backendInstantMs = (value: BackendTime): number =>
+    parseBackendInstant(value)?.getTime() ?? 0;
 
 /** "6 Aug 2026", or "" when the value can't be parsed. */
 export const formatBackendDate = (value: BackendTime): string => {

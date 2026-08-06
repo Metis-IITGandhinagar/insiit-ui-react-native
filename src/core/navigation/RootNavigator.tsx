@@ -21,7 +21,6 @@ import CabshareScreen from "@/features/cabshare/screens/CabshareScreen";
 import BuySellScreen from "@/features/buysell/screens/BuySellScreen";
 import { useTheme } from "@/core/theme";
 import { AdminDashboardScreen } from "@/features/admin/screens/AdminDashboardScreen";
-import { EventManagementScreen } from "@/features/admin/screens/EventManagementScreen";
 import { AnnouncementManagementScreen } from "@/features/admin/screens/AnnouncementManagementScreen";
 import { MessMenuManagementScreen } from "@/features/admin/screens/MessMenuManagementScreen";
 import { UserManagementScreen } from "@/features/admin/screens/UserManagementScreen";
@@ -113,11 +112,6 @@ export default function RootNavigator() {
                                     name="AdminDashboard"
                                     component={AdminDashboardScreen}
                                     options={{ title: "Admin Console" }}
-                                />
-                                <Stack.Screen
-                                    name="EventManagement"
-                                    component={EventManagementScreen}
-                                    options={{ title: "Event Management" }}
                                 />
                                 <Stack.Screen
                                     name="AnnouncementManagement"

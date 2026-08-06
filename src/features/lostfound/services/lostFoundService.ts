@@ -9,8 +9,8 @@ export interface LostFoundClaim {
     item_name: string;
     claimed_by_email: string;
     remarks: string;
-    /** Unix seconds — see backendTime.ts. */
-    claim_timestamp: number;
+    /** RFC 3339 string — see backendTime.ts. */
+    claim_timestamp: string;
 }
 
 /** Mirrors `LostFoundEntry` in the backend (src/schemas/lost_found_schemas.rs). */
@@ -18,7 +18,7 @@ export interface LostFoundEntry {
     id: number;
     item_name: string;
     description: string;
-    added_on_timestamp: number;
+    added_on_timestamp: string;
     added_by_email: string;
     status: LostFoundStatus;
     found_claims: LostFoundClaim[];

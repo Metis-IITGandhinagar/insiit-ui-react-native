@@ -2,42 +2,52 @@
 
 Deliberate shortcuts and things to revisit.
 
-## ⚠️ Backend datetime encoding (`../insiit-backend-rust`)
+## Datetime encoding: RFC 3339 everywhere
 
-The backend's `time` dependency enables `serde` but **not** `serde-human-readable`. With
-that combination an unannotated `OffsetDateTime` serializes as a **9-element JSON array**
-`[year, ordinal, hour, min, sec, nanos, off_h, off_m, off_s]` and deserializes via
-`deserialize_tuple(9)` — unusable from JS. Every datetime field therefore needs an
-explicit `#[serde(with = …)]`, and the codebase is inconsistent about it:
+**Every** `OffsetDateTime` in the backend schemas carries
+`#[serde(with = "time::serde::rfc3339")]` — one convention, no exceptions. Keep it that
+way when adding fields. `Cargo.toml` needs the `time` feature `serde-well-known` (it
+implies `serde`) for that module to exist.
 
-| Field | Encoding |
-| --- | --- |
-| `EventEntry.start_datetime` | `rfc3339` ✅ |
-| **`EventRequest.start_datetime`** | **none → breaks `POST`/`PUT /events` with 400** |
-| **`Outlet` / `OutletRequest` `open_time`, `close_time`** | **none → broken (×4)** |
-| bus / announcements / buy_sell / lost_found timestamps | `timestamp` (unix **seconds**) — works, inconsistent |
+This matters because an *unannotated* `OffsetDateTime` silently serializes as a 9-element
+JSON array `[year, ordinal, hour, min, sec, nanos, off_h, off_m, off_s]` and deserializes
+via `deserialize_tuple(9)`, which no JS client can consume — `serde-well-known` does not
+enable `serde-human-readable`. A missing attribute is a silent wire-format break, not a
+compile error.
 
-Also open on the backend:
+Chosen over unix seconds because the failure modes are loud rather than silent: a bad
+RFC 3339 string 400s at the deserialize boundary, whereas a seconds/milliseconds mix-up
+parses fine and renders 1970 or the year 58,000.
+
+App side, always go through `core/api/backendTime.ts` — including `backendInstantMs()`
+for sorting. Never subtract the raw values: they're strings, so `a - b` is `NaN` and
+`Array.sort` silently does nothing.
+
+Still open on the backend:
 - `POST /admin` is dead: `add_admin` lists 12 columns but `VALUES ($1..$13)` with 12 binds
-  → Postgres rejects it, 500 every time.
-- `BusStop.time` is an `OffsetDateTime`, but schedules recur daily so the date is
-  meaningless. `time::Time` + a Postgres `TIME` column fits; decided against for now.
-  Note `time` ships no well-known serde format for `Time` — it needs a
-  `time::serde::format_description!` module, not just a decorator.
+  → Postgres rejects it, 500 every time. Not reachable from the app any more (admins are
+  managed with psql), but the route is still broken.
+- Outlet `open_time`/`close_time` are recurring **clock times** modelled as instants, so
+  their date component is meaningless. Buses solved this by storing `departure_time` as a
+  plain `"7:30 AM"` string; outlets could do the same, or use `time::Time` + a Postgres
+  `TIME` column. Note `time` ships no well-known serde format for `Time` — that route
+  needs a `time::serde::format_description!` module, not just a decorator.
+- **The `bus` table changed shape** (JSONB `source`/`via`/`destination` → flat
+  `departure_time TIME`/`source`/`destination`/`stops TEXT[]`). `CREATE TABLE IF NOT
+  EXISTS` does not migrate, so an existing deployment needs `DROP TABLE bus;`.
 
-Unix seconds are a footgun from JS: `new Date()` takes **milliseconds**. Nothing in the
-app reads those fields yet.
+`departure_time` is the one clock-time field done properly: a Postgres `TIME` column,
+read as `departure_time::text` and written as `$2::time`, so the Rust struct stays a
+`String` with no `time::Time` serde plumbing. Postgres validates and normalises on
+insert — `'7:30'` becomes `"07:30:00"`, junk is rejected with a 400 (SQLSTATE class 22).
+Outlets could adopt the same trick.
 
 ## App ↔ backend mismatches still unfixed
 
-- **Bus is fully incompatible.** `busTypes.ts` expects `{_id, BusName, DepartureTime:
-  "7:30 AM", Source, Destination, Stops: string[]}`; the backend returns `{id, name,
-  source: {time, location}, via: [...], destination}`. `useBusData.ts:30` calls
-  `bus.BusName.toLowerCase()` → **TypeError on any non-empty response**; the tab only
-  works while the table is empty. `via` carries a time per stop, which the flat
-  `Stops: string[]` can't represent — needs a UI decision, not a rename.
 - `busService.createBus` is never called (BusScreen's "+ Add" sets state but renders no
-  modal), so `POST /buses` still has no client — blocked on the bus model above.
+  modal), so `POST /buses` still has no client.
+- The bus tab filter matches the **name** string ("56-Seater" vs the `BusType` tabs
+  `EECO | 29 | 56`) because there is no route/type column. Renaming a row breaks its tab.
 - `searchTypes.ts:12` `ApiEventResponse` is dead code from an older backend shape.
 - Outlets shows "Hours unavailable" until the backend annotates `open_time`/`close_time`.
 - `edit_lost_found` / `edit_buy_sell` **replace** `img_urls` with whatever
