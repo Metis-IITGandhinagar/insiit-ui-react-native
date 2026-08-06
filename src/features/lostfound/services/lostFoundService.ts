@@ -1,75 +1,65 @@
-// src/features/lostfound/services/lostFoundService.ts
-import { apiClient } from '@/core/api/apiClient';
-
-/** Mirrors `LostFoundStatus` (serde renames to snake_case). */
-export type LostFoundStatus = 'lost' | 'found' | 'claimed_to_be_found';
-
-export interface LostFoundClaim {
-    id: number;
-    item_name: string;
-    claimed_by_email: string;
-    remarks: string;
-    /** RFC 3339 string — see backendTime.ts. */
-    claim_timestamp: string;
-}
-
-/** Mirrors `LostFoundEntry` in the backend (src/schemas/lost_found_schemas.rs). */
-export interface LostFoundEntry {
-    id: number;
-    item_name: string;
-    description: string;
-    added_on_timestamp: string;
-    added_by_email: string;
-    status: LostFoundStatus;
-    found_claims: LostFoundClaim[];
-    img_urls: string[];
-}
-
-export interface LostFoundRequest {
-    item_name: string;
-    description: string;
-    /** Raw base64 payloads; the backend saves them and returns img_urls. */
-    base64_images: string[];
-}
+import { apiClient } from "@/core/api/apiClient";
+import {
+    LostFoundEntry,
+    LostFoundRequest,
+    LostFoundClaimRequest,
+} from "./lostFoundTypes";
 
 export const lostFoundService = {
-    getAll: async (): Promise<LostFoundEntry[]> => {
-        const response = await apiClient.get<LostFoundEntry[]>('/lost-found');
-        return Array.isArray(response.data) ? response.data : [];
+    async getAllLostFound(): Promise<LostFoundEntry[]> {
+        const { data } = await apiClient.get("/lost-found");
+        return data;
     },
 
-    report: async (payload: LostFoundRequest): Promise<LostFoundEntry> => {
-        const response = await apiClient.post<LostFoundEntry>('/lost-found', payload);
-        return response.data;
+    async getLostFoundById(id: number): Promise<LostFoundEntry> {
+        const { data } = await apiClient.get(`/lost-found/${id}`);
+        return data;
     },
 
-    /**
-     * Author only. NOTE: the backend's `edit_lost_found` updates item_name and
-     * description only — `base64_images` in the body is ignored, so existing photos
-     * can't be replaced or removed through this endpoint.
-     */
-    edit: async (id: number, payload: LostFoundRequest): Promise<LostFoundEntry> => {
-        const response = await apiClient.put<LostFoundEntry>(`/lost-found/${id}`, payload);
-        return response.data;
+    async addLostFound(
+        request: LostFoundRequest
+    ): Promise<LostFoundEntry> {
+        const { data } = await apiClient.post("/lost-found", request);
+        return data;
     },
 
-    /** Author only — the backend scopes this by added_by_email. */
-    markFound: async (entry: LostFoundEntry): Promise<LostFoundEntry> => {
-        const response = await apiClient.put<LostFoundEntry>('/lost-found/mark-found', entry);
-        return response.data;
+    async editLostFound(
+        id: number,
+        request: LostFoundRequest
+    ): Promise<LostFoundEntry> {
+        const { data } = await apiClient.put(
+            `/lost-found/${id}`,
+            request
+        );
+        return data;
     },
 
-    /** Tell the owner you think you've found their item. */
-    claimFound: async (entry: LostFoundEntry, remarks: string): Promise<LostFoundEntry> => {
-        const response = await apiClient.post<LostFoundEntry>('/lost-found/claim-found', {
-            id: entry.id,
-            item_name: entry.item_name,
-            remarks,
-        });
-        return response.data;
-    },
-
-    remove: async (id: number): Promise<void> => {
+    async deleteLostFound(id: number): Promise<void> {
         await apiClient.delete(`/lost-found/${id}`);
+    },
+
+    async markFound(entry: LostFoundEntry): Promise<LostFoundEntry> {
+        const { data } = await apiClient.put(
+            "/lost-found/mark-found",
+            entry
+        );
+        return data;
+    },
+
+    async claimFound(
+        request: LostFoundClaimRequest
+    ): Promise<LostFoundEntry> {
+        // The backend deserializes this straight into the LostFoundClaim
+        // struct. `claimed_by_email` is overwritten server-side from the
+        // auth token, and `claim_timestamp` falls back to a serde default
+        // if omitted — but the fields must still be present in the JSON.
+        const { data } = await apiClient.post("/lost-found/claim-found", {
+            id: request.id,
+            item_name: request.item_name,
+            remarks: request.remarks,
+            claimed_by_email: "",
+            claim_timestamp: Math.floor(Date.now() / 1000),
+        });
+        return data;
     },
 };

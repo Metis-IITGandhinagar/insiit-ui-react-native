@@ -3,7 +3,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-nati
 import { BlurView } from "expo-blur";
 import { UtensilsCrossed, X } from "lucide-react-native";
 import { useTheme } from "@/core/theme";
-import { MessMenuResponse, DayMenu } from "../services/messTypes";
+import { MessMenuResponse } from "../services/messTypes";
 
 export type WeeklyMenuSheetRef = {
     expand: () => void;

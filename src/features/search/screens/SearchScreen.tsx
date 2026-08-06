@@ -84,9 +84,9 @@ export default function SearchScreen() {
                             <TouchableOpacity
                                 style={[styles.addButton, { backgroundColor: colors.primary }]}
                                 onPress={() => {
-                                setEditingEvent(null);
-                                setAddModalVisible(true);
-                            }}
+                                    setEditingEvent(null);
+                                    setAddModalVisible(true);
+                                }}
                             >
                                 <Text style={styles.addButtonText}>+ Add</Text>
                             </TouchableOpacity>

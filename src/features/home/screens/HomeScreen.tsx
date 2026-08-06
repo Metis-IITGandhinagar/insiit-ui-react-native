@@ -79,7 +79,6 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
     },
     contentScroll: {
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
         paddingBottom: 120,
         gap: spacing.lg,
     },

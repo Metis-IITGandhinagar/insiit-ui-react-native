@@ -270,7 +270,6 @@ const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.c
         color: colors.textSecondary || '#666',
     },
     emptyCard: {
-        backgroundColor: '#F9F9F9',
         borderRadius: radius.lg,
         padding: spacing.xl,
         alignItems: 'center',

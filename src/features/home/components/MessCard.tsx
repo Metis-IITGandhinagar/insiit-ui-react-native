@@ -77,7 +77,7 @@ const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
                     <View style={styles.iconCircle}>
-                        <UtensilsCrossed size={22} color={colors.primary} strokeWidth={2.2} />
+                        <UtensilsCrossed size={22} color={colors.primaryLight} strokeWidth={2.2} />
                     </View>
 
                     <View style={styles.headerTextContainer}>
@@ -186,7 +186,7 @@ const getStyles = ({ colors, radius, spacing, typography }: any) => StyleSheet.c
         width: 48,
         height: 48,
         borderRadius: radius.round || 24,
-        backgroundColor: colors.primaryLight || "#EAF2FF",
+        backgroundColor: colors.primary || "#EAF2FF",
         justifyContent: "center",
         alignItems: "center",
         marginRight: spacing.md,

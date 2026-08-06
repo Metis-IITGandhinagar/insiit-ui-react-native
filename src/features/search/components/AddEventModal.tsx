@@ -225,6 +225,7 @@ const getStyles = ({ colors, spacing, typography, radius }: any) => StyleSheet.c
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: spacing.lg,
+        paddingTop: spacing.xxl,
         borderBottomWidth: 1,
         borderBottomColor: '#EEE',
     },
