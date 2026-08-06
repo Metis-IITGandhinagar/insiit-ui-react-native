@@ -20,6 +20,7 @@ import { Card } from '@shared/components/Card';
 import { PermissionGate } from '../components/PermissionGate';
 import { useAdminPermissions } from '../hooks/useAdminPermissions';
 import { adminService, AdminUser, AdminPermissions } from '../services/adminService';
+import { NO_PERMISSIONS } from '@/core/navigation/types';
 
 export const UserManagementScreen: React.FC = () => {
     const { colors, spacing, typography, radius } = useTheme();
@@ -34,12 +35,7 @@ export const UserManagementScreen: React.FC = () => {
 
     const [email, setEmail] = useState<string>('');
     const [permissionsState, setPermissionsState] = useState<AdminPermissions>({
-        get_admin: false,
-        post_admin: false,
-        put_admin: false,
-        post_event: false,
-        post_mess_menu: false,
-        post_announcement: false,
+        ...NO_PERMISSIONS,
     });
 
     const fetchAdmins = useCallback(async () => {
@@ -61,14 +57,7 @@ export const UserManagementScreen: React.FC = () => {
 
     const resetForm = useCallback(() => {
         setEmail('');
-        setPermissionsState({
-            get_admin: false,
-            post_admin: false,
-            put_admin: false,
-            post_event: false,
-            post_mess_menu: false,
-            post_announcement: false,
-        });
+        setPermissionsState({ ...NO_PERMISSIONS });
     }, []);
 
     const handleOpenAddModal = useCallback(() => {

@@ -15,6 +15,7 @@ import ProfileScreen from "@/features/more/screens/ProfileScreen";
 import SettingsScreen from "@/features/more/screens/SettingsScreen";
 import CampusMapScreen from "@/features/map/screens/CampusMapScreen";
 import OutletsScreen from "@/features/outlets/screens/OutletsScreen";
+import AnnouncementsScreen from "@/features/announcements/screens/AnnouncementsScreen";
 import LostFoundScreen from "@/features/lostfound/screens/LostFoundScreen";
 import CabshareScreen from "@/features/cabshare/screens/CabshareScreen";
 import BuySellScreen from "@/features/buysell/screens/BuySellScreen";
@@ -161,6 +162,11 @@ export default function RootNavigator() {
                         name="Outlets"
                         component={OutletsScreen}
                         options={{ title: "Outlets" }}
+                    />
+                    <Stack.Screen
+                        name="Announcements"
+                        component={AnnouncementsScreen}
+                        options={{ title: "Announcements" }}
                     />
                     <Stack.Screen
                         name="LostFound"

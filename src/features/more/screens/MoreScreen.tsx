@@ -1,6 +1,6 @@
 import React from "react";
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
-import { Map, Users, Settings, Info, ShieldCheck, Bug } from "lucide-react-native";
+import { Map, Users, Settings, Info, ShieldCheck, Bug, Megaphone } from "lucide-react-native";
 
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -45,6 +45,12 @@ const MoreScreen = () => {
                             leadingIcon={<Map size={22} color={colors.primary} />}
                             title="Campus Map"
                             onPress={() => navigation.navigate("CampusMap")}
+                            showDivider={true}
+                        />
+                        <ListItem
+                            leadingIcon={<Megaphone size={22} color={colors.primary} />}
+                            title="Announcements"
+                            onPress={() => navigation.navigate("Announcements")}
                             showDivider={true}
                         />
                         <ListItem

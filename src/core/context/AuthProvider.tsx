@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { nativeAuth } from '../auth/firebase';
 import { authService } from '../auth/authService';
 import { userService } from '../api/userService';
-import { UserSessionProfile, AppPermissions } from '../navigation/types';
+import { UserSessionProfile, AppPermissions, NO_PERMISSIONS } from '../navigation/types';
 
 interface AuthContextType {
     user: UserSessionProfile | null;
@@ -14,18 +14,7 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEFAULT_STUDENT_PERMISSIONS: AppPermissions = {
-    get_admin: false,
-    post_admin: false,
-    put_admin: false,
-
-    post_event: false,
-    put_event: false,
-
-    post_mess_menu: false,
-
-    post_announcement: false,
-};
+const DEFAULT_STUDENT_PERMISSIONS: AppPermissions = NO_PERMISSIONS;
 
 async function buildProfile(firebaseUser: any): Promise<UserSessionProfile> {
     const backendPermissions = await userService.fetchUserPermissions();

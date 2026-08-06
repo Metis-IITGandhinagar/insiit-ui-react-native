@@ -1,5 +1,5 @@
 import { apiClient } from '@core/api/apiClient';
-import { AppPermissions } from '@/core/navigation/types';
+import { AppPermissions, NO_PERMISSIONS } from '@/core/navigation/types';
 import { AdminEntryResponse } from '@/core/api/userService';
 
 export type AdminPermissions = AppPermissions;
@@ -9,13 +9,15 @@ export interface AdminUser {
     permissions: AdminPermissions;
 }
 
+// Not Partial: the backend deserializes into a struct where every permission is a
+// required field, so a partial object is rejected with 422.
 export interface CreateAdminPayload {
     email: string;
-    permissions: Partial<AdminPermissions>;
+    permissions: AdminPermissions;
 }
 
 export interface UpdatePermissionsPayload {
-    permissions: Partial<AdminPermissions>;
+    permissions: AdminPermissions;
 }
 
 class AdminService {
@@ -26,7 +28,7 @@ class AdminService {
         } catch (error: any) {
             // Handle non-admin users gracefully (403/404) or server errors (500)
             if (error.response && (error.response.status === 403 || error.response.status === 404 || error.response.status === 500)) {
-                return {} as AdminPermissions;
+                return { ...NO_PERMISSIONS };
             }
             throw error;
         }

@@ -1,74 +1,93 @@
 # Notes
 
-Running list of deliberate shortcuts and things to revisit.
+Deliberate shortcuts and things to revisit.
 
-## Mapbox token (added 2026-08-06)
+## ⚠️ Backend datetime encoding (`../insiit-backend-rust`)
 
-The campus map (`src/features/map/screens/CampusMapScreen.tsx`) uses the
-**secret** `sk.*` token belonging to the `metis-mapbox` account, carried over
-from the Flutter app (`insiit-ui/lib/widgets/maps.dart`, line 1). It lives in
-exactly one committed place:
+The backend's `time` dependency enables `serde` but **not** `serde-human-readable`. With
+that combination an unannotated `OffsetDateTime` serializes as a **9-element JSON array**
+`[year, ordinal, hour, min, sec, nanos, off_h, off_m, off_s]` and deserializes via
+`deserialize_tuple(9)` — unusable from JS. Every datetime field therefore needs an
+explicit `#[serde(with = …)]`, and the codebase is inconsistent about it:
 
-| Where | Key | Purpose |
-| --- | --- | --- |
-| `.env` | `EXPO_PUBLIC_MAPBOX_TOKEN` | runtime token passed to `Mapbox.setAccessToken()` |
+| Field | Encoding |
+| --- | --- |
+| `EventEntry.start_datetime` | `rfc3339` ✅ |
+| **`EventRequest.start_datetime`** | **none → breaks `POST`/`PUT /events` with 400** |
+| **`Outlet` / `OutletRequest` `open_time`, `close_time`** | **none → broken (×4)** |
+| bus / announcements / buy_sell / lost_found timestamps | `timestamp` (unix **seconds**) — works, inconsistent |
 
-This was a conscious call to get the map working now. The consequence to be aware
-of: **the token ships in plain text.** `EXPO_PUBLIC_*` values are inlined into the
-JS bundle at build time, so anyone who unzips the APK can read it and use it
-against the `metis-mapbox` account — including any scope the token carries beyond
-map tiles, and any billed tile usage.
+Also open on the backend:
+- `POST /admin` is dead: `add_admin` lists 12 columns but `VALUES ($1..$13)` with 12 binds
+  → Postgres rejects it, 500 every time.
+- `BusStop.time` is an `OffsetDateTime`, but schedules recur daily so the date is
+  meaningless. `time::Time` + a Postgres `TIME` column fits; decided against for now.
+  Note `time` ships no well-known serde format for `Time` — it needs a
+  `time::serde::format_description!` module, not just a decorator.
 
-No build-time download token is needed. The `@rnmapbox/maps` config plugin adds
-Mapbox's Maven repo at prebuild and treats credentials as optional (Mapbox
-dropped the download-token requirement), so `RNMapboxMapsDownloadToken` was
-removed from `app.json` after verifying `:app:dependencies` still resolves. If a
-future SDK version does require one, pass it as the
-`RNMAPBOX_MAPS_DOWNLOAD_TOKEN` environment variable or an EAS secret rather than
-putting it back in `app.json`.
+Unix seconds are a footgun from JS: `new Date()` takes **milliseconds**. Nothing in the
+app reads those fields yet.
 
-### Before any public release
+## App ↔ backend mismatches still unfixed
 
-- Create a **public** `pk.*` token in the Mapbox dashboard, scoped to styles/tiles
-  reads only, and put that in `EXPO_PUBLIC_MAPBOX_TOKEN`. Consider URL/app
-  restrictions on it.
-- **Rotate the current `sk.*` token** — it has been sitting in the Flutter repo's
-  git history and is now in this one too, so treat it as compromised regardless
-  of what we do next.
+- **Bus is fully incompatible.** `busTypes.ts` expects `{_id, BusName, DepartureTime:
+  "7:30 AM", Source, Destination, Stops: string[]}`; the backend returns `{id, name,
+  source: {time, location}, via: [...], destination}`. `useBusData.ts:30` calls
+  `bus.BusName.toLowerCase()` → **TypeError on any non-empty response**; the tab only
+  works while the table is empty. `via` carries a time per stop, which the flat
+  `Stops: string[]` can't represent — needs a UI decision, not a rename.
+- `busService.createBus` is never called (BusScreen's "+ Add" sets state but renders no
+  modal), so `POST /buses` still has no client — blocked on the bus model above.
+- `searchTypes.ts:12` `ApiEventResponse` is dead code from an older backend shape.
+- Outlets shows "Hours unavailable" until the backend annotates `open_time`/`close_time`.
+- `edit_lost_found` / `edit_buy_sell` **replace** `img_urls` with whatever
+  `base64_images` contains, exactly like the add handlers — an empty array removes all
+  photos. Since the client only holds URLs, opening an edit sheet downloads the existing
+  photos and re-encodes them (`fetchImageAsBase64`) so they survive the save. Each edit
+  therefore re-uploads every kept photo, and orphans the previous files on disk.
+- No client for `POST /outlets` (no admin outlets screen) or `PUT /events/{id}` (events
+  can be created and deleted, not edited). Detail endpoints (`GET /<thing>/{id}`) are
+  unused by design — lists carry the full entity.
+- `save_image` returns a RELATIVE path (`images/<file>`) served by `ServeDir` at `/images`,
+  so anything shown in an `<Image>` must go through `resolveBackendAsset()` in
+  `core/api/apiClient.ts`. Announcements and event posters were both rendering the raw
+  path before this was noticed.
 
-## Build requirements for the map
+Fixed already: announcements writes send `description` (was `content` → 422), and
+`AppPermissions` mirrors the backend's 11 keys via `NO_PERMISSIONS` (`put_event` never
+existed server-side).
 
-`@rnmapbox/maps` is a native module, so it is not available in Expo Go and not in
-any dev build made before it was added. After pulling these changes:
+## Mapbox token
 
-```
-npx expo prebuild
-# then rebuild the dev client
-```
+`EXPO_PUBLIC_MAPBOX_TOKEN` in `.env` is the **secret** `sk.*` token from the `metis-mapbox`
+account, carried over from the Flutter app (`insiit-ui/lib/widgets/maps.dart:1`).
+`EXPO_PUBLIC_*` values are inlined into the bundle, so anyone who unzips the APK can read
+it and bill tile usage to that account.
 
-Env vars are inlined at bundle time — restart the dev server after editing `.env`.
+Before release: create a `pk.*` token scoped to styles/tiles reads, put that in `.env`, and
+**rotate the `sk.*`** — it's in two repos' git history.
 
-## Navigation headers and transitions (added 2026-08-06)
+No build-time download token is needed; the `@rnmapbox/maps` plugin adds Mapbox's Maven repo
+at prebuild and treats credentials as optional. If a future SDK requires one, pass
+`RNMAPBOX_MAPS_DOWNLOAD_TOKEN` as an env var or EAS secret — not `app.json`.
 
-The root stack in `src/core/navigation/RootNavigator.tsx` owns both of these, so
-screens should not re-implement them:
+## Build
 
-- **Headers.** `screenOptions` turns the built-in native-stack header on for the
-  whole stack and themes it once. Each screen supplies only a `title` in its
-  `options`. Screens must therefore *not* hand-roll a back button or a page title,
-  and their `SafeAreaView` should use `edges={["left", "right"]}` — the header
-  already clears the notch. `headerShown: false` is set on exactly two routes:
-  `MainTabs` (draws the floating navbar and pager) and `Login`.
-- **Transitions.** One `animation: 'simple_push'` + `animationDuration: 200` for
-  the whole stack, chosen to feel as quick as the tab pager's spring. Note that
-  `animationDuration` only affects iOS; on Android the platform push timing
-  applies. Because every screen lives in this one stack, there is a single
-  transition across the app rather than one per navigator.
+`@rnmapbox/maps` is native: not in Expo Go, and not in any dev build made before it was
+added. After pulling: `npx expo prebuild`, then rebuild the dev client. Env vars are
+inlined at bundle time — restart the dev server after editing `.env`.
 
-The admin screens used to be a nested JS `createStackNavigator`: slower and
-visibly different, and it needed a hidden parent header plus a hand-rolled back
-button on its first route. They are now plain screens in the root stack wrapped in
-a `<Stack.Group>`. react-navigation's guidance is "think of nesting as a way to
-achieve the UI you want, not a way to organize your code", with `Group` as the
-organising tool. Consequence: `@react-navigation/stack` is no longer imported
-anywhere and can be dropped from `package.json`.
+## Navigation
+
+`RootNavigator` owns headers and transitions; screens must not re-implement either.
+
+- Built-in native-stack header, themed once in `screenOptions`. Screens pass only a
+  `title`, never a hand-rolled back button or page title, and use
+  `edges={["left", "right"]}` — the header clears the notch. `headerShown: false` on
+  exactly two routes: `MainTabs` and `Login`.
+- One transition: `animation: 'simple_push'` + `animationDuration: 200`, tuned to match the
+  tab pager's spring. `animationDuration` is **iOS-only**; Android uses platform timing.
+- Admin screens are a `<Stack.Group>` in the root stack, not a nested navigator —
+  react-navigation's guidance is that nesting is for UI, not code organisation. Nesting
+  previously cost a hidden parent header and a hand-rolled back button.
+  `@react-navigation/stack` is now unused and can be dropped from `package.json`.

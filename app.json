@@ -29,6 +29,14 @@
       "expo-status-bar",
       "expo-secure-store",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow INSIIT to access your photos so you can attach them to listings.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
         "@react-native-firebase/app",
         {
           "androidServicesFile": "./google-services.json"

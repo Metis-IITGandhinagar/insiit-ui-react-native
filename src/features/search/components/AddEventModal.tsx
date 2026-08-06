@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import { ImagePlus, X } from 'lucide-react-native';
 import { eventService } from '../services/eventService';
+import { pickImagesAsBase64 } from '@/shared/media/pickImages';
 import { useTheme } from '@core/theme';
 
 interface Props {
@@ -26,6 +28,17 @@ export default function AddEventModal({ visible, onClose, onSuccess }: Props) {
 
     const handleChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    // `image` holds a data URI, which doubles as the preview source and as the
+    // poster_base64 payload the backend expects.
+    const handlePickPoster = async () => {
+        try {
+            const [picked] = await pickImagesAsBase64(1);
+            if (picked) handleChange('image', picked);
+        } catch (error: any) {
+            Alert.alert('Error', error?.message || 'Could not open your photo library.');
+        }
     };
 
     const handleSubmit = async () => {
@@ -98,14 +111,22 @@ export default function AddEventModal({ visible, onClose, onSuccess }: Props) {
                             onChangeText={(val) => handleChange('time', val)}
                         />
                     </View>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Poster Image (Base64) (Optional)"
-                        placeholderTextColor="#999"
-                        value={formData.image}
-                        onChangeText={(val) => handleChange('image', val)}
-                        autoCapitalize="none"
-                    />
+                    {formData.image ? (
+                        <View style={styles.posterWrap}>
+                            <Image source={{ uri: formData.image }} style={styles.poster} />
+                            <TouchableOpacity
+                                style={styles.posterRemove}
+                                onPress={() => handleChange('image', '')}
+                            >
+                                <X size={14} color="#FFFFFF" />
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <TouchableOpacity style={styles.posterPicker} onPress={handlePickPoster}>
+                            <ImagePlus size={20} color={colors.textSecondary} />
+                            <Text style={styles.posterPickerText}>Add a poster (optional)</Text>
+                        </TouchableOpacity>
+                    )}
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="Event Description..."
@@ -120,10 +141,46 @@ export default function AddEventModal({ visible, onClose, onSuccess }: Props) {
     );
 }
 
-const getStyles = ({ colors, spacing, typography }: any) => StyleSheet.create({
+const getStyles = ({ colors, spacing, typography, radius }: any) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
+    },
+    posterPicker: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: spacing.sm,
+        paddingVertical: spacing.lg,
+        borderRadius: radius.md,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: colors.border,
+        marginBottom: spacing.md,
+    },
+    posterPickerText: {
+        color: colors.textSecondary,
+        fontSize: 14,
+    },
+    posterWrap: {
+        marginBottom: spacing.md,
+    },
+    poster: {
+        width: '100%',
+        height: 180,
+        borderRadius: radius.md,
+        backgroundColor: colors.surface,
+    },
+    posterRemove: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        width: 26,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         flexDirection: 'row',

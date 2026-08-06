@@ -1,4 +1,4 @@
-import { apiClient } from '@/core/api/apiClient';
+import { apiClient, resolveBackendAsset } from '@/core/api/apiClient';
 import { Event } from "./searchTypes";
 
 export const mapApiEventToUi = (event: any, fallbackIndex: number): Event => {
@@ -13,8 +13,9 @@ export const mapApiEventToUi = (event: any, fallbackIndex: number): Event => {
             hour: "2-digit",
             minute: "2-digit",
         }),
+        // poster_url is a relative path from the backend's save_image.
         image:
-            event.poster_url ??
+            resolveBackendAsset(event.poster_url) ??
             "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500",
         description: event.description ?? "",
         isBookmarked: false,
