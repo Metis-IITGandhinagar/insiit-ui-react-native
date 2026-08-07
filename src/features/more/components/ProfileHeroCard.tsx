@@ -13,11 +13,37 @@ const ProfileHeroCard = () => {
     const { colors } = theme;
     const styles = getStyles(theme);
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-    const { user } = useAuth();
+    const { user, isGuest } = useAuth();
 
     const displayName = user?.displayName || "IITGN Student";
     const email = user?.email || "";
     const photoURL = user?.photoURL;
+
+    // A guest has no profile to open — offer the sign-in instead.
+    if (isGuest || !user) {
+        return (
+            <Card style={styles.cardContainer}>
+                <TouchableOpacity
+                    style={styles.profileButton}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("Login")}
+                >
+                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                        <User size={24} color={colors.textSecondary} />
+                    </View>
+
+                    <View style={styles.textContainer}>
+                        <Text style={styles.name}>Browsing as guest</Text>
+                        <Text style={styles.email} numberOfLines={1}>
+                            Sign in with your IITGN account
+                        </Text>
+                    </View>
+
+                    <ChevronRight size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+            </Card>
+        );
+    }
 
     return (
         <Card style={styles.cardContainer}>

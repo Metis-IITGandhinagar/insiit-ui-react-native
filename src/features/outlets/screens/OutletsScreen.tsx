@@ -43,32 +43,12 @@ export default function OutletsScreen() {
                 backgroundColor={colors.background}
             />
 
+            {/* No in-screen header: the stack header provides the title and back
+                button (see notes.md, "Navigation"). */}
             <SafeAreaView
                 style={styles.container}
-                edges={["top", "left", "right"]}
+                edges={["left", "right"]}
             >
-                <View style={styles.header}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => navigation.goBack()}
-                    >
-                        <ArrowLeft
-                            size={18}
-                            color={colors.text}
-                        />
-                    </TouchableOpacity>
-
-                    <View style={styles.headerTextWrap}>
-                        <Text style={styles.title}>
-                            Campus Outlets
-                        </Text>
-
-                        <Text style={styles.subtitle}>
-                            Browse campus cafés, food courts and stores.
-                        </Text>
-                    </View>
-                </View>
-
                 {loading && outlets.length === 0 ? (
                     <View style={styles.center}>
                         <ActivityIndicator
@@ -98,8 +78,10 @@ export default function OutletsScreen() {
                         contentContainerStyle={styles.content}
                         showsVerticalScrollIndicator={false}
                         refreshControl={
+                            // Only spin here for a pull-to-refresh; the first load is
+                            // already covered by the centred indicator above.
                             <RefreshControl
-                                refreshing={loading}
+                                refreshing={loading && outlets.length > 0}
                                 onRefresh={refresh}
                             />
                         }

@@ -137,10 +137,12 @@ const AddLostItemModal = ({
                 base64_images: images,
             });
             resetAndClose();
-        } catch (e) {
+        } catch (e: any) {
+            console.error("Lost & found submit failed:", e);
             Alert.alert(
                 "Error",
-                `Couldn't ${isEditing ? "update" : "submit"} the report. Please try again.`
+                e?.message ??
+                    `Couldn't ${isEditing ? "update" : "submit"} the report. Please try again.`
             );
         } finally {
             setSubmitting(false);

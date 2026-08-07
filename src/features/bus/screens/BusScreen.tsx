@@ -1,6 +1,6 @@
 // src/screens/bus/BusScreen.tsx
-import React, { useState } from "react";
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, Text, View, TouchableOpacity, RefreshControl } from "react-native";
+import React from "react";
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, Text, View, RefreshControl } from "react-native";
 
 import BusHeader from "../components/BusHeader";
 import BusTypeTabs from "../components/BusTypeTabs";
@@ -10,15 +10,12 @@ import RouteCard from "../components/RouteCard";
 
 import { useBusData } from "../hooks/useBusData";
 import { useTheme } from "@/core/theme";
-import { useAuth } from "@/core/auth/useAuth";
 
 const BusScreen = () => {
     const { selectedTab, setSelectedTab, departures, nextBus, stops, loading, error, refreshBuses } = useBusData();
-    const [isAddModalOpen, setAddModalOpen] = useState(false);
 
-    const { hasPermission } = useAuth();
     const theme = useTheme();
-    const { colors, spacing } = theme;
+    const { colors } = theme;
     const styles = getStyles(theme);
 
     return (
@@ -30,16 +27,16 @@ const BusScreen = () => {
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.content}
                     refreshControl={
-                        <RefreshControl refreshing={loading} onRefresh={refreshBuses} tintColor={colors.primary} />
+                        <RefreshControl
+                            refreshing={loading && departures.length > 0}
+                            onRefresh={refreshBuses}
+                            tintColor={colors.primary}
+                        />
                     }
                 >
                     <BusHeader />
 
-                    <View style={styles.tabRow}>
-                        <View style={{ flex: 1 }}>
-                            <BusTypeTabs selected={selectedTab} onSelect={setSelectedTab} />
-                        </View>
-                    </View>
+                    <BusTypeTabs selected={selectedTab} onSelect={setSelectedTab} />
 
                     {loading && departures.length === 0 ? (
                         <View style={styles.centered}>
@@ -67,9 +64,6 @@ export default BusScreen;
 const getStyles = ({ colors, spacing }: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: 130, gap: spacing.lg },
-    tabRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
-    addButton: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, justifyContent: 'center' },
-    addButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
     centered: { paddingVertical: spacing.xxl, justifyContent: "center", alignItems: "center" },
     errorText: { color: colors.danger || 'red', fontWeight: "600", fontSize: 16 }
 });

@@ -11,6 +11,10 @@ import { useTheme } from "../../../core/theme";
 import { Card } from "../../../shared/components/Card";
 import { ListItem } from "../../../shared/components/ListItem";
 import ProfileHeroCard from "../components/ProfileHeroCard";
+import { useAuth } from "@/core/auth/useAuth";
+import { openLink } from "@/utils/linking";
+import { LINKS } from "@/constants/links";
+import appConfig from "../../../../app.json";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -19,6 +23,11 @@ const MoreScreen = () => {
     const { colors } = theme;
     const styles = getStyles(theme);
     const navigation = useNavigation<NavigationProp>();
+    const { user } = useAuth();
+
+    // Any admin-ish permission is enough to make the console worth showing.
+    const isAdmin = !!user?.permissions && Object.values(user.permissions).some(Boolean);
+
     const SectionTitle = ({ title }: { title: string }) => (
         <Text style={styles.sectionTitle}>{title}</Text>
     );
@@ -56,7 +65,7 @@ const MoreScreen = () => {
                         <ListItem
                             leadingIcon={<Users size={22} color={colors.primary} />}
                             title="Representatives"
-                            onPress={() => { }}
+                            onPress={() => navigation.navigate("Representatives")}
                             showDivider={false}
                         />
                     </Card>
@@ -68,14 +77,18 @@ const MoreScreen = () => {
                             leadingIcon={<Settings size={22} color={colors.primary} />}
                             title="Settings"
                             onPress={() => navigation.navigate("Settings")}
-                            showDivider={true}
+                            showDivider={isAdmin}
                         />
-                        <ListItem
-                            leadingIcon={<Settings size={22} color={colors.primary} />}
-                            title="Admin Dashboard"
-                            onPress={() => navigation.navigate("AdminDashboard")}
-                            showDivider={false}
-                        />
+                        {/* Hidden for guests and ordinary students — the console is empty
+                            without permissions, and guests hold none by definition. */}
+                        {isAdmin && (
+                            <ListItem
+                                leadingIcon={<ShieldCheck size={22} color={colors.primary} />}
+                                title="Admin Dashboard"
+                                onPress={() => navigation.navigate("AdminDashboard")}
+                                showDivider={false}
+                            />
+                        )}
                     </Card>
 
                     {/* About Section */}
@@ -84,31 +97,34 @@ const MoreScreen = () => {
                         <ListItem
                             leadingIcon={<Info size={22} color={colors.primary} />}
                             title="About INSIIT"
-                            onPress={() => { }}
+                            onPress={() => navigation.navigate("AboutInsiit")}
                             showDivider={true}
                         />
                         <ListItem
                             leadingIcon={<Users size={22} color={colors.primary} />}
                             title="Team INSIIT"
-                            onPress={() => { }}
+                            onPress={() => navigation.navigate("TeamINSIIT")}
                             showDivider={true}
                         />
                         <ListItem
                             leadingIcon={<ShieldCheck size={22} color={colors.primary} />}
                             title="Privacy Policy"
-                            onPress={() => { }}
+                            onPress={() => navigation.navigate("PrivacyPolicy")}
                             showDivider={true}
                         />
                         <ListItem
                             leadingIcon={<Bug size={22} color={colors.primary} />}
                             title="Report Bug"
-                            onPress={() => { }}
+                            subtitle="Opens GitHub issues"
+                            onPress={() => openLink(LINKS.issues)}
                             showDivider={true}
                         />
+                        {/* Not tappable: the version is the whole content of the row. */}
                         <ListItem
                             leadingIcon={<Info size={22} color={colors.primary} />}
                             title="Version"
-                            onPress={() => { }}
+                            subtitle={appConfig.expo.version}
+                            showChevron={false}
                             showDivider={false}
                         />
                     </Card>

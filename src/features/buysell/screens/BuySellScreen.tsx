@@ -20,6 +20,7 @@ import { ImagePlus, Pencil, ShoppingBag, Trash2, X } from 'lucide-react-native';
 
 import { useTheme } from '@/core/theme';
 import { useAuth } from '@/core/auth/useAuth';
+import { useAuthGate } from '@/core/auth/useAuthGate';
 import { formatBackendDateTime } from '@/core/api/backendTime';
 import { resolveBackendAsset } from '@/core/api/apiClient';
 import { fetchImageAsBase64, pickImagesAsBase64 } from '@/shared/media/pickImages';
@@ -31,6 +32,7 @@ export default function BuySellScreen() {
     const { colors } = theme;
     const styles = getStyles(theme);
     const { user } = useAuth();
+    const { ensureSignedIn } = useAuthGate();
     const { entries, loading, error, refresh } = useBuySell();
 
     // One sheet serves three flows: listing an item, editing your own listing, and
@@ -140,10 +142,11 @@ export default function BuySellScreen() {
                 entry.img_urls.map((url) => fetchImageAsBase64(resolveBackendAsset(url)!))
             );
             setImages(existing);
-        } catch {
+        } catch (err: any) {
+            console.error('Failed to load existing listing photos:', err);
             Alert.alert(
                 'Existing photos unavailable',
-                'Those photos could not be loaded. Saving now would remove them from the listing.'
+                `${err?.message ?? 'Those photos could not be loaded.'}\n\nSaving now would remove them from the listing.`
             );
         } finally {
             setLoadingImages(false);
@@ -199,7 +202,13 @@ export default function BuySellScreen() {
                     contentContainerStyle={styles.content}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
-                        <RefreshControl refreshing={loading} onRefresh={refresh} tintColor={colors.primary} />
+                        // Only spin here for a pull-to-refresh; the first load is already
+                        // covered by the centred indicator below.
+                        <RefreshControl
+                            refreshing={loading && entries.length > 0}
+                            onRefresh={refresh}
+                            tintColor={colors.primary}
+                        />
                     }
                 >
                     <View style={styles.heroCard}>
@@ -210,7 +219,13 @@ export default function BuySellScreen() {
                         </Text>
                     </View>
 
-                    <TouchableOpacity style={styles.actionButton} onPress={() => setSheet({ mode: 'sell' })}>
+                    <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={() => {
+                            if (!ensureSignedIn('list an item for sale')) return;
+                            setSheet({ mode: 'sell' });
+                        }}
+                    >
                         <Text style={styles.actionButtonText}>Sell an Item</Text>
                     </TouchableOpacity>
 
@@ -294,6 +309,7 @@ export default function BuySellScreen() {
                                                 <TouchableOpacity
                                                     style={styles.smallButtonOutline}
                                                     onPress={() => {
+                                                        if (!ensureSignedIn('place a bid')) return;
                                                         setAmount('');
                                                         setDescription('');
                                                         setImages([]);

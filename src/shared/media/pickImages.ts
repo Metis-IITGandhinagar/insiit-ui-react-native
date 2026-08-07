@@ -36,20 +36,34 @@ export const pickImagesAsBase64 = async (limit = 4): Promise<string[]> => {
  * the client only holds URLs — so to keep an existing photo through an edit we have to
  * fetch it back and resend it as base64.
  */
-export const fetchImageAsBase64 = async (url: string): Promise<string> => {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Could not fetch image (${response.status})`);
+export const fetchImageAsBase64 = (url: string): Promise<string> =>
+    // XMLHttpRequest with responseType 'blob', NOT fetch().blob(). React Native's fetch
+    // is the whatwg-fetch polyfill, whose blob() constructs a Blob from the already-read
+    // body — which RN's Blob implementation rejects ("Creating blobs from 'ArrayBuffer'
+    // and 'ArrayBufferView' are not supported"). Native <Image> loads the same URL
+    // through a different path, so a URL that displays fine still fails under fetch.
+    new Promise<string>((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.responseType = 'blob';
 
-    const blob = await response.blob();
+        request.onerror = () => reject(new Error(`Could not download image: ${url}`));
 
-    return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error('Could not read image data'));
-        reader.onload = () => {
-            typeof reader.result === 'string'
-                ? resolve(reader.result)
-                : reject(new Error('Unexpected image data'));
+        request.onload = () => {
+            if (request.status < 200 || request.status >= 300) {
+                reject(new Error(`Could not download image (${request.status}): ${url}`));
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error(`Could not read image data: ${url}`));
+            reader.onload = () => {
+                typeof reader.result === 'string'
+                    ? resolve(reader.result)
+                    : reject(new Error(`Unexpected image data: ${url}`));
+            };
+            reader.readAsDataURL(request.response);
         };
-        reader.readAsDataURL(blob);
+
+        request.open('GET', url);
+        request.send();
     });
-};

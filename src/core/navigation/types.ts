@@ -8,6 +8,8 @@ export type RootStackParamList = {
     UserManagement: undefined;
     Representatives: undefined;
     TeamINSIIT: undefined;
+    AboutInsiit: undefined;
+    PrivacyPolicy: undefined;
     CourseSearch: undefined;
     MessFeedback: undefined;
     Outlets: undefined;

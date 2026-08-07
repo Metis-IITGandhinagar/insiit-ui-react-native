@@ -8,10 +8,14 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Users } from 'lucide-react-native';
+import { Clock, Users } from 'lucide-react-native';
 
 import { useTheme } from '@/core/theme';
 
+/**
+ * Placeholder. There is no cabshare API yet, so the screen states that plainly rather
+ * than showing buttons that do nothing.
+ */
 export default function CabshareScreen() {
     const theme = useTheme();
     const { colors } = theme;
@@ -33,15 +37,18 @@ export default function CabshareScreen() {
                         </Text>
                     </View>
 
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Text style={styles.actionButtonText}>Offer a Ride</Text>
-                    </TouchableOpacity>
+                    <View style={styles.comingSoonCard}>
+                        <View style={styles.badge}>
+                            <Clock size={14} color={colors.primary} />
+                            <Text style={styles.badgeText}>Coming soon</Text>
+                        </View>
 
-                    <TouchableOpacity
-                        style={[styles.actionButton, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }]}
-                    >
-                        <Text style={[styles.actionButtonText, { color: colors.primary }]}>Find a Ride</Text>
-                    </TouchableOpacity>
+                        <Text style={styles.comingSoonBody}>
+                            Cabshare is still being built. Once it lands you'll be able to post a
+                            ride you're taking, find students heading the same way, and split the
+                            fare.
+                        </Text>
+                    </View>
                 </ScrollView>
             </SafeAreaView>
         </>
@@ -80,15 +87,35 @@ const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
         lineHeight: 18,
         textAlign: 'center',
     },
-    actionButton: {
-        backgroundColor: colors.primary,
+    comingSoonCard: {
+        backgroundColor: colors.surface,
         borderRadius: radius.lg,
-        paddingVertical: spacing.md,
+        borderWidth: 1,
+        borderColor: colors.border,
+        padding: spacing.lg,
         alignItems: 'center',
+        gap: spacing.md,
     },
-    actionButtonText: {
-        color: 'white',
-        fontSize: 14,
+    badge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: `${colors.primary}15`,
+        borderRadius: radius.round,
+        paddingHorizontal: spacing.md,
+        paddingVertical: 6,
+    },
+    badgeText: {
+        color: colors.primary,
+        fontSize: 12,
         fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    comingSoonBody: {
+        color: colors.textSecondary,
+        fontSize: 14,
+        lineHeight: 20,
+        textAlign: 'center',
     },
 });

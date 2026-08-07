@@ -34,7 +34,11 @@ export default function AnnouncementsScreen() {
                     contentContainerStyle={styles.content}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
-                        <RefreshControl refreshing={loading} onRefresh={refresh} tintColor={colors.primary} />
+                        <RefreshControl
+                            refreshing={loading && announcements.length > 0}
+                            onRefresh={refresh}
+                            tintColor={colors.primary}
+                        />
                     }
                 >
                     {loading && announcements.length === 0 ? (

@@ -49,7 +49,7 @@ const HomeScreen = () => {
                     </View>
                 ) : (
                     <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
-                        <GreetingSection />
+                        <GreetingSection onRefresh={manualRefresh} refreshing={loading} />
 
                         <MessCard
                             meal={currentMeal}

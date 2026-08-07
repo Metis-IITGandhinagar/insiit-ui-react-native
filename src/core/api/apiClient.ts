@@ -17,7 +17,9 @@ export const resolveBackendAsset = (path?: string | null): string | undefined =>
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,
-    timeout: 10000,
+    // Generous because posts carry images inline as base64 — 10s was not enough to
+    // upload a photo on campus wifi, and axios surfaces the abort as "Network Error".
+    timeout: 60000,
     headers: {
         'Content-Type': 'application/json',
     },

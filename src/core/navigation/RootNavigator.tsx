@@ -16,6 +16,10 @@ import SettingsScreen from "@/features/more/screens/SettingsScreen";
 import CampusMapScreen from "@/features/map/screens/CampusMapScreen";
 import OutletsScreen from "@/features/outlets/screens/OutletsScreen";
 import AnnouncementsScreen from "@/features/announcements/screens/AnnouncementsScreen";
+import AboutScreen from "@/features/about/screens/AboutScreen";
+import PrivacyPolicyScreen from "@/features/about/screens/PrivacyPolicyScreen";
+import TeamScreen from "@/features/about/screens/TeamScreen";
+import RepresentativesScreen from "@/features/about/screens/RepresentativesScreen";
 import LostFoundScreen from "@/features/lostfound/screens/LostFoundScreen";
 import CabshareScreen from "@/features/cabshare/screens/CabshareScreen";
 import BuySellScreen from "@/features/buysell/screens/BuySellScreen";
@@ -28,7 +32,7 @@ import { UserManagementScreen } from "@/features/admin/screens/UserManagementScr
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
-    const { user, loading } = useAuth();
+    const { user, isGuest, loading } = useAuth();
     const { colors, isDark, typography } = useTheme();
 
     const navigationTheme = {
@@ -86,7 +90,7 @@ export default function RootNavigator() {
                         animationDuration: 200,
                     }}
                 >
-                    {user ? (
+                    {user || isGuest ? (
                         <>
                             {/* The tab host draws its own floating navbar and pages. */}
                             <Stack.Screen
@@ -129,6 +133,16 @@ export default function RootNavigator() {
                                     options={{ title: "User Permissions" }}
                                 />
                             </Stack.Group>
+
+                            {/* Reachable from guest mode so a guest can sign in without
+                                being thrown out of whatever they were looking at. */}
+                            {isGuest && (
+                                <Stack.Screen
+                                    name="Login"
+                                    component={LoginScreen}
+                                    options={{ headerShown: false, animation: "slide_from_bottom" }}
+                                />
+                            )}
                         </>
                     ) : (
                         <Stack.Screen
@@ -161,6 +175,26 @@ export default function RootNavigator() {
                         name="Announcements"
                         component={AnnouncementsScreen}
                         options={{ title: "Announcements" }}
+                    />
+                    <Stack.Screen
+                        name="Representatives"
+                        component={RepresentativesScreen}
+                        options={{ title: "Representatives" }}
+                    />
+                    <Stack.Screen
+                        name="AboutInsiit"
+                        component={AboutScreen}
+                        options={{ title: "About INSIIT" }}
+                    />
+                    <Stack.Screen
+                        name="TeamINSIIT"
+                        component={TeamScreen}
+                        options={{ title: "Team INSIIT" }}
+                    />
+                    <Stack.Screen
+                        name="PrivacyPolicy"
+                        component={PrivacyPolicyScreen}
+                        options={{ title: "Privacy Policy" }}
                     />
                     <Stack.Screen
                         name="LostFound"

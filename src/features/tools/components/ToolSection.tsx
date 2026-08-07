@@ -5,11 +5,14 @@ import { Users, LucideIcon } from "lucide-react-native";
 import { useTheme } from "@/core/theme";
 import { Card } from "@shared/components/Card";
 import { ListItem } from "@shared/components/ListItem";
+import { openLink } from "@/utils/linking";
+import { LINKS } from "@/constants/links";
 
 type Tool = {
     title: string;
     description: string;
     icon: LucideIcon;
+    link: string;
 };
 
 const tools: Tool[] = [
@@ -17,6 +20,7 @@ const tools: Tool[] = [
         title: "Academic Officials",
         description: "Faculty & administration contacts",
         icon: Users,
+        link: LINKS.academic_officials,
     },
 ];
 
@@ -48,7 +52,7 @@ const ToolSection = () => {
                                 }
                                 title={tool.title}
                                 subtitle={tool.description}
-                                onPress={() => { }}
+                                onPress={() => openLink(tool.link)}
                                 showDivider={false}
                             />
                         </View>

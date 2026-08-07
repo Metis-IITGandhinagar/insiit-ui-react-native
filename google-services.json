@@ -126,6 +126,22 @@
           }
         },
         {
+          "client_id": "799004821779-ekmsnpipppd5qe5kdi4knggtjo05ovga.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.metis.insiit",
+            "certificate_hash": "4f002df11240e966251504b3bf934dc7c3369964"
+          }
+        },
+        {
+          "client_id": "799004821779-vdii06tersh03qedr84dobacnn5hjrf0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.metis.insiit",
+            "certificate_hash": "cb7de1b77ee9b6d54c9670901c91a25b7441dab3"
+          }
+        },
+        {
           "client_id": "799004821779-mpv0sue4pjuhg3e2jld70htmbk3nfc2i.apps.googleusercontent.com",
           "client_type": 3
         }
