@@ -18,12 +18,14 @@ export default function SearchScreen() {
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
+    // Non-null while the form is open for an edit; null means "new event".
+    const [editingEvent, setEditingEvent] = useState<Event | null>(null);
 
     const theme = useTheme();
     const { colors, spacing } = theme;
     const styles = getStyles(theme);
 
-    const { hasPermission } = useAuth();
+    const { hasPermission, user } = useAuth();
     const { eventsList, loading, refreshEvents } = useEventData();
 
     const filteredEvents = useMemo(() => {
@@ -65,7 +67,7 @@ export default function SearchScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-            <StatusBar barStyle="dark-content" />
+            <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
 
             <View style={styles.content}>
                 <View style={styles.header}>
@@ -77,6 +79,18 @@ export default function SearchScreen() {
                                 ? `Upcoming Events (${filteredEvents.length})`
                                 : `Results (${filteredEvents.length})`}
                         </Text>
+
+                        {hasPermission('post_event') && (
+                            <TouchableOpacity
+                                style={[styles.addButton, { backgroundColor: colors.primary }]}
+                                onPress={() => {
+                                    setEditingEvent(null);
+                                    setAddModalVisible(true);
+                                }}
+                            >
+                                <Text style={styles.addButtonText}>+ Add</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
 
@@ -93,14 +107,24 @@ export default function SearchScreen() {
                             tintColor={colors.primary}
                         />
                     }
-                    renderItem={({ item }) => (
-                        <EventCard
-                            event={item}
-                            onPress={() => handleOpenDetail(item)}
-                            onBookmark={() => { }}
-                            onDelete={() => handleDeleteEvent(item)}
-                        />
-                    )}
+                    renderItem={({ item }) => {
+                        // The backend scopes edit/delete to the author, so only show the
+                        // controls that would actually succeed.
+                        const isAuthor = !!user?.email && user.email === item.addedByEmail;
+
+                        return (
+                            <EventCard
+                                event={item}
+                                onPress={() => handleOpenDetail(item)}
+                                onBookmark={() => { }}
+                                onEdit={isAuthor ? () => {
+                                    setEditingEvent(item);
+                                    setAddModalVisible(true);
+                                } : undefined}
+                                onDelete={isAuthor ? () => handleDeleteEvent(item) : undefined}
+                            />
+                        );
+                    }}
                 />
             </View>
 
@@ -108,9 +132,14 @@ export default function SearchScreen() {
 
             <AddEventModal
                 visible={addModalVisible}
-                onClose={() => setAddModalVisible(false)}
+                event={editingEvent}
+                onClose={() => {
+                    setAddModalVisible(false);
+                    setEditingEvent(null);
+                }}
                 onSuccess={() => {
                     setAddModalVisible(false);
+                    setEditingEvent(null);
                     refreshEvents();
                 }}
             />

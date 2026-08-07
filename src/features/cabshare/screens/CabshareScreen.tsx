@@ -8,13 +8,15 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft, Users } from 'lucide-react-native';
+import { Clock, Users } from 'lucide-react-native';
 
 import { useTheme } from '@/core/theme';
 
+/**
+ * Placeholder. There is no cabshare API yet, so the screen states that plainly rather
+ * than showing buttons that do nothing.
+ */
 export default function CabshareScreen() {
-    const navigation = useNavigation<any>();
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
@@ -25,18 +27,7 @@ export default function CabshareScreen() {
                 barStyle={theme.isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={colors.background}
             />
-            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-                <View style={styles.header}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                        <ArrowLeft size={18} color={colors.text} />
-                    </TouchableOpacity>
-
-                    <View style={styles.headerTextWrap}>
-                        <Text style={styles.title}>Cabshare</Text>
-                        <Text style={styles.subtitle}>Ride with campus mates.</Text>
-                    </View>
-                </View>
-
+            <SafeAreaView style={styles.container} edges={["left", "right"]}>
                 <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                     <View style={styles.heroCard}>
                         <Users size={32} color={colors.primary} style={{ marginBottom: 12 }} />
@@ -46,55 +37,28 @@ export default function CabshareScreen() {
                         </Text>
                     </View>
 
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Text style={styles.actionButtonText}>Offer a Ride</Text>
-                    </TouchableOpacity>
+                    <View style={styles.comingSoonCard}>
+                        <View style={styles.badge}>
+                            <Clock size={14} color={colors.primary} />
+                            <Text style={styles.badgeText}>Coming soon</Text>
+                        </View>
 
-                    <TouchableOpacity
-                        style={[styles.actionButton, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }]}
-                    >
-                        <Text style={[styles.actionButtonText, { color: colors.primary }]}>Find a Ride</Text>
-                    </TouchableOpacity>
+                        <Text style={styles.comingSoonBody}>
+                            Cabshare is still being built. Once it lands you'll be able to post a
+                            ride you're taking, find students heading the same way, and split the
+                            fare.
+                        </Text>
+                    </View>
                 </ScrollView>
             </SafeAreaView>
         </>
     );
 }
 
-const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.create({
+const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTextWrap: {
-        flex: 1,
-        marginLeft: spacing.md,
-    },
-    title: {
-        ...typography.h2,
-        color: colors.text,
-    },
-    subtitle: {
-        color: colors.textSecondary,
-        fontSize: 13,
-        marginTop: 2,
     },
     content: {
         paddingHorizontal: spacing.lg,
@@ -123,15 +87,35 @@ const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.c
         lineHeight: 18,
         textAlign: 'center',
     },
-    actionButton: {
-        backgroundColor: colors.primary,
+    comingSoonCard: {
+        backgroundColor: colors.surface,
         borderRadius: radius.lg,
-        paddingVertical: spacing.md,
+        borderWidth: 1,
+        borderColor: colors.border,
+        padding: spacing.lg,
         alignItems: 'center',
+        gap: spacing.md,
     },
-    actionButtonText: {
-        color: 'white',
-        fontSize: 14,
+    badge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: `${colors.primary}15`,
+        borderRadius: radius.round,
+        paddingHorizontal: spacing.md,
+        paddingVertical: 6,
+    },
+    badgeText: {
+        color: colors.primary,
+        fontSize: 12,
         fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    comingSoonBody: {
+        color: colors.textSecondary,
+        fontSize: 14,
+        lineHeight: 20,
+        textAlign: 'center',
     },
 });

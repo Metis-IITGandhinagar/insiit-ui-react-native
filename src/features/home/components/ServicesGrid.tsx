@@ -49,6 +49,7 @@ const ServicesGrid = () => {
             color: '#8B5CF6',
             bgColor: '#8B5CF6',
             route: 'Cabshare',
+            badge: 'Soon',
         },
         {
             id: 'buy-sell',

@@ -12,8 +12,10 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Image,
 } from 'react-native';
-import { Plus, Trash2, Edit2, RefreshCw, Megaphone, X } from 'lucide-react-native';
+import { Plus, Trash2, Edit2, RefreshCw, Megaphone, X, ImagePlus } from 'lucide-react-native';
+import { pickImagesAsBase64 } from '@/shared/media/pickImages';
 import { useTheme } from '@core/theme';
 import { useAuth } from '@core/auth/useAuth';
 import { Card } from '@shared/components/Card';
@@ -26,6 +28,7 @@ export interface Announcement {
     id: string;
     title: string;
     description: string;
+    /** RFC 3339 string — the backend serializes this with `time::serde::rfc3339`. */
     added_on_timestamp: string;
     added_by_email: string;
     img_url: string;
@@ -47,6 +50,7 @@ export const AnnouncementManagementScreen: React.FC = () => {
     const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
     const [formTitle, setFormTitle] = useState<string>('');
     const [formContent, setFormContent] = useState<string>('');
+    const [formImage, setFormImage] = useState<string | null>(null);
 
     const fetchAnnouncements = useCallback(async () => {
         setIsLoading(true);
@@ -69,6 +73,7 @@ export const AnnouncementManagementScreen: React.FC = () => {
         setEditingAnnouncement(null);
         setFormTitle('');
         setFormContent('');
+        setFormImage(null);
         setIsModalOpen(true);
     }, []);
 
@@ -76,6 +81,7 @@ export const AnnouncementManagementScreen: React.FC = () => {
         setEditingAnnouncement(announcement);
         setFormTitle(announcement.title);
         setFormContent(announcement.description);
+        setFormImage(null);
         setIsModalOpen(true);
     }, []);
 
@@ -85,7 +91,19 @@ export const AnnouncementManagementScreen: React.FC = () => {
         setEditingAnnouncement(null);
         setFormTitle('');
         setFormContent('');
+        setFormImage(null);
     }, [isSubmitting]);
+
+    // Data URI: previewed directly, and sent as img_base64 (the backend strips the
+    // prefix before decoding).
+    const handlePickImage = useCallback(async () => {
+        try {
+            const [picked] = await pickImagesAsBase64(1);
+            if (picked) setFormImage(picked);
+        } catch (err: any) {
+            Alert.alert('Error', err?.message || 'Could not open your photo library.');
+        }
+    }, []);
 
     const handleSubmit = useCallback(async () => {
         if (!formTitle.trim() || !formContent.trim()) {
@@ -96,14 +114,19 @@ export const AnnouncementManagementScreen: React.FC = () => {
         setIsSubmitting(true);
         try {
             if (editingAnnouncement) {
+                // The backend's AnnouncementRequest requires `description`; `content`
+                // was silently dropped and the request rejected as incomplete.
                 await apiClient.put(`/announcements/${editingAnnouncement.id}`, {
                     title: formTitle.trim(),
-                    content: formContent.trim(),
+                    description: formContent.trim(),
+                    // COALESCE server-side: omitting it keeps the existing image.
+                    img_base64: formImage ?? null,
                 });
             } else {
                 await apiClient.post('/announcements', {
                     title: formTitle.trim(),
-                    content: formContent.trim(),
+                    description: formContent.trim(),
+                    img_base64: formImage ?? null,
                 });
             }
             handleCloseModal();
@@ -113,7 +136,7 @@ export const AnnouncementManagementScreen: React.FC = () => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [formTitle, formContent, editingAnnouncement, handleCloseModal, fetchAnnouncements]);
+    }, [formTitle, formContent, formImage, editingAnnouncement, handleCloseModal, fetchAnnouncements]);
 
     const handleDelete = useCallback((id: string) => {
         Alert.alert(
@@ -373,6 +396,31 @@ export const AnnouncementManagementScreen: React.FC = () => {
                                 value={formContent}
                                 onChangeText={setFormContent}
                             />
+
+                            {formImage ? (
+                                <View style={styles.imageWrap}>
+                                    <Image
+                                        source={{ uri: formImage }}
+                                        style={[styles.imagePreview, { borderRadius: radius.md }]}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.imageRemove}
+                                        onPress={() => setFormImage(null)}
+                                    >
+                                        <X size={14} color="#FFFFFF" />
+                                    </TouchableOpacity>
+                                </View>
+                            ) : (
+                                <TouchableOpacity
+                                    style={[styles.imagePicker, { borderColor: colors.border, borderRadius: radius.md }]}
+                                    onPress={handlePickImage}
+                                >
+                                    <ImagePlus size={20} color={colors.textSecondary} />
+                                    <Text style={[styles.imagePickerText, { color: colors.textSecondary }]}>
+                                        {editingAnnouncement ? 'Replace image' : 'Add an image (optional)'}
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </ScrollView>
                     </KeyboardAvoidingView>
                 </Modal>
@@ -384,6 +432,37 @@ export const AnnouncementManagementScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    imagePicker: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        paddingVertical: 20,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        marginTop: 12,
+    },
+    imagePickerText: {
+        fontSize: 14,
+    },
+    imageWrap: {
+        marginTop: 12,
+    },
+    imagePreview: {
+        width: '100%',
+        height: 180,
+    },
+    imageRemove: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        width: 26,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     centered: {
         flex: 1,

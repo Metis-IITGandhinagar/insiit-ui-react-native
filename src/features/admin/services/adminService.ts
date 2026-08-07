@@ -1,5 +1,5 @@
 import { apiClient } from '@core/api/apiClient';
-import { AppPermissions } from '@/core/navigation/types';
+import { AppPermissions, NO_PERMISSIONS } from '@/core/navigation/types';
 import { AdminEntryResponse } from '@/core/api/userService';
 
 export type AdminPermissions = AppPermissions;
@@ -9,14 +9,6 @@ export interface AdminUser {
     permissions: AdminPermissions;
 }
 
-export interface CreateAdminPayload {
-    email: string;
-    permissions: Partial<AdminPermissions>;
-}
-
-export interface UpdatePermissionsPayload {
-    permissions: Partial<AdminPermissions>;
-}
 
 class AdminService {
     async fetchPermissions(): Promise<AdminPermissions> {
@@ -26,7 +18,7 @@ class AdminService {
         } catch (error: any) {
             // Handle non-admin users gracefully (403/404) or server errors (500)
             if (error.response && (error.response.status === 403 || error.response.status === 404 || error.response.status === 500)) {
-                return {} as AdminPermissions;
+                return { ...NO_PERMISSIONS };
             }
             throw error;
         }
@@ -35,15 +27,6 @@ class AdminService {
     async fetchAdmins(): Promise<AdminUser[]> {
         const response = await apiClient.get<AdminUser[]>('/admin');
         return response.data;
-    }
-
-    async createAdmin(payload: CreateAdminPayload): Promise<AdminUser> {
-        const response = await apiClient.post<AdminUser>('/admin', payload);
-        return response.data;
-    }
-
-    async deleteEvent(eventId: string): Promise<void> {
-        await apiClient.delete(`/events/${eventId}`);
     }
 
     async deleteAnnouncement(announcementId: string): Promise<void> {

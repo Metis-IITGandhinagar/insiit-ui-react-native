@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { Card } from "@/shared/components/Card";
 import { useTheme } from "@/core/theme";
+import { resolveBackendAsset } from "@/core/api/apiClient";
 import { Outlet } from "../services/outletTypes";
 
 interface Props {
@@ -37,7 +38,7 @@ const OutletCard = ({ outlet, onPress }: Props) => {
                     <Image
                         source={{
                             uri:
-                                outlet.image_url ||
+                                resolveBackendAsset(outlet.image_url) ||
                                 "https://placehold.co/800x500?text=Outlet",
                         }}
                         style={styles.image}

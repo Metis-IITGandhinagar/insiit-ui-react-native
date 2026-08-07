@@ -15,6 +15,7 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/core/theme";
+import { resolveBackendAsset } from "@/core/api/apiClient";
 import { useAuth } from "@/core/auth/useAuth";
 import { LostFoundEntry } from "../services/lostFoundTypes";
 import { formatRelativeDate } from "../utils/formatDate";
@@ -140,11 +141,8 @@ const LostFoundDetailModal = ({
     };
 
     const image =
-        entry.img_urls?.[0]
-            ? entry.img_urls[0].startsWith("http")
-                ? entry.img_urls[0]
-                : `https://insiit-api-rust.metis-iitgn.tech/${entry.img_urls[0]}`
-            : "https://placehold.co/800x500?text=Lost+%26+Found";
+        resolveBackendAsset(entry.img_urls?.[0]) ??
+        "https://placehold.co/800x500?text=Lost+%26+Found";
 
     return (
         <Modal

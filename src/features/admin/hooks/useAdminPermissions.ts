@@ -6,7 +6,6 @@ export interface UseAdminPermissionsResult {
     isLoading: boolean;
     error: Error | null;
     refetch: () => Promise<void>;
-    canManageEvents: boolean;
     canManageAnnouncements: boolean;
     canManageMessMenu: boolean;
     canManageUsers: boolean;
@@ -35,13 +34,8 @@ export const useAdminPermissions = (): UseAdminPermissionsResult => {
         fetchPermissions();
     }, [fetchPermissions]);
 
-    const canManageEvents = useMemo(() => {
-        if (!permissions) return false;
-        return Boolean(
-            permissions.post_event 
-        );
-    }, [permissions]);
-
+    // No canManageEvents: events are authored and edited from the Events tab, scoped to
+    // the author by the backend. There is no admin moderation of other people's events.
     const canManageAnnouncements = useMemo(() => {
         if (!permissions) return false;
         return Boolean(permissions.post_announcement);
@@ -62,15 +56,14 @@ export const useAdminPermissions = (): UseAdminPermissionsResult => {
     }, [permissions]);
 
     const hasAnyAdminPermission = useMemo(() => {
-        return canManageEvents || canManageAnnouncements || canManageMessMenu || canManageUsers;
-    }, [canManageEvents, canManageAnnouncements, canManageMessMenu, canManageUsers]);
+        return canManageAnnouncements || canManageMessMenu || canManageUsers;
+    }, [canManageAnnouncements, canManageMessMenu, canManageUsers]);
 
     return {
         permissions,
         isLoading,
         error,
         refetch: fetchPermissions,
-        canManageEvents,
         canManageAnnouncements,
         canManageMessMenu,
         canManageUsers,

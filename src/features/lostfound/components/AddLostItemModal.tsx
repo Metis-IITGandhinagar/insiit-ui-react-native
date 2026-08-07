@@ -16,6 +16,8 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useTheme } from "@/core/theme";
+import { resolveBackendAsset } from "@/core/api/apiClient";
+import { fetchImageAsBase64 } from "@/shared/media/pickImages";
 import { LostFoundEntry, LostFoundRequest } from "../services/lostFoundTypes";
 
 interface Props {
@@ -51,7 +53,9 @@ const AddLostItemModal = ({
             setItemName(editingEntry?.item_name ?? "");
             setDescription(editingEntry?.description ?? "");
             setImageBase64(null);
-            setImagePreviewUri(editingEntry?.img_urls?.[0] ?? null);
+            // img_urls are relative paths; resolve so the preview loads and so an
+            // unchanged photo can be fetched back on submit.
+            setImagePreviewUri(resolveBackendAsset(editingEntry?.img_urls?.[0]) ?? null);
         }
     }, [visible, editingEntry]);
 
@@ -76,7 +80,8 @@ const AddLostItemModal = ({
         }
 
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            // MediaTypeOptions is deprecated in SDK 54+; the array form is current.
+            mediaTypes: ['images'],
             allowsEditing: true,
             quality: 0.7,
             base64: true,
@@ -107,9 +112,7 @@ const AddLostItemModal = ({
             return;
         }
 
-        // On create, an image is required by convention (cards look for
-        // img_urls[0]); on edit, keeping the existing image with no new
-        // pick is fine — we just don't resend base64_images in that case.
+        // On create, an image is required by convention (cards look for img_urls[0]).
         if (!isEditing && !imageBase64) {
             Alert.alert(
                 "Add a photo",
@@ -120,16 +123,26 @@ const AddLostItemModal = ({
 
         try {
             setSubmitting(true);
+
+            // The edit endpoint REPLACES img_urls with whatever base64 it receives, so
+            // an unchanged photo has to be fetched back and resent or it gets wiped.
+            let images: string[] = imageBase64 ? [imageBase64] : [];
+            if (!imageBase64 && imagePreviewUri) {
+                images = [await fetchImageAsBase64(imagePreviewUri)];
+            }
+
             await onSubmit({
                 item_name: itemName.trim(),
                 description: description.trim(),
-                base64_images: imageBase64 ? [imageBase64] : [],
+                base64_images: images,
             });
             resetAndClose();
-        } catch (e) {
+        } catch (e: any) {
+            console.error("Lost & found submit failed:", e);
             Alert.alert(
                 "Error",
-                `Couldn't ${isEditing ? "update" : "submit"} the report. Please try again.`
+                e?.message ??
+                    `Couldn't ${isEditing ? "update" : "submit"} the report. Please try again.`
             );
         } finally {
             setSubmitting(false);

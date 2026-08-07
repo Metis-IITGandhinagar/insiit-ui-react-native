@@ -12,6 +12,7 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/core/theme";
+import { resolveBackendAsset } from "@/core/api/apiClient";
 import { Outlet } from "../services/outletTypes";
 
 interface Props {
@@ -65,7 +66,7 @@ const OutletDetailModal = ({
                         <Image
                             source={{
                                 uri:
-                                    outlet.image_url ||
+                                    resolveBackendAsset(outlet.image_url) ||
                                     "https://placehold.co/800x500?text=Outlet",
                             }}
                             style={styles.image}

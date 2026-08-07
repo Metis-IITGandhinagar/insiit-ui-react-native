@@ -1,8 +1,14 @@
+import { parseBackendInstant } from "@/core/api/backendTime";
 
-export function formatRelativeDate(timestampSeconds: number): string {
-    const now = Date.now();
-    const then = timestampSeconds * 1000;
-    const diffMs = now - then;
+/**
+ * The API sends RFC 3339 strings, not unix seconds — go through parseBackendInstant
+ * rather than doing arithmetic on the raw value.
+ */
+export function formatRelativeDate(timestamp: string | number): string {
+    const then = parseBackendInstant(timestamp)?.getTime();
+    if (then === undefined) return "";
+
+    const diffMs = Date.now() - then;
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -13,19 +19,18 @@ export function formatRelativeDate(timestampSeconds: number): string {
     if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays}d ago`;
 
-    const date = new Date(then);
-    return date.toLocaleDateString(undefined, {
+    return new Date(then).toLocaleDateString(undefined, {
         day: "numeric",
         month: "short",
         year: "numeric",
     });
 }
 
-
-export function daysUntilArchive(addedOnTimestampSeconds: number): number {
+export function daysUntilArchive(addedOnTimestamp: string | number): number {
     const ARCHIVE_AFTER_DAYS = 30;
-    const addedOn = addedOnTimestampSeconds * 1000;
+    const addedOn = parseBackendInstant(addedOnTimestamp)?.getTime();
+    if (addedOn === undefined) return 0;
+
     const archiveAt = addedOn + ARCHIVE_AFTER_DAYS * 24 * 60 * 60 * 1000;
-    const remainingMs = archiveAt - Date.now();
-    return Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
+    return Math.max(0, Math.ceil((archiveAt - Date.now()) / (1000 * 60 * 60 * 24)));
 }

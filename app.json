@@ -2,7 +2,7 @@
   "expo": {
     "name": "insiit",
     "slug": "insiit",
-    "version": "1.0.0",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -10,7 +10,8 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.me.insiit",
+      "package": "com.metis.insiit",
+      "versionCode": 14,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -29,13 +30,28 @@
       "expo-status-bar",
       "expo-secure-store",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow INSIIT to access your photos so you can attach them to listings.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
         "@react-native-firebase/app",
         {
           "androidServicesFile": "./google-services.json"
         }
       ],
       "@react-native-firebase/auth",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      "./plugins/withAndroidSigning",
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsVersion": "11.20.1"
+        }
+      ]
     ]
   }
 }

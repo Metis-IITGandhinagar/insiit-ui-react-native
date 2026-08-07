@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { Card } from "@/shared/components/Card";
 import { useTheme } from "@/core/theme";
+import { resolveBackendAsset } from "@/core/api/apiClient";
 import { LostFoundEntry } from "../services/lostFoundTypes";
 import { formatRelativeDate } from "../utils/formatDate";
 
@@ -45,11 +46,8 @@ const LostFoundCard = ({ entry, onPress }: Props) => {
     const statusColor = getStatusColor(entry.status, colors);
     const claimCount = entry.found_claims?.length ?? 0;
     const image =
-        entry.img_urls?.[0]
-            ? entry.img_urls[0].startsWith("http")
-                ? entry.img_urls[0]
-                : `https://insiit-api-rust.metis-iitgn.tech/${entry.img_urls[0]}`
-            : "https://placehold.co/800x500?text=Lost+%26+Found";
+        resolveBackendAsset(entry.img_urls?.[0]) ??
+        "https://placehold.co/800x500?text=Lost+%26+Found";
     return (
         <TouchableOpacity activeOpacity={0.92} onPress={onPress}>
             <Card variant="surface" style={styles.cardOverrides}>

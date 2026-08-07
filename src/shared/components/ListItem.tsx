@@ -8,7 +8,8 @@ interface ListItemProps {
     leadingIcon: React.ReactNode;
     title: string;
     subtitle?: string;
-    onPress: () => void;
+    /** Omit for a purely informational row — it then renders as non-tappable. */
+    onPress?: () => void;
     showChevron?: boolean;
     showDivider?: boolean;
     trailingElement?: React.ReactNode; 
@@ -29,7 +30,12 @@ export const ListItem: React.FC<ListItemProps> = ({
 
     return (
         <View style={styles.wrapper}>
-            <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+            <TouchableOpacity
+                style={styles.container}
+                onPress={onPress}
+                disabled={!onPress}
+                activeOpacity={0.7}
+            >
                 <View style={styles.iconContainer}>{leadingIcon}</View>
 
                 <View style={styles.textContainer}>

@@ -2,11 +2,24 @@
 import axios from 'axios';
 import { authService } from '../auth/authService';
 
-const BASE_URL = "https://insiit-api-rust.metis-iitgn.tech";
+export const BASE_URL = "https://insiit-api-rust.metis-iitgn.tech";
+
+/**
+ * The backend's `save_image` returns a RELATIVE path ("images/1786…-0"), served by
+ * `ServeDir` at `/images`. Anything rendered in an <Image> has to go through here.
+ * Absolute URLs are passed through, so older rows with full URLs still work.
+ */
+export const resolveBackendAsset = (path?: string | null): string | undefined => {
+    if (!path) return undefined;
+    if (/^https?:\/\//i.test(path)) return path;
+    return `${BASE_URL}/${path.replace(/^\/+/, '')}`;
+};
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,
-    timeout: 10000,
+    // Generous because posts carry images inline as base64 — 10s was not enough to
+    // upload a photo on campus wifi, and axios surfaces the abort as "Network Error".
+    timeout: 60000,
     headers: {
         'Content-Type': 'application/json',
     },

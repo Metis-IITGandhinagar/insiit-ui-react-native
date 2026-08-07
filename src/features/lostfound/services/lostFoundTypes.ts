@@ -5,14 +5,16 @@ export interface LostFoundClaim {
     item_name: string;
     claimed_by_email: string;
     remarks: string;
-    claim_timestamp: number;
+    /** RFC 3339 string — see core/api/backendTime. */
+    claim_timestamp: string;
 }
 
 export interface LostFoundEntry {
     id: number;
     item_name: string;
     description: string;
-    added_on_timestamp: number;
+    /** RFC 3339 string — see core/api/backendTime. */
+    added_on_timestamp: string;
     added_by_email: string;
     status: LostFoundStatus;
     found_claims: LostFoundClaim[];

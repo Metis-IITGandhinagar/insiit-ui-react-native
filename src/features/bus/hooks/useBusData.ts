@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { BusType, ApiBusResponse, BusDeparture } from "../services/busTypes";
-import { busService, calculateMinutesLeft } from "../services/busServices";
+import { busService, calculateMinutesLeft, formatDepartureTime } from "../services/busServices";
 
 export const useBusData = () => {
     const [selectedTab, setSelectedTab] = useState<BusType>("56");
@@ -26,8 +26,11 @@ export const useBusData = () => {
     }, [refreshBuses]);
 
     const filteredBuses = useMemo(() => {
+        // The tab is matched against the name ("56-Seater", "EECO shuttle") — there is
+        // no separate route/type column. Guard the name: it's the only field a bad row
+        // could leave undefined, and it used to crash the whole tab.
         return rawBuses.filter(bus =>
-            bus.BusName.toLowerCase().includes(selectedTab.toLowerCase())
+            (bus.name ?? '').toLowerCase().includes(selectedTab.toLowerCase())
         );
     }, [rawBuses, selectedTab]);
 
@@ -36,14 +39,18 @@ export const useBusData = () => {
             return { departures: [], nextBus: null, stops: [] };
         }
 
-        const mapped = filteredBuses.map(bus => ({
-            vehicle: bus.BusName,
-            time: bus.DepartureTime,
-            from: bus.Source,
-            to: bus.Destination,
-            minutesLeft: calculateMinutesLeft(bus.DepartureTime),
-            rawStops: bus.Stops
-        }));
+        const mapped = filteredBuses
+            .map(bus => ({
+                vehicle: bus.name,
+                time: formatDepartureTime(bus.departure_time),
+                from: bus.source,
+                to: bus.destination,
+                minutesLeft: calculateMinutesLeft(bus.departure_time),
+                rawStops: bus.stops ?? []
+            }))
+            // Drop rows whose time didn't parse rather than showing them as "departing
+            // now", which is what the old silent `return 0` fallback did.
+            .filter((bus): bus is typeof bus & { minutesLeft: number } => bus.minutesLeft !== null);
 
         const upcoming = mapped.filter(b => b.minutesLeft >= 0).sort((a, b) => a.minutesLeft - b.minutesLeft);
         const passed = mapped.filter(b => b.minutesLeft < 0).sort((a, b) => a.minutesLeft - b.minutesLeft);

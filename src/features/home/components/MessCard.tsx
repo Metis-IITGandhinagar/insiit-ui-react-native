@@ -60,13 +60,49 @@ const getMealHighlights = (mealName: string, itemsList: string[]): PrioritizedIt
 };
 
 const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
-    if (!meal) return null;
-
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
 
     const MAX_FONT_SCALE = 1.3;
+
+    // No menu published (the API returns [] when the mess table is empty). Say so and
+    // keep the QR reachable — the dining QR comes from the mess portal and doesn't
+    // depend on the menu at all.
+    if (!meal) {
+        return (
+            <Card variant="surface">
+                <View style={styles.header}>
+                    <View style={styles.headerLeft}>
+                        <View style={styles.iconCircle}>
+                            <UtensilsCrossed size={22} color={colors.primaryLight} strokeWidth={2.2} />
+                        </View>
+
+                        <View style={styles.headerTextContainer}>
+                            <Text style={styles.mealTitle} maxFontSizeMultiplier={MAX_FONT_SCALE}>
+                                Mess
+                            </Text>
+                            <Text style={styles.timeText} maxFontSizeMultiplier={MAX_FONT_SCALE}>
+                                Menu not published yet
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.footer}>
+                    <TouchableOpacity
+                        activeOpacity={0.85}
+                        style={styles.qrButton}
+                        onPress={onShowQR}
+                        accessibilityRole="button"
+                    >
+                        <QrCode size={18} color="white" />
+                        <Text style={styles.qrText} maxFontSizeMultiplier={MAX_FONT_SCALE}>Show QR</Text>
+                    </TouchableOpacity>
+                </View>
+            </Card>
+        );
+    }
     const isServingNow = meal.countdown === "Serving Now";
 
     const highlights = getMealHighlights(meal.mealName, meal.itemsList);

@@ -10,15 +10,15 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { Calendar, Megaphone, Utensils, Users, RefreshCw } from 'lucide-react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Megaphone, Utensils, Users, RefreshCw } from 'lucide-react-native';
 import { useTheme } from '@core/theme';
 import { useAdminPermissions } from '../hooks/useAdminPermissions';
 import { AdminSectionCard } from '../components/AdminSectionCard';
 import { EmptyPermission } from '../components/EmptyPermission';
-import { AdminStackParamList } from '@/core/navigation/AdminNavigator';
+import { RootStackParamList } from '@/core/navigation/types';
 
-type AdminDashboardNavigationProp = StackNavigationProp<AdminStackParamList, 'AdminDashboard'>;
+type AdminDashboardNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AdminDashboard'>;
 
 export const AdminDashboardScreen: React.FC = () => {
     const theme = useTheme();
@@ -32,15 +32,10 @@ export const AdminDashboardScreen: React.FC = () => {
         isLoading,
         error,
         refetch,
-        canManageEvents,
         canManageAnnouncements,
         canManageMessMenu,
         hasAnyAdminPermission,
     } = useAdminPermissions();
-
-    const handleNavigateEvents = useCallback(() => {
-        navigation.navigate('EventManagement');
-    }, [navigation]);
 
     const handleNavigateAnnouncements = useCallback(() => {
         navigation.navigate('AnnouncementManagement');
@@ -56,16 +51,6 @@ export const AdminDashboardScreen: React.FC = () => {
 
     const sections = useMemo(() => {
         const items = [];
-
-        if (canManageEvents) {
-            items.push({
-                id: 'events',
-                title: 'Events Management',
-                description: 'Create, update, and moderate campus events',
-                icon: <Calendar size={22} color={colors.primary} />,
-                onPress: handleNavigateEvents,
-            });
-        }
 
         if (canManageAnnouncements) {
             items.push({
@@ -99,11 +84,9 @@ export const AdminDashboardScreen: React.FC = () => {
 
         return items;
     }, [
-        canManageEvents,
         canManageAnnouncements,
         canManageMessMenu,
         colors.primary,
-        handleNavigateEvents,
         handleNavigateAnnouncements,
         handleNavigateMessMenu,
         handleNavigateUsers,

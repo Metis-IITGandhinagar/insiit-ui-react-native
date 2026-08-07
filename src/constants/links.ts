@@ -1,4 +1,8 @@
 export const LINKS = {
+        repository: "https://github.com/Metis-IITGandhinagar/insiit-ui-react-native-new",
+        issues: "https://github.com/Metis-IITGandhinagar/insiit-ui-react-native-new/issues/new",
+        metis: "https://github.com/Metis-IITGandhinagar",
+
         maintenance: "https://maintenance.iitgn.ac.in/",
         medical: "https://hcrs.iitgn.ac.in/slotbooking/",
         ims: "https://ims.iitgn.ac.in/employee/pagemanager.aspx",

@@ -17,7 +17,7 @@ import { useTheme } from "@/core/theme";
 import { useAuth } from "@core/auth/useAuth";
 
 const LoginScreen = () => {
-    const { signIn } = useAuth();
+    const { signIn, continueAsGuest } = useAuth();
     const { colors } = useTheme();
 
     const styles = getStyles(useTheme());
@@ -45,8 +45,24 @@ const LoginScreen = () => {
 
     const handleGuestLogin = () => {
         Alert.alert(
-            "Guest Mode",
-            "Guest mode will be available soon."
+            "Continue as guest",
+            "You can browse the mess menu, bus timings, events, outlets and lost & found. Posting, bidding and your profile need an IITGN account — you can sign in any time.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Continue",
+                    onPress: async () => {
+                        try {
+                            await continueAsGuest();
+                        } catch {
+                            Alert.alert(
+                                "Couldn't continue as guest",
+                                "Check your connection and try again."
+                            );
+                        }
+                    },
+                },
+            ]
         );
     };
 

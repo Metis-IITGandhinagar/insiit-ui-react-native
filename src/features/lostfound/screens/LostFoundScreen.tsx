@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft, Plus } from "lucide-react-native";
 
 import { useTheme } from "@/core/theme";
+import { useAuthGate } from "@/core/auth/useAuthGate";
 
 import { useLostFoundData } from "../hooks/useLostFoundData";
 import { LostFoundEntry } from "../services/lostFoundTypes";
@@ -27,6 +28,8 @@ export default function LostFoundScreen() {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
+
+    const { ensureSignedIn } = useAuthGate();
 
     const {
         entries,
@@ -50,6 +53,7 @@ export default function LostFoundScreen() {
 
     const handleClaimFound = async (remarks: string) => {
         if (!selectedEntry) return;
+        if (!ensureSignedIn("tell the owner you found this")) return;
         const updated = await claimFound({
             id: selectedEntry.id,
             item_name: selectedEntry.item_name,
@@ -96,28 +100,12 @@ export default function LostFoundScreen() {
                 backgroundColor={colors.background}
             />
 
+            {/* No in-screen header: the stack header provides the title and back
+                button (see notes.md, "Navigation"). */}
             <SafeAreaView
                 style={styles.container}
-                edges={["top", "left", "right"]}
+                edges={["left", "right"]}
             >
-                <View style={styles.header}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => navigation.goBack()}
-                    >
-                        <ArrowLeft
-                            size={18}
-                            color={colors.text}
-                        />
-                    </TouchableOpacity>
-
-                    <View style={styles.headerTextWrap}>
-                        <Text style={styles.title}>
-                            Lost & Found
-                        </Text>
-                    </View>
-                </View>
-
                 {loading && entries.length === 0 ? (
                     <View style={styles.center}>
                         <ActivityIndicator
@@ -148,7 +136,7 @@ export default function LostFoundScreen() {
                         showsVerticalScrollIndicator={false}
                         refreshControl={
                             <RefreshControl
-                                refreshing={loading}
+                                refreshing={loading && entries.length > 0}
                                 onRefresh={refresh}
                             />
                         }
@@ -167,9 +155,10 @@ export default function LostFoundScreen() {
 
                                 <TouchableOpacity
                                     style={styles.heroButton}
-                                    onPress={() =>
-                                        setAddModalVisible(true)
-                                    }
+                                    onPress={() => {
+                                        if (!ensureSignedIn("report a lost item")) return;
+                                        setAddModalVisible(true);
+                                    }}
                                 >
                                     <Plus size={16} color="#FFF" />
                                     <Text style={styles.heroButtonText}>
