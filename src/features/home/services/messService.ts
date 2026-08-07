@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MessMenuResponse, UserSession } from "./messTypes";
 
-const BASE_URL = "https://insiit-api-rust.metis-iitgn.tech";
+const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL as string).replace(/\/+$/, '');
 
 const CACHE_KEY_MENU = "@insiit:cached_mess_menu";
 const CACHE_KEY_SESSION = "@insiit:auth_session";

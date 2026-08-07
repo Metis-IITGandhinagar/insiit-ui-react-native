@@ -2,7 +2,9 @@
 import axios from 'axios';
 import { authService } from '../auth/authService';
 
-export const BASE_URL = "https://insiit-api-rust.metis-iitgn.tech";
+// Referenced as a static `process.env.X` property so Expo inlines it at bundle time.
+// Presence is checked once at startup by core/config/checkEnv.ts.
+export const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL as string).replace(/\/+$/, '');
 
 /**
  * The backend's `save_image` returns a RELATIVE path ("images/1786…-0"), served by

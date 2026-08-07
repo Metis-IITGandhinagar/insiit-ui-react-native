@@ -1,4 +1,9 @@
-export type BusType = "EECO" | "29" | "56";
+/**
+ * A route is identified by the bus `name` the backend returns ("GTS-07", ...).
+ * There is no separate route/type column, so the set of routes is whatever names
+ * exist in the data — not a fixed union we can hardcode.
+ */
+export type BusRoute = string;
 
 /** Mirrors `BusEntry` in the backend (src/schemas/bus_schemas.rs). */
 export interface ApiBusResponse {
@@ -23,4 +28,8 @@ export interface BusDeparture {
     from: string;
     to: string;
     isNext: boolean;
+    /** Short countdown ("12m", "2h 5m", "Now", "Passed") — see formatCountdown. */
+    countdown: string;
+    /** Already departed today. The list keeps these, but shows them as spent. */
+    passed: boolean;
 }

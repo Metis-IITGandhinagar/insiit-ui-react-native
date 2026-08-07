@@ -22,12 +22,15 @@ export default BusHeader;
 const getStyles = ({ colors, spacing }: any) => StyleSheet.create({
     container: {
         paddingTop: spacing.lg,
-        alignItems: "center",
-        justifyContent: "space-between",
+        // Left-aligned, not centred: `alignItems: "center"` on a lone flex:1 child
+        // pushed the title into the middle, under the top-right control.
+        alignItems: "flex-start",
     },
     titleContainer: {
-        flex: 1,
-        marginHorizontal: 16,
+        // The screen already applies horizontal padding; the extra 16 here inset the
+        // title past every card below it. Reserve room for the top-right control instead.
+        alignSelf: "stretch",
+        paddingRight: 56,
     },
     title: {
         fontSize: 30,

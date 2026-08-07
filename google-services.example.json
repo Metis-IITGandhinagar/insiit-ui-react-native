@@ -1,0 +1,56 @@
+{
+  "_comment": [
+    "TEMPLATE ONLY — this file is not read by the build.",
+    "Download the real google-services.json from the Firebase console",
+    "(Project settings -> Your apps -> Android -> google-services.json) and save it at",
+    "the repo root as `google-services.json`. It is gitignored: every contributor uses",
+    "their own Firebase project. See README.md -> Firebase setup.",
+    "The 'client_type': 3 client_id below is the value that also goes into",
+    "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID in your .env."
+  ],
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "your-firebase-project-id",
+    "storage_bucket": "your-firebase-project-id.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "android_client_info": {
+          "package_name": "com.metis.insiit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "000000000000-android.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.metis.insiit",
+            "certificate_hash": "0000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "client_id": "000000000000-web.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "YOUR_FIREBASE_ANDROID_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "000000000000-web.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

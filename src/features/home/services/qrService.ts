@@ -4,6 +4,10 @@ import { QRSession } from './qrTypes';
 
 const QR_SESSION_KEY = '@mess_qr_session';
 
+// Referenced as a static `process.env.X` property so Expo inlines it at bundle time.
+// Presence is checked once at startup by core/config/checkEnv.ts.
+const MESS_PORTAL_URL = (process.env.EXPO_PUBLIC_MESS_PORTAL_URL as string).replace(/\/+$/, '');
+
 export const qrService = {
     async getSession(): Promise<QRSession | null> {
         try {
@@ -27,7 +31,7 @@ export const qrService = {
         try {
             const formBody = `useremail=${encodeURIComponent(email)}&userpassword=${encodeURIComponent(password)}`;
 
-            const loginResponse = await fetch('http://mess.iitgn.ac.in/phpscripts/authenticate.php', {
+            const loginResponse = await fetch(`${MESS_PORTAL_URL}/phpscripts/authenticate.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -45,12 +49,12 @@ export const qrService = {
                 throw new Error("Authentication failed. No session cookie received.");
             }
 
-            const indexResponse = await fetch('http://mess.iitgn.ac.in/', {
+            const indexResponse = await fetch(`${MESS_PORTAL_URL}/`, {
                 method: 'GET',
                 headers: {
                     'Cookie': sessionCookie,
                     'User-Agent': 'Mozilla/5.0 (Mobile; React-Native)',
-                    'Referer': 'http://mess.iitgn.ac.in/'
+                    'Referer': `${MESS_PORTAL_URL}/`
                 },
             });
 

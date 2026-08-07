@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { BusType, ApiBusResponse, BusDeparture } from "../services/busTypes";
-import { busService, calculateMinutesLeft, formatDepartureTime } from "../services/busServices";
+import { BusRoute, ApiBusResponse, BusDeparture } from "../services/busTypes";
+import { busService, calculateMinutesLeft, formatCountdown, formatDepartureTime } from "../services/busServices";
 
 export const useBusData = () => {
-    const [selectedTab, setSelectedTab] = useState<BusType>("56");
+    const [selectedRoute, setSelectedRoute] = useState<BusRoute | null>(null);
     const [rawBuses, setRawBuses] = useState<ApiBusResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -25,14 +25,34 @@ export const useBusData = () => {
         refreshBuses();
     }, [refreshBuses]);
 
+    /**
+     * The routes to offer as tabs, derived from the data rather than hardcoded: the
+     * backend has no route/type column, so `name` is the only route identifier, and a
+     * fixed list would silently show nothing whenever the names didn't match.
+     */
+    const routes = useMemo(() => {
+        const names = rawBuses
+            .map(bus => bus.name?.trim())
+            .filter((name): name is string => !!name);
+
+        return [...new Set(names)].sort((a, b) => a.localeCompare(b));
+    }, [rawBuses]);
+
+    // Keep the selection valid as routes load or change; falling back to the first
+    // route means the screen is never stuck on a tab that no longer exists.
+    useEffect(() => {
+        if (routes.length === 0) {
+            if (selectedRoute !== null) setSelectedRoute(null);
+        } else if (selectedRoute === null || !routes.includes(selectedRoute)) {
+            setSelectedRoute(routes[0]);
+        }
+    }, [routes, selectedRoute]);
+
     const filteredBuses = useMemo(() => {
-        // The tab is matched against the name ("56-Seater", "EECO shuttle") — there is
-        // no separate route/type column. Guard the name: it's the only field a bad row
-        // could leave undefined, and it used to crash the whole tab.
-        return rawBuses.filter(bus =>
-            (bus.name ?? '').toLowerCase().includes(selectedTab.toLowerCase())
-        );
-    }, [rawBuses, selectedTab]);
+        if (!selectedRoute) return [];
+
+        return rawBuses.filter(bus => bus.name?.trim() === selectedRoute);
+    }, [rawBuses, selectedRoute]);
 
     const scheduleData = useMemo(() => {
         if (filteredBuses.length === 0) {
@@ -62,7 +82,9 @@ export const useBusData = () => {
             time: bus.time,
             from: bus.from,
             to: bus.to,
-            isNext: nextBusItem ? bus.time === nextBusItem.time && bus.from === nextBusItem.from : false
+            isNext: nextBusItem ? bus.time === nextBusItem.time && bus.from === nextBusItem.from : false,
+            countdown: formatCountdown(bus.minutesLeft),
+            passed: bus.minutesLeft < 0
         }));
 
         let stops: string[] = [];
@@ -73,33 +95,20 @@ export const useBusData = () => {
         return {
             departures,
             nextBus: nextBusItem ? {
-                vehicle: nextBusItem.vehicle || `${selectedTab}-Seater`,
+                vehicle: nextBusItem.vehicle || selectedRoute || 'Bus',
                 departure: nextBusItem.time,
-                countdown:
-                    nextBusItem.minutesLeft < 0
-                        ? "Passed"
-                        : nextBusItem.minutesLeft === 0
-                            ? "Now"
-                            : nextBusItem.minutesLeft >= 60
-                                ? (() => {
-                                    const hours = Math.floor(nextBusItem.minutesLeft / 60);
-                                    const mins = nextBusItem.minutesLeft % 60;
-
-                                    return mins === 0
-                                        ? `${hours}h`
-                                        : `${hours}h ${mins}m`;
-                                })()
-                                : `${nextBusItem.minutesLeft}m`,
+                countdown: formatCountdown(nextBusItem.minutesLeft),
                 from: nextBusItem.from,
                 to: nextBusItem.to
             } : null,
             stops
         };
-    }, [filteredBuses, selectedTab]);
+    }, [filteredBuses, selectedRoute]);
 
     return {
-        selectedTab,
-        setSelectedTab,
+        routes,
+        selectedRoute,
+        setSelectedRoute,
         loading,
         error,
         refreshBuses, 

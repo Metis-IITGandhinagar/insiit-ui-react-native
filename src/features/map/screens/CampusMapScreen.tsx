@@ -13,8 +13,10 @@ const CAMPUS_ZOOM = 17;
 // Must be referenced as a static `process.env.X` property so Expo can inline it at bundle time.
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
 
-// Set once at module load, before any MapView mounts.
-// NOTE: currently a secret sk.* token inlined into the bundle — see notes.md.
+// Set once at module load, before any MapView mounts. Optional on purpose: without a
+// token the screen shows the fallback below, so a contributor can skip Mapbox setup.
+// Must be a PUBLIC pk.* token — EXPO_PUBLIC_* values are inlined into the bundle and
+// are readable by anyone who unzips the APK.
 Mapbox.setAccessToken(MAPBOX_TOKEN ?? null);
 
 export default function CampusMapScreen() {

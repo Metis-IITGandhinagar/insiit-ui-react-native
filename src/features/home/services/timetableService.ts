@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://timetable-ky2z.onrender.com/api';
+const BASE_URL = (process.env.EXPO_PUBLIC_TIMETABLE_API_URL as string).replace(/\/+$/, '');
 
 const COURSES_CACHE_KEY = '@timetable_courses_cache';
 const CACHE_TIME_KEY = '@timetable_courses_cache_time';

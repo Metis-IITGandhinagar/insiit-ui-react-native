@@ -3,6 +3,13 @@ export type ThemeMode = 'light' | 'dark' | 'emerald' | 'sunshine';
 export interface ColorScheme {
     primary: string;
     primaryLight: string;
+    /**
+     * Foreground for content sitting *on* `primary` (hero cards, filled badges).
+     * Distinct from `surface`, which some screens used for this by accident: it happens
+     * to be white in the light themes, but is dark slate in the dark one — which put
+     * near-black text on a blue card.
+     */
+    onPrimary: string;
     background: string;
     surface: string;
     card: string;
@@ -62,6 +69,7 @@ export const themes: Record<ThemeMode, ColorScheme> = {
     light: {
         primary: '#2563EB',
         primaryLight: '#EFF6FF',
+        onPrimary: '#FFFFFF',
         background: '#F8FAFC',
         surface: '#FFFFFF',
         card: '#FFFFFF',
@@ -75,6 +83,7 @@ export const themes: Record<ThemeMode, ColorScheme> = {
     dark: {
         primary: '#3B82F6',
         primaryLight: '#1E293B',
+        onPrimary: '#FFFFFF',
         background: '#0F172A',
         surface: '#1E293B',
         card: '#1E293B',
@@ -88,6 +97,7 @@ export const themes: Record<ThemeMode, ColorScheme> = {
     emerald: {
         primary: '#059669',
         primaryLight: '#ECFDF5',
+        onPrimary: '#FFFFFF',
         background: '#F0FDF4',
         surface: '#FFFFFF',
         card: '#FFFFFF',
@@ -101,6 +111,7 @@ export const themes: Record<ThemeMode, ColorScheme> = {
     sunshine: {
         primary: '#EA580C',
         primaryLight: '#FFF7ED',
+        onPrimary: '#FFFFFF',
         background: '#FAFAF9',
         surface: '#FFFFFF',
         card: '#FFFFFF',

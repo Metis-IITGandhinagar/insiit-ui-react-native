@@ -1,6 +1,12 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# local secrets / per-developer config — .env.example is the tracked template
 .env
+google-services.json
+GoogleService-Info.plist
+android/gradle.properties.local
+keystore.properties
+
 # dependencies
 node_modules/
 

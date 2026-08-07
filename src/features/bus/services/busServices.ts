@@ -51,6 +51,21 @@ export const calculateMinutesLeft = (timeStr: string): number | null => {
     return departure - (now.getHours() * 60 + now.getMinutes());
 };
 
+/**
+ * Minutes-until as a short human string: `"Now"`, `"12m"`, `"2h 5m"`, `"Passed"`.
+ * Shared by the hero countdown and the schedule rows so they can never disagree.
+ */
+export const formatCountdown = (minutesLeft: number): string => {
+    if (minutesLeft < 0) return "Passed";
+    if (minutesLeft === 0) return "Now";
+    if (minutesLeft < 60) return `${minutesLeft}m`;
+
+    const hours = Math.floor(minutesLeft / 60);
+    const minutes = minutesLeft % 60;
+
+    return minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
+};
+
 /** `"07:30:00"` -> `"7:30 AM"`, for display only. */
 export const formatDepartureTime = (timeStr: string): string => {
     const departure = parseDepartureMinutes(timeStr);
