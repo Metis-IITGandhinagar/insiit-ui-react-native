@@ -4,8 +4,6 @@ import { QRSession } from './qrTypes';
 
 const QR_SESSION_KEY = '@mess_qr_session';
 
-// Referenced as a static `process.env.X` property so Expo inlines it at bundle time.
-// Presence is checked once at startup by core/config/checkEnv.ts.
 const MESS_PORTAL_URL = (process.env.EXPO_PUBLIC_MESS_PORTAL_URL as string).replace(/\/+$/, '');
 
 export const qrService = {
@@ -38,27 +36,25 @@ export const qrService = {
                     'User-Agent': 'Mozilla/5.0 (Mobile; React-Native)',
                 },
                 body: formBody,
+                credentials: 'include',
             });
 
-            const setCookieHeader = loginResponse.headers.get('set-cookie');
-            let sessionCookie = '';
-
-            if (setCookieHeader) {
-                sessionCookie = setCookieHeader.split(';')[0];
-            } else {
-                throw new Error("Authentication failed. No session cookie received.");
+            if (!loginResponse.ok) {
+                throw new Error(`Authentication request failed with status ${loginResponse.status}.`);
             }
 
             const indexResponse = await fetch(`${MESS_PORTAL_URL}/`, {
                 method: 'GET',
                 headers: {
-                    'Cookie': sessionCookie,
                     'User-Agent': 'Mozilla/5.0 (Mobile; React-Native)',
                     'Referer': `${MESS_PORTAL_URL}/`
                 },
+                credentials: 'include',
             });
 
             const html = await indexResponse.text();
+
+            const looksLoggedIn = !/name=["']userpassword["']/i.test(html);
 
             const regex = /<span[^>]*class=["'][^"']*\btext-purple\b[^"']*["'][^>]*>(.*?)<\/span>/gi;
             let matches: string[] = [];
