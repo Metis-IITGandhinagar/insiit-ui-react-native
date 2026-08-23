@@ -5,9 +5,9 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    TouchableWithoutFeedback,
     ScrollView,
     Image,
+    Pressable,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -45,24 +45,31 @@ const OutletDetailModal = ({
             animationType="fade"
             onRequestClose={onClose}
         >
-            <TouchableOpacity
-                style={styles.overlay}
-                activeOpacity={1}
-                onPress={onClose}
-            >
-                <TouchableWithoutFeedback>
-                    <View style={styles.modal}>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={onClose}
-                        >
-                            <Ionicons
-                                name="close"
-                                size={24}
-                                color={colors.text}
-                            />
-                        </TouchableOpacity>
+            <View style={styles.overlay}>
+                {/* Backdrop press listener isolated as absolute sibling */}
+                <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
+                {/* Modal Container */}
+                <View style={styles.modal}>
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={onClose}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <Ionicons
+                            name="close"
+                            size={24}
+                            color={colors.text}
+                        />
+                    </TouchableOpacity>
+
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.body}
+                        showsVerticalScrollIndicator={true}
+                        nestedScrollEnabled={true}
+                        overScrollMode="never"
+                    >
                         <Image
                             source={{
                                 uri:
@@ -72,7 +79,7 @@ const OutletDetailModal = ({
                             style={styles.image}
                         />
 
-                        <ScrollView contentContainerStyle={styles.body}>
+                        <View style={styles.contentWrap}>
                             <Text style={styles.title}>
                                 {outlet.name}
                             </Text>
@@ -126,10 +133,10 @@ const OutletDetailModal = ({
                                     </Text>
                                 </View>
                             ))}
-                        </ScrollView>
-                    </View>
-                </TouchableWithoutFeedback>
-            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
+                </View>
+            </View>
         </Modal>
     );
 };
@@ -157,6 +164,11 @@ const getStyles = ({
             backgroundColor: colors.surface,
             borderRadius: radius.xl,
             overflow: "hidden",
+            zIndex: 1,
+        },
+
+        scrollView: {
+            width: "100%",
         },
 
         closeButton: {
@@ -174,10 +186,14 @@ const getStyles = ({
 
         image: {
             width: "100%",
-            height: 240,
+            height: 200,
         },
 
         body: {
+            paddingBottom: spacing.md,
+        },
+
+        contentWrap: {
             padding: spacing.lg,
         },
 

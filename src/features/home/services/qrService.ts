@@ -4,7 +4,7 @@ import { QRSession } from './qrTypes';
 
 const QR_SESSION_KEY = '@mess_qr_session';
 
-const MESS_PORTAL_URL = (process.env.EXPO_PUBLIC_MESS_PORTAL_URL as string).replace(/\/+$/, '');
+const MESS_PORTAL_URL = (process.env.EXPO_PUBLIC_MESS_PORTAL_URL as string);
 
 export const qrService = {
     async getSession(): Promise<QRSession | null> {
