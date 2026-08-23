@@ -65,12 +65,10 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
 
             setSession(qrSession);
             setCampusPassword("");
-        } catch (err) {
+        } catch (err: any) {
             console.log("QR ERROR:", err);
-            if (err instanceof Error) {
-                console.log("MESSAGE:", err.message);
-            }
-            setValidationMessage("Unable to fetch your mess QR.");
+            const displayError = err?.message || "Unable to fetch your mess QR.";
+            setValidationMessage(displayError);
         } finally {
             setUiLoading(false);
         }
