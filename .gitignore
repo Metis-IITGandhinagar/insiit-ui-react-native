@@ -13,6 +13,10 @@ node_modules/
 # Expo
 .expo/
 dist/
+
+# OTA update payloads — `npm run ota` output: raw export and the staged server mirror
+.ota-export/
+.ota-publish/
 web-build/
 expo-env.d.ts
 

@@ -101,3 +101,17 @@ inlined at bundle time — restart the dev server after editing `.env`.
   react-navigation's guidance is that nesting is for UI, not code organisation. Nesting
   previously cost a hidden parent header and a hand-rolled back button.
   `@react-navigation/stack` is now unused and can be dropped from `package.json`.
+
+## OTA updates are unsigned
+
+`expo-updates` fetches from `https://ota.metis-iitgn.tech/manifest` over TLS, but the
+manifests carry no code signature, so write access to `/var/www/insiit-ota` on the VPS is
+enough to push arbitrary JS to every installed app. `npx expo-updates
+codesigning:generate` would close that: manifests are generated on the publishing machine
+(`scripts/publish-ota.mjs`), so the private key never needs to exist on the server, and a
+compromised VPS could no longer forge an update. Not done yet — until it is, treat that
+directory as key material.
+
+Related trap: the runtime version comes from `expo.version` via the `appVersion` policy,
+so a native change without a version bump silently makes the next `npm run ota` ship JS to
+builds that can't run it. See [`docs/ota-updates.md`](docs/ota-updates.md).
