@@ -26,7 +26,7 @@ anything compiled into the APK:
 
 The guard rail is the **runtime version**. `app.json` sets
 `"runtimeVersion": { "policy": "appVersion" }`, so a build's runtime version *is*
-`expo.version` — `3.0.0` today — and the server keys manifests by it. A client only ever
+`expo.version` — `3.1.0` today — and the server keys manifests by it. A client only ever
 sees updates published under its own runtime version.
 
 > **The rule that keeps this safe:** bump `expo.version` in `app.json` in the same commit
@@ -61,7 +61,7 @@ client a half-published update. Blobs are content-addressed, so uploads are incr
 Set the deploy target once, in your shell profile or `.env.local`:
 
 ```sh
-export OTA_DEPLOY_TARGET=deploy@ota.metis-iitgn.tech:/var/www/insiit-ota
+export OTA_DEPLOY_TARGET=root@ota.metis-iitgn.tech:/var/www/insiit-ota
 ```
 
 Without it the script stages everything locally and tells you what to copy. Useful flags:
@@ -105,7 +105,7 @@ then `npm run ota -- --channel staging`.
 │   └── 8b61a4c7….png
 └── manifests/
     └── production/
-        └── 3.0.0/
+        └── 3.1.0/
             ├── android.json
             └── ios.json
 ```
@@ -131,16 +131,61 @@ comm -23 <(ls blobs | grep -v '\.gz$' | sort) \
 
 ## First-time setup
 
-**On the VPS** — the header comments in
-[`deploy/nginx/ota.metis-iitgn.tech.conf`](../deploy/nginx/ota.metis-iitgn.tech.conf) are
-the install script: create `/var/www/insiit-ota`, symlink the config, point
-`ota.metis-iitgn.tech` at the box, run certbot, reload nginx. Uncomment `gzip_static on;`
-if `nginx -V 2>&1 | grep with-http_gzip_static_module` prints something — it cuts the
-bundle download from 7 MB to 2.6 MB with no CPU cost at request time.
+**DNS** — an `A` record (plus `AAAA` if the box has IPv6) for `ota.metis-iitgn.tech`
+pointing at the VPS. Not a CNAME to the API host: certbot needs to answer on port 80 for
+this exact name. Wait for it to resolve (`dig +short ota.metis-iitgn.tech`) before
+continuing — certbot fails otherwise, and its rate limits are per-name per-week.
 
-**In the app** — OTA only works for builds that contain `expo-updates`. The APKs already
-in the wild (`versionCode 15`) do not, so the first Play Store release after this change
-is what switches OTA on; every release after that can be patched over the air.
+**nginx, then TLS** — the same routine as every other subdomain on the box.
+[`deploy/nginx/ota.metis-iitgn.tech.conf`](../deploy/nginx/ota.metis-iitgn.tech.conf) is
+deliberately plain HTTP with nothing TLS-related in it, so certbot can rewrite it in place
+the way it does the others:
+
+```sh
+# 1. copy the three `map` blocks into nginx.conf at http{} level — they must be OUTSIDE
+#    server{}. Copy the server{} block in next to the other subdomains.
+sudo install -d -o www-data -g www-data /var/www/insiit-ota
+sudo nginx -t && sudo nginx -s reload
+sudo certbot run -d ota.metis-iitgn.tech    # adds listen 443 ssl, certs, :80 redirect
+sudo nginx -s reload
+```
+
+The one difference from the other blocks: this one has no `proxy_pass`, because there is
+no process to proxy to. `root` plus `try_files` is the whole server.
+
+Uncomment `gzip_static on;` if `nginx -V 2>&1 | grep with-http_gzip_static_module` prints
+something — it cuts the bundle download from 7 MB to 2.6 MB with no CPU cost at request
+time.
+
+**Deploy access** — `npm run ota` uploads over ssh as whatever user the target names,
+which must be able to write `/var/www/insiit-ota`. Password auth works (rsync inherits the
+terminal and prompts), but there are two rsync calls per publish, so either add an ssh
+`ControlMaster` block for that host or install a key with `ssh-copy-id` to stop being asked
+twice. Set the target in `.env.local` or your shell profile:
+
+```sh
+export OTA_DEPLOY_TARGET=root@ota.metis-iitgn.tech:/var/www/insiit-ota
+```
+
+**Smoke-test the server before touching the app.** Publish once, then pretend to be a
+client:
+
+```sh
+OTA_DEPLOY_TARGET=root@ota.metis-iitgn.tech:/var/www/insiit-ota npm run ota
+
+curl -si https://ota.metis-iitgn.tech/manifest \
+  -H 'expo-platform: android' -H 'expo-runtime-version: 3.1.0' \
+  -H 'expo-channel-name: production' -H 'expo-protocol-version: 1' | head -20
+```
+
+Expect `200`, `content-type: application/json`, `expo-protocol-version: 1`, and a body
+whose `launchAsset.url` is fetchable. A `400` means a header is missing or malformed; a
+`404` means no manifest exists at that channel/runtime-version path.
+
+**In the app** — OTA only works for builds that contain `expo-updates`. Everything
+released up to and including v3.0.0 / `versionCode 15` predates it and will never check
+for updates. v3.1.0 / `versionCode 16` is the first build that can be patched over the
+air; ship it to the store and every release after it is patchable.
 
 ```sh
 npx expo prebuild -p android   # regenerate android/ so the manifest picks up the config

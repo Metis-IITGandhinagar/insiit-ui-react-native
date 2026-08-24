@@ -2,7 +2,7 @@
   "expo": {
     "name": "insiit",
     "slug": "insiit",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -30,7 +30,7 @@
     },
     "android": {
       "package": "com.metis.insiit",
-      "versionCode": 15,
+      "versionCode": 16,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -76,6 +76,7 @@
       "@react-native-firebase/auth",
       "@react-native-google-signin/google-signin",
       "./plugins/withAndroidSigning",
+      "./plugins/withGradleMemory",
       "./plugins/withIosPodMinDeploymentTarget",
       "./plugins/withIosSceneManifest",
       [

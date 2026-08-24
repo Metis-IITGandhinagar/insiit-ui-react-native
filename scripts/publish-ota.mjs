@@ -40,6 +40,21 @@ const MIME = {
   '.wav': 'audio/wav',
 };
 
+// --- environment ------------------------------------------------------------------
+
+// Expo's CLI loads .env files for the subprocesses it runs, but this script is plain
+// node — so OTA_* settings placed in .env.local would otherwise be silently ignored and
+// a publish would quietly stage instead of upload. Real environment variables win.
+for (const file of ['.env.local', '.env']) {
+  const envPath = path.join(ROOT, file);
+  if (!fs.existsSync(envPath)) continue;
+  for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+    const match = /^\s*(OTA_[A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);
+    if (!match || process.env[match[1]] !== undefined) continue;
+    process.env[match[1]] = match[2].trim().replace(/^["']|["']$/g, '');
+  }
+}
+
 // --- args -------------------------------------------------------------------------
 
 const argv = process.argv.slice(2);

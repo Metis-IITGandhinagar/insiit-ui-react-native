@@ -316,7 +316,7 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 ## Publishing a release
 
 ```sh
-VERSION=v3.0.0
+VERSION=v3.1.0
 mkdir -p dist                                  # dist/ is gitignored
 
 ./gradlew -p android assembleRelease -PreactNativeArchitectures=arm64-v8a
@@ -355,8 +355,9 @@ Two things to internalise before using it:
   runtime version is derived from it (`runtimeVersion.policy: "appVersion"`), and it is
   what stops new JS from being handed to an old build that can't run it.
 
-OTA starts working from the first store release built *after* this was added — the APKs
-already out there (`versionCode 15`) have no updates client in them.
+OTA starts working from the first store release built *after* this was added: v3.1.0 /
+`versionCode 16`. Everything up to v3.0.0 / `versionCode 15` has no updates client in it
+and will never check.
 
 Full picture — server layout, nginx config, channels, rollback, debugging:
 [`docs/ota-updates.md`](docs/ota-updates.md).
