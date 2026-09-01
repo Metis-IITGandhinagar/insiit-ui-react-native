@@ -2,12 +2,26 @@
   "expo": {
     "name": "insiit",
     "slug": "insiit",
-    "version": "3.0.0",
+    "version": "3.1.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://ota.metis-iitgn.tech/manifest",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.metis.insiit",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
@@ -15,9 +29,8 @@
       }
     },
     "android": {
-      "usesCleartextTraffic": true,
       "package": "com.metis.insiit",
-      "versionCode": 14,
+      "versionCode": 16,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -31,6 +44,17 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          },
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
       "expo-font",
       "expo-splash-screen",
       "expo-status-bar",
@@ -52,13 +76,15 @@
       "@react-native-firebase/auth",
       "@react-native-google-signin/google-signin",
       "./plugins/withAndroidSigning",
+      "./plugins/withGradleMemory",
+      "./plugins/withIosPodMinDeploymentTarget",
+      "./plugins/withIosSceneManifest",
       [
         "@rnmapbox/maps",
         {
           "RNMapboxMapsVersion": "11.20.1"
         }
-      ],
-      "expo-build-properties"
+      ]
     ]
   }
 }

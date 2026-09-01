@@ -23,6 +23,7 @@ is untested.
 - [Running the app](#running-the-app)
 - [Building a release APK](#building-a-release-apk)
 - [Publishing a release](#publishing-a-release)
+- [Over-the-air updates](#over-the-air-updates)
 - [Project layout](#project-layout)
 - [Troubleshooting](#troubleshooting)
 
@@ -315,7 +316,7 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 ## Publishing a release
 
 ```sh
-VERSION=v3.0.0
+VERSION=v3.1.0
 mkdir -p dist                                  # dist/ is gitignored
 
 ./gradlew -p android assembleRelease -PreactNativeArchitectures=arm64-v8a
@@ -336,6 +337,33 @@ directly need "Install unknown apps" enabled for their browser or file manager.
 
 ---
 
+## Over-the-air updates
+
+JavaScript-only fixes can go out without a Play Store review. The app carries
+`expo-updates` and checks our own VPS on launch:
+
+```sh
+npm run ota                 # export, build manifests, rsync to the update server
+npm run ota -- --no-deploy  # build the payload locally without uploading
+```
+
+Two things to internalise before using it:
+
+- **Only JS and assets travel this way.** Anything native — a new module, a permission, an
+  `app.json` plugin, an SDK bump — still needs a store release.
+- **Bump `expo.version` in `app.json` in the same commit as any native change.** The
+  runtime version is derived from it (`runtimeVersion.policy: "appVersion"`), and it is
+  what stops new JS from being handed to an old build that can't run it.
+
+OTA starts working from the first store release built *after* this was added: v3.1.0 /
+`versionCode 16`. Everything up to v3.0.0 / `versionCode 15` has no updates client in it
+and will never check.
+
+Full picture — server layout, nginx config, channels, rollback, debugging:
+[`docs/ota-updates.md`](docs/ota-updates.md).
+
+---
+
 ## Project layout
 
 ```
@@ -351,7 +379,10 @@ src/
   shared/        cross-feature components
   constants/     static links (institute portals, mess forms)
   utils/
-plugins/         Expo config plugins (Android release signing)
+plugins/         Expo config plugins (Android release signing, iOS pod/scene tweaks)
+scripts/         publish-ota.mjs — builds and uploads OTA updates
+deploy/nginx/    server block for the OTA update host
+docs/            ota-updates.md
 assets/          icons, splash, fonts
 ```
 

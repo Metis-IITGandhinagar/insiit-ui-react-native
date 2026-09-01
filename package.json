@@ -33,6 +33,7 @@
     "expo-splash-screen": "~57.0.1",
     "expo-status-bar": "~57.0.0",
     "expo-system-ui": "~57.0.1",
+    "expo-updates": "~57.0.16",
     "expo-web-browser": "~57.0.0",
     "firebase": "^12.16.0",
     "lucide-react-native": "^1.23.0",
@@ -65,7 +66,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "ota": "node scripts/publish-ota.mjs"
   },
   "private": true
 }
