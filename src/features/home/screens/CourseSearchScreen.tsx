@@ -65,6 +65,7 @@ export default function CourseSearchScreen() {
         navigation.goBack(); // Go back to Home
     };
 
+    // Inside CourseSearchScreen.tsx:
     const renderItem = ({ item }: { item: string }) => {
         const isSelected = selectedCourses.has(item);
 
@@ -74,9 +75,16 @@ export default function CourseSearchScreen() {
                 onPress={() => toggleCourse(item)}
                 activeOpacity={0.7}
             >
-                <Text style={[styles.courseCode, isSelected && { color: colors.primary }]}>
-                    {item}
-                </Text>
+                <View style={styles.courseTextContainer}>
+                    <Text
+                        style={[styles.courseCode, isSelected && { color: colors.primary }]}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                    >
+                        {item}
+                    </Text>
+                </View>
+
                 <View style={[styles.checkbox, isSelected && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
                     {isSelected ? <Check size={14} color="#FFF" /> : <Plus size={14} color="#999" />}
                 </View>
@@ -149,13 +157,34 @@ const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.c
     emptyState: { alignItems: 'center', marginTop: 40 },
     emptyText: { color: '#999', fontSize: 16 },
     courseRow: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0'
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 16,
+        paddingHorizontal: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0'
     },
-    courseRowSelected: { backgroundColor: colors.primary + '05', paddingHorizontal: 8, borderRadius: 8 },
-    courseCode: { ...typography.h3, color: colors.text },
+    courseRowSelected: {
+        backgroundColor: colors.primary + '05',
+        borderRadius: 8
+    },
+    courseTextContainer: {
+        flex: 1,          
+        marginRight: 12,  
+    },
+    courseCode: {
+        ...typography.h3,
+        color: colors.text,
+        flexShrink: 1,   
+    },
     checkbox: {
-        width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#DDD',
-        justifyContent: 'center', alignItems: 'center'
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#DDD',
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 });

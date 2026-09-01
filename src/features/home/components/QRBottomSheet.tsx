@@ -282,7 +282,7 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         width: 240,
         height: 250,
         borderRadius: radius.xl,
-        backgroundColor: colors.surfaceAlt,
+        backgroundColor: "#ffffff",
         justifyContent: "center",
         alignItems: "center",
         borderWidth: 1,

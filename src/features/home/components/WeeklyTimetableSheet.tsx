@@ -104,8 +104,18 @@ export default function WeeklyTimetableSheet({ visible, onClose, schedule }: Pro
                                                 <View key={idx} style={styles.sessionRow}>
                                                     <Text style={styles.sessionTime}>{session.time}</Text>
                                                     <View style={styles.sessionInfo}>
-                                                        <Text style={styles.sessionCourse}>{session.course}</Text>
-                                                        <Text style={styles.sessionMeta}>
+                                                        <Text
+                                                            style={styles.sessionCourse}
+                                                            numberOfLines={1}
+                                                            ellipsizeMode="tail"
+                                                        >
+                                                            {session.course}{session.name ? ` - ${session.name}` : ''}
+                                                        </Text>
+                                                        <Text
+                                                            style={styles.sessionMeta}
+                                                            numberOfLines={1}
+                                                            ellipsizeMode="tail"
+                                                        >
                                                             {session.type}{session.venue ? ` • ${session.venue}` : ''}
                                                         </Text>
                                                     </View>
@@ -172,7 +182,9 @@ const getStyles = ({ colors, spacing, typography }: any) => StyleSheet.create({
         fontWeight: '600',
         color: colors.textSecondary || '#666',
     },
-    sessionInfo: { flex: 1 },
+    
+    sessionInfo: { flex: 1, minWidth: 0 },
+
     sessionCourse: {
         fontSize: 15,
         fontWeight: '700',

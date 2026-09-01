@@ -5,8 +5,6 @@ import { nativeAuth } from './firebase';
 
 const ALLOWED_EMAIL_DOMAIN = 'iitgn.ac.in';
 
-// Must be referenced as a static `process.env.X` property so Expo can inline it at
-// bundle time. Presence is checked once at startup by core/config/checkEnv.ts.
 const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID as string;
 
 GoogleSignin.configure({
@@ -51,30 +49,25 @@ export const authService = {
     }
   },
 
-  /**
-   * Guest browsing. Creates a real (anonymous) Firebase session, so requests still
-   * carry an ID token — one without an email claim, which every write route on the
-   * backend rejects with 403. Firebase persists the session across launches.
-   */
   loginAnonymously: async () => {
     const userCredential = await nativeAuth.signInAnonymously();
     return userCredential.user;
   },
 
   logout: async () => {
-    // Best effort: a guest never signed in through Google, so this has nothing to
-    // clear and must not be allowed to block the Firebase sign-out below.
     try {
       await GoogleSignin.signOut();
     } catch (error) {
       console.warn('Google sign-out skipped:', error);
     }
 
-    try {
-      await nativeAuth.signOut();
-    } catch (error) {
-      console.error('Error during authService.logout step:', error);
-      throw error;
+    if (nativeAuth.currentUser) {
+      try {
+        await nativeAuth.signOut();
+      } catch (error) {
+        console.error('Error during authService.logout step:', error);
+        throw error;
+      }
     }
   },
 

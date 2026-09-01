@@ -8,6 +8,7 @@ const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000;
 const SCHEDULE_CACHE_KEY = '@timetable_schedule_cache';
 
 export interface TimetableSession {
+    name: string;
     course: string;
     day: string;
     time: string;
@@ -31,12 +32,13 @@ interface RawGridEntry {
 }
 type RawTimetableGrid = Record<string, RawGridEntry[]>;
 
-function parseClassString(raw: string): { course: string; type: string; venue: string } {
+function parseClassString(raw: string): { course: string; name: string; type: string; venue: string } {
     const parts = raw.split(',').map(p => p.trim());
 
     if (parts.length >= 4) {
         return {
             course: parts[0],
+            name: parts[1],
             type: parts[2],
             venue: parts.slice(3).join(', '),
         };
@@ -44,6 +46,7 @@ function parseClassString(raw: string): { course: string; type: string; venue: s
 
     return {
         course: raw,
+        name: '',
         type: 'Class',
         venue: '',
     };
@@ -57,9 +60,10 @@ function transformGridToSessions(grid: RawTimetableGrid): TimetableSession[] {
         if (!letter) continue;
 
         for (const entry of grid[dayKey] ?? []) {
-            const { course, type, venue } = parseClassString(entry.class);
+            const { course, name, type, venue } = parseClassString(entry.class);
             sessions.push({
                 course,
+                name,
                 day: letter,
                 time: entry.time,
                 venue,
@@ -90,7 +94,12 @@ export const timetableService = {
             if (!response.ok) throw new Error('Failed to fetch courses');
 
             const rawData = await response.json();
-            const courseList = rawData.courses.map((course: any) => course.code);
+            const courseList = rawData.courses.map((course: any) => {
+                if (course.name) {
+                    return `${course.code} - ${course.name}`;
+                }
+                return course.code || course.title || String(course);
+            });
 
             AsyncStorage.setItem(COURSES_CACHE_KEY, JSON.stringify(courseList));
             AsyncStorage.setItem(CACHE_TIME_KEY, new Date().getTime().toString());
@@ -101,7 +110,6 @@ export const timetableService = {
 
             const cachedData = await AsyncStorage.getItem(COURSES_CACHE_KEY);
             if (cachedData) {
-                console.log('Network failed, falling back to cached courses.');
                 return JSON.parse(cachedData);
             }
 

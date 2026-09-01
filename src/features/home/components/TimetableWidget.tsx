@@ -103,7 +103,7 @@ export default function TimetableWidget() {
 
         return {
             courseCode: next!.course,
-            courseName: next!.course, 
+            courseName: next!.name || next!.course,
             time: next!.time,
             venue: next!.venue,
             startsIn: startsInStr,
@@ -143,9 +143,22 @@ export default function TimetableWidget() {
                         </View>
                     </View>
 
-                    <Text style={styles.courseCode}>{nextClass.courseCode}</Text>
-                    <Text style={styles.courseName}>{nextClass.courseName}</Text>
+                            <Text
+                                style={styles.courseCode}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                            >
+                                {nextClass.courseCode}
+                            </Text>
 
+                            <Text
+                                style={styles.courseName}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                            >
+                                {nextClass.courseName}
+                            </Text>
+                            
                     <View style={styles.detailsRow}>
                         <View style={styles.detailItem}>
                             <Clock size={14} color={colors.textSecondary || '#666'} />
