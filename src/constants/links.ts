@@ -11,7 +11,7 @@ export const LINKS = {
         academic_officials:"https://iitgn.ac.in/about/academic-officials",
         
         bhopal_mess:"https://docs.google.com/forms/d/e/1FAIpQLSe14dvwv6ulxYOIKY_o074DRqc0Q3YnjcNf-6NRKOgG9przQw/viewform",
-        rgouras_mess:"https://docs.google.com/forms/d/e/1FAIpQLSe14dvwv6ulxYOIKY_o074DRqc0Q3YnjcNf-6NRKOgG9przQw/viewform",
+        rgouras_mess:"https://docs.google.com/forms/d/1V5-3xvFkZlNdOvqdDO-X9IFBmLK3zRmQguWcRGzsvbY/viewform",
         jaiswal_mess:"https://docs.google.com/forms/d/e/1FAIpQLSfcTE3RaSzwrx7B2lqoyULTOJP5iC7jKSPdss-hZVeiV84zJw/viewform",
         mohani_mess:"https://docs.google.com/forms/d/e/1FAIpQLSeCLjKjfsgu7FWiGZ0nqoPQX710oH98ENJ43MqjYf5cib1fXA/viewform",
     };

@@ -3,10 +3,10 @@ import {
     View,
     Text,
     StyleSheet,
-    Image,
     TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 
 import { Card } from "@/shared/components/Card";
 import { useTheme } from "@/core/theme";
@@ -36,12 +36,11 @@ const OutletCard = ({ outlet, onPress }: Props) => {
             <Card variant="surface" style={styles.cardOverrides}>
                 <View style={styles.imageContainer}>
                     <Image
-                        source={{
-                            uri:
-                                resolveBackendAsset(outlet.image_url) ||
-                                "https://placehold.co/800x500?text=Outlet",
-                        }}
+                        source={{ uri: resolveBackendAsset(outlet.image_url) || "https://placehold.co/800x500?text=Outlet" }}
                         style={styles.image}
+                        contentFit="cover"
+                        transition={200}
+                        cachePolicy="disk"
                     />
 
                     <View style={styles.badge}>

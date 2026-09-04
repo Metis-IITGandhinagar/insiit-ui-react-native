@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { Plus, Trash2, Edit2, RefreshCw, Megaphone, X, ImagePlus } from 'lucide-react-native';
 import { pickImagesAsBase64 } from '@/shared/media/pickImages';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@core/theme';
 import { useAuth } from '@core/auth/useAuth';
 import { Card } from '@shared/components/Card';
@@ -36,6 +37,8 @@ export interface Announcement {
 
 export const AnnouncementManagementScreen: React.FC = () => {
     const { colors, spacing, typography, radius } = useTheme();
+    const insets = useSafeAreaInsets();
+    const buttonForeground = (colors as typeof colors & { white?: string }).white || '#FFFFFF';
     const { user } = useAuth();
     const { permissions, canManageAnnouncements } = useAdminPermissions();
 
@@ -306,30 +309,50 @@ export const AnnouncementManagementScreen: React.FC = () => {
                         refreshing={isLoading}
                         onRefresh={fetchAnnouncements}
                         ListEmptyComponent={
-                            <View style={[styles.centered, { paddingVertical: spacing.xxl }]}>
-                                <Text style={{ color: colors.textSecondary, fontSize: typography.h1?.fontSize || 16 }}>
-                                    No announcements broadcasted yet.
+                            <View style={[styles.emptyState, { padding: spacing.xl }]}>
+                                <Text style={{ color: colors.textSecondary, fontSize: typography.h2?.fontSize || 16 }}>
+                                    No announcements yet    
                                 </Text>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.emptyStateAddButton,
+                                        {
+                                            backgroundColor: colors.primary,
+                                            borderRadius: radius.md,
+                                            marginTop: spacing.lg,
+                                            paddingHorizontal: spacing.lg,
+                                            paddingVertical: spacing.md,
+                                        },
+                                    ]}
+                                    onPress={handleOpenAddModal}
+                                    activeOpacity={0.8}
+                                >
+                                    <Plus size={20} color={buttonForeground} />
+                                    <Text style={[styles.emptyStateAddText, { color: buttonForeground }]}>
+                                        Add Announcement
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
                         }
                     />
                 )}
 
-                {permissions?.post_announcement && (
+                {permissions?.post_announcement && announcements.length > 0 && (
                     <TouchableOpacity
                         style={[
                             styles.fab,
                             {
                                 backgroundColor: colors.primary,
                                 borderRadius: radius.xl ?? 9999,
-                                bottom: spacing.xl,
+                                // Account for device safe areas so the entire button stays tappable.
+                                bottom: Math.max(spacing.xl, insets.bottom + spacing.lg),
                                 right: spacing.xl,
                             },
                         ]}
                         onPress={handleOpenAddModal}
                         activeOpacity={0.8}
                     >
-                        <Plus size={24} color={colors.primary || '#FFFFFF'} />
+                        <Plus size={24} color={buttonForeground} />
                     </TouchableOpacity>
                 )}
 
@@ -343,7 +366,18 @@ export const AnnouncementManagementScreen: React.FC = () => {
                         style={[styles.modalContainer, { backgroundColor: colors.background }]}
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     >
-                        <View style={[styles.modalHeader, { borderBottomColor: colors.border || '#EEE', padding: spacing.lg }]}>
+                        <View
+                            style={[
+                                styles.modalHeader,
+                                {
+                                    borderBottomColor: colors.border || '#EEE',
+                                    paddingHorizontal: spacing.lg,
+                                    paddingBottom: spacing.lg,
+                                    // Keep the close control below the notch/status area on every device.
+                                    paddingTop: Math.max(spacing.lg, insets.top + spacing.sm),
+                                },
+                            ]}
+                        >
                             <TouchableOpacity onPress={handleCloseModal} disabled={isSubmitting}>
                                 <X size={24} color={colors.text} />
                             </TouchableOpacity>
@@ -468,6 +502,21 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    emptyState: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    emptyStateAddButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    emptyStateAddText: {
+        marginLeft: 8,
+        fontSize: 16,
+        fontWeight: '700',
     },
     listContent: {
         flexGrow: 1,

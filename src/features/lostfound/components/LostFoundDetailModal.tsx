@@ -5,7 +5,7 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    TouchableWithoutFeedback,
+    Pressable,
     ScrollView,
     Image,
     TextInput,
@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/core/theme";
 import { resolveBackendAsset } from "@/core/api/apiClient";
 import { useAuth } from "@/core/auth/useAuth";
+import ImageZoomModal from "@/shared/components/ImageZoomModal";
 import { LostFoundEntry } from "../services/lostFoundTypes";
 import { formatRelativeDate } from "../utils/formatDate";
 
@@ -62,14 +63,12 @@ const LostFoundDetailModal = ({
     const { colors } = theme;
     const styles = getStyles(theme);
 
-    // Assumption: useAuth exposes the current Firebase user with an
-    // `email` field. Adjust the accessor below if your hook's shape
-    // differs (e.g. `user?.email` vs `currentUser?.email`).
     const { user } = useAuth() as { user?: { email?: string | null } };
 
     const [remarks, setRemarks] = useState("");
     const [submittingClaim, setSubmittingClaim] = useState(false);
     const [submittingAction, setSubmittingAction] = useState(false);
+    const [zoomVisible, setZoomVisible] = useState(false);
 
     if (!entry) return null;
 
@@ -145,91 +144,124 @@ const LostFoundDetailModal = ({
         "https://placehold.co/800x500?text=Lost+%26+Found";
 
     return (
+        <>
         <Modal
             transparent
             visible={visible}
             animationType="fade"
             onRequestClose={handleClose}
         >
-            <TouchableOpacity
-                style={styles.overlay}
-                activeOpacity={1}
-                onPress={handleClose}
-            >
-                <TouchableWithoutFeedback>
-                    <View style={styles.modal}>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={handleClose}
-                        >
-                            <Ionicons
-                                name="close"
-                                size={24}
-                                color={colors.text}
-                            />
-                        </TouchableOpacity>
+            <View style={styles.overlay}>
+                {/* Backdrop press listener isolated as absolute sibling to allow internal scrolling */}
+                <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
 
-                        <Image
-                            source={{ uri:image}}
-                            style={styles.image}
+                <View style={styles.modal}>
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={handleClose}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <Ionicons
+                            name="close"
+                            size={24}
+                            color={colors.text}
                         />
+                    </TouchableOpacity>
 
-                        <View
-                            style={[
-                                styles.statusBadge,
-                                { backgroundColor: statusColor },
-                            ]}
-                        >
-                            <Text style={styles.statusBadgeText}>
-                                {STATUS_LABEL[entry.status].toUpperCase()}
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.body}
+                        showsVerticalScrollIndicator={true}
+                        nestedScrollEnabled={true}
+                    >
+                        <View style={styles.imageWrap}>
+                            <TouchableOpacity
+                                activeOpacity={0.9}
+                                onPress={() => setZoomVisible(true)}
+                            >
+                                <Image
+                                    source={{ uri: image }}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
+                            </TouchableOpacity>
+                            <View
+                                style={[
+                                    styles.statusBadge,
+                                    { backgroundColor: statusColor },
+                                ]}
+                            >
+                                <Text style={styles.statusBadgeText}>
+                                    {STATUS_LABEL[entry.status].toUpperCase()}
+                                </Text>
+                            </View>
+                        </View>
+
+                        <Text style={styles.title}>
+                            {entry.item_name}
+                        </Text>
+
+                        {!!entry.description && (
+                            <Text style={styles.description}>
+                                {entry.description}
+                            </Text>
+                        )}
+
+                        <View style={styles.infoRow}>
+                            <Ionicons
+                                name="calendar-outline"
+                                size={18}
+                                color={colors.textSecondary}
+                            />
+                            <Text style={styles.infoText}>
+                                Reported{" "}
+                                {formatRelativeDate(
+                                    entry.added_on_timestamp
+                                )}
                             </Text>
                         </View>
 
-                        <ScrollView contentContainerStyle={styles.body}>
-                            <Text style={styles.title}>
-                                {entry.item_name}
+                        <View style={styles.infoRow}>
+                            <Ionicons
+                                name="mail-outline"
+                                size={18}
+                                color={colors.textSecondary}
+                            />
+                            <Text style={styles.infoText}>
+                                {entry.added_by_email}
                             </Text>
+                        </View>
 
-                            {!!entry.description && (
-                                <Text style={styles.description}>
-                                    {entry.description}
-                                </Text>
-                            )}
+                        {/* Only original poster can see actions */}
+                        {isOwner && (
+                            <View style={styles.ownerActions}>
+                                <TouchableOpacity
+                                    style={styles.secondaryButton}
+                                    onPress={onEdit}
+                                    disabled={submittingAction}
+                                >
+                                    <Ionicons
+                                        name="create-outline"
+                                        size={16}
+                                        color={colors.text}
+                                    />
+                                    <Text
+                                        style={
+                                            styles.secondaryButtonText
+                                        }
+                                    >
+                                        Edit
+                                    </Text>
+                                </TouchableOpacity>
 
-                            <View style={styles.infoRow}>
-                                <Ionicons
-                                    name="calendar-outline"
-                                    size={18}
-                                    color={colors.textSecondary}
-                                />
-                                <Text style={styles.infoText}>
-                                    Reported{" "}
-                                    {formatRelativeDate(
-                                        entry.added_on_timestamp
-                                    )}
-                                </Text>
-                            </View>
-
-                            <View style={styles.infoRow}>
-                                <Ionicons
-                                    name="mail-outline"
-                                    size={18}
-                                    color={colors.textSecondary}
-                                />
-                                <Text style={styles.infoText}>
-                                    {entry.added_by_email}
-                                </Text>
-                            </View>
-
-                            {isOwner && (
-                                <View style={styles.ownerActions}>
+                                {entry.status !== "found" && (
                                     <TouchableOpacity
                                         style={styles.secondaryButton}
-                                        onPress={onEdit}
+                                        onPress={handleMarkFound}
                                         disabled={submittingAction}
                                     >
                                         <Ionicons
-                                            name="create-outline"
+                                            name="checkmark-circle-outline"
                                             size={16}
                                             color={colors.text}
                                         />
@@ -238,136 +270,122 @@ const LostFoundDetailModal = ({
                                                 styles.secondaryButtonText
                                             }
                                         >
-                                            Edit
+                                            Mark Recovered
                                         </Text>
                                     </TouchableOpacity>
+                                )}
 
-                                    {entry.status !== "found" && (
-                                        <TouchableOpacity
-                                            style={styles.secondaryButton}
-                                            onPress={handleMarkFound}
-                                            disabled={submittingAction}
-                                        >
-                                            <Ionicons
-                                                name="checkmark-circle-outline"
-                                                size={16}
-                                                color={colors.text}
-                                            />
-                                            <Text
-                                                style={
-                                                    styles.secondaryButtonText
-                                                }
-                                            >
-                                                Mark Recovered
-                                            </Text>
-                                        </TouchableOpacity>
-                                    )}
+                                <TouchableOpacity
+                                    style={styles.dangerButton}
+                                    onPress={handleDelete}
+                                    disabled={submittingAction}
+                                >
+                                    <Ionicons
+                                        name="trash-outline"
+                                        size={16}
+                                        color={colors.danger ?? "#DC2626"}
+                                    />
+                                    <Text style={styles.dangerButtonText}>
+                                        Delete
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
 
-                                    <TouchableOpacity
-                                        style={styles.dangerButton}
-                                        onPress={handleDelete}
-                                        disabled={submittingAction}
-                                    >
-                                        <Ionicons
-                                            name="trash-outline"
-                                            size={16}
-                                            color={colors.danger ?? "#DC2626"}
-                                        />
-                                        <Text style={styles.dangerButtonText}>
-                                            Delete
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
+                        <View style={styles.divider} />
 
-                            <View style={styles.divider} />
+                        <Text style={styles.sectionTitle}>
+                            Claims{" "}
+                            {entry.found_claims?.length > 0 &&
+                                `(${entry.found_claims.length})`}
+                        </Text>
 
-                            <Text style={styles.sectionTitle}>
-                                Claims{" "}
-                                {entry.found_claims?.length > 0 &&
-                                    `(${entry.found_claims.length})`}
+                        {!entry.found_claims ||
+                            entry.found_claims.length === 0 ? (
+                            <Text style={styles.emptyClaims}>
+                                No claims submitted yet.
                             </Text>
-
-                            {!entry.found_claims ||
-                                entry.found_claims.length === 0 ? (
-                                <Text style={styles.emptyClaims}>
-                                    No claims submitted yet.
-                                </Text>
-                            ) : (
-                                entry.found_claims.map((claim, index) => (
-                                    <View
-                                        key={`${claim.claimed_by_email}-${claim.claim_timestamp}-${index}`}
-                                        style={styles.claimRow}
-                                    >
-                                        <View style={styles.claimHeader}>
-                                            <Text style={styles.claimEmail}>
-                                                {claim.claimed_by_email}
-                                            </Text>
-                                            <Text style={styles.claimTime}>
-                                                {formatRelativeDate(
-                                                    claim.claim_timestamp
-                                                )}
-                                            </Text>
-                                        </View>
-                                        <Text style={styles.claimRemarks}>
-                                            {claim.remarks}
+                        ) : (
+                            entry.found_claims.map((claim, index) => (
+                                <View
+                                    key={`${claim.claimed_by_email}-${claim.claim_timestamp}-${index}`}
+                                    style={styles.claimRow}
+                                >
+                                    <View style={styles.claimHeader}>
+                                        <Text style={styles.claimEmail}>
+                                            {claim.claimed_by_email}
+                                        </Text>
+                                        <Text style={styles.claimTime}>
+                                            {formatRelativeDate(
+                                                claim.claim_timestamp
+                                            )}
                                         </Text>
                                     </View>
-                                ))
-                            )}
-
-                            {isActive && !isOwner && (
-                                <>
-                                    <View style={styles.divider} />
-
-                                    <Text style={styles.sectionTitle}>
-                                        Claim Found
+                                    <Text style={styles.claimRemarks}>
+                                        {claim.remarks}
                                     </Text>
+                                </View>
+                            ))
+                        )}
 
-                                    <Text style={styles.claimHint}>
-                                        Let the reporter know where the
-                                        item was found or how it can be
-                                        collected.
-                                    </Text>
+                        {isActive && !isOwner && (
+                            <>
+                                <View style={styles.divider} />
 
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="e.g. Found near SAC entrance"
-                                        placeholderTextColor={
-                                            colors.textSecondary
-                                        }
-                                        value={remarks}
-                                        onChangeText={setRemarks}
-                                        multiline
-                                        numberOfLines={3}
-                                    />
+                                <Text style={styles.sectionTitle}>
+                                    Claim Found
+                                </Text>
 
-                                    <TouchableOpacity
-                                        style={styles.primaryButton}
-                                        onPress={handleSubmitClaim}
-                                        disabled={submittingClaim}
-                                    >
-                                        {submittingClaim ? (
-                                            <ActivityIndicator
-                                                color="#FFF"
-                                            />
-                                        ) : (
-                                            <Text
-                                                style={
-                                                    styles.primaryButtonText
-                                                }
-                                            >
-                                                Submit Claim
-                                            </Text>
-                                        )}
-                                    </TouchableOpacity>
-                                </>
-                            )}
-                        </ScrollView>
-                    </View>
-                </TouchableWithoutFeedback>
-            </TouchableOpacity>
+                                <Text style={styles.claimHint}>
+                                    Let the reporter know where the
+                                    item was found or how it can be
+                                    collected.
+                                </Text>
+
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="e.g. Found near SAC entrance"
+                                    placeholderTextColor={
+                                        colors.textSecondary
+                                    }
+                                    value={remarks}
+                                    onChangeText={setRemarks}
+                                    multiline
+                                    numberOfLines={3}
+                                />
+
+                                <TouchableOpacity
+                                    style={styles.primaryButton}
+                                    onPress={handleSubmitClaim}
+                                    disabled={submittingClaim}
+                                >
+                                    {submittingClaim ? (
+                                        <ActivityIndicator
+                                            color="#FFF"
+                                        />
+                                    ) : (
+                                        <Text
+                                            style={
+                                                styles.primaryButtonText
+                                            }
+                                        >
+                                            Submit Claim
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                            </>
+                        )}
+                    </ScrollView>
+                </View>
+            </View>
         </Modal>
+
+        <ImageZoomModal
+            visible={zoomVisible}
+            imageUri={image}
+            onClose={() => setZoomVisible(false)}
+        />
+        </>
     );
 };
 
@@ -394,6 +412,7 @@ const getStyles = ({
             backgroundColor: colors.surface,
             borderRadius: radius.xl,
             overflow: "hidden",
+            zIndex: 1,
         },
 
         closeButton: {
@@ -409,15 +428,26 @@ const getStyles = ({
             backgroundColor: colors.surface,
         },
 
-        image: {
+        scrollView: {
+            width: "100%",
+        },
+
+        imageWrap: {
+            position: "relative",
             width: "100%",
             height: 240,
             backgroundColor: colors.border,
+            marginBottom: spacing.md,
+        },
+
+        image: {
+            width: "100%",
+            height: "100%",
         },
 
         statusBadge: {
             position: "absolute",
-            top: 200,
+            bottom: 12,
             left: spacing.lg,
             paddingHorizontal: 10,
             paddingVertical: 6,
@@ -432,6 +462,7 @@ const getStyles = ({
 
         body: {
             padding: spacing.lg,
+            paddingTop: 0,
         },
 
         title: {

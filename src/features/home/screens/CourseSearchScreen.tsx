@@ -15,7 +15,7 @@ export default function CourseSearchScreen() {
 
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
-
+    const [saving, setSaving] = useState(false);
     const [allCourses, setAllCourses] = useState<string[]>([]);
     const [selectedCourses, setSelectedCourses] = useState<Set<string>>(new Set());
 
@@ -61,11 +61,25 @@ export default function CourseSearchScreen() {
 
     const handleSave = async () => {
         const coursesArray = Array.from(selectedCourses);
-        await AsyncStorage.setItem('@selected_courses', JSON.stringify(coursesArray));
-        navigation.goBack(); // Go back to Home
+        setSaving(true);
+
+        try {
+            await AsyncStorage.setItem('@selected_courses', JSON.stringify(coursesArray));
+
+            navigation.goBack();
+
+            if (coursesArray.length > 0) {
+                timetableService.getTimetable(coursesArray).catch(err => {
+                    console.error("Background timetable update failed:", err);
+                });
+            }
+        } catch (error) {
+            Alert.alert('Error', "Couldn't save your selection.");
+        } finally {
+            setSaving(false);
+        }
     };
 
-    // Inside CourseSearchScreen.tsx:
     const renderItem = ({ item }: { item: string }) => {
         const isSelected = selectedCourses.has(item);
 
@@ -103,8 +117,8 @@ export default function CourseSearchScreen() {
                     onChangeText={setSearch}
                     autoFocus
                 />
-                <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-                    <Text style={styles.saveText}>Done</Text>
+                <TouchableOpacity onPress={handleSave} style={styles.saveButton} disabled={saving}>
+                    <Text style={styles.saveText}>{saving ? 'Saving...' : 'Done'}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -170,13 +184,13 @@ const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.c
         borderRadius: 8
     },
     courseTextContainer: {
-        flex: 1,          
-        marginRight: 12,  
+        flex: 1,
+        marginRight: 12,
     },
     courseCode: {
         ...typography.h3,
         color: colors.text,
-        flexShrink: 1,   
+        flexShrink: 1,
     },
     checkbox: {
         width: 24,

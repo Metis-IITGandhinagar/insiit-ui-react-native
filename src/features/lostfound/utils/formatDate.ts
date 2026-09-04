@@ -1,9 +1,5 @@
 import { parseBackendInstant } from "@/core/api/backendTime";
 
-/**
- * The API sends RFC 3339 strings, not unix seconds — go through parseBackendInstant
- * rather than doing arithmetic on the raw value.
- */
 export function formatRelativeDate(timestamp: string | number): string {
     const then = parseBackendInstant(timestamp)?.getTime();
     if (then === undefined) return "";
@@ -26,11 +22,10 @@ export function formatRelativeDate(timestamp: string | number): string {
     });
 }
 
-export function daysUntilArchive(addedOnTimestamp: string | number): number {
-    const ARCHIVE_AFTER_DAYS = 30;
+export function daysUntilArchive(addedOnTimestamp: string | number, maxDays = 7): number {
     const addedOn = parseBackendInstant(addedOnTimestamp)?.getTime();
     if (addedOn === undefined) return 0;
 
-    const archiveAt = addedOn + ARCHIVE_AFTER_DAYS * 24 * 60 * 60 * 1000;
+    const archiveAt = addedOn + maxDays * 24 * 60 * 60 * 1000;
     return Math.max(0, Math.ceil((archiveAt - Date.now()) / (1000 * 60 * 60 * 24)));
 }

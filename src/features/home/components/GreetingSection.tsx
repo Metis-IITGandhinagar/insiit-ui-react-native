@@ -1,6 +1,6 @@
 import React from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { RefreshCw, Settings2 } from "lucide-react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Megaphone, Settings2 } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "@/core/theme";
 import { useAuth } from "@/core/auth/useAuth";
@@ -44,16 +44,11 @@ const GreetingSection = ({ onRefresh, refreshing = false }: Props) => {
                 <TouchableOpacity
                     style={[styles.settingsButton, styles.refreshButton]}
                     activeOpacity={0.75}
-                    onPress={onRefresh}
-                    disabled={refreshing}
-                    accessibilityLabel="Refresh"
+                    onPress={() => navigation.navigate("Announcements")}
+                    accessibilityLabel="Announcements"
                     accessibilityRole="button"
                 >
-                    {refreshing ? (
-                        <ActivityIndicator size="small" color={colors.primary} />
-                    ) : (
-                        <RefreshCw size={20} color={colors.primary} strokeWidth={2} />
-                    )}
+                    <Megaphone size={20} color={colors.primary} strokeWidth={2} />
                 </TouchableOpacity>
             )}
 

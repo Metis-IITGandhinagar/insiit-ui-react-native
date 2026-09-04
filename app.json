@@ -20,8 +20,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.metis.insiit",
-      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.metis.insiitjanil",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
@@ -29,7 +28,7 @@
       }
     },
     "android": {
-      "package": "com.metis.insiit",
+      "package": "com.metis.insiitjanil",
       "versionCode": 16,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
@@ -67,14 +66,6 @@
           "microphonePermission": false
         }
       ],
-      [
-        "@react-native-firebase/app",
-        {
-          "androidServicesFile": "./google-services.json"
-        }
-      ],
-      "@react-native-firebase/auth",
-      "@react-native-google-signin/google-signin",
       "./plugins/withAndroidSigning",
       "./plugins/withGradleMemory",
       "./plugins/withIosPodMinDeploymentTarget",
@@ -84,7 +75,8 @@
         {
           "RNMapboxMapsVersion": "11.20.1"
         }
-      ]
+      ],
+      "expo-image"
     ]
   }
 }

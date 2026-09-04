@@ -93,7 +93,9 @@ const getStyles = ({ colors, radius, spacing, typography }: any) => StyleSheet.c
         marginHorizontal: -spacing.lg,
         // Vertical slack turns the band from pill-height into something you can grab
         // anywhere in the section, which is the whole point of a scrollable chip row.
-        marginVertical: -spacing.sm,
+        // Matched 1:1 against row.paddingVertical below so the extra grab area stays
+        // invisible — the pills sit in the same visual spot either way.
+        marginVertical: -spacing.md,
     },
 
     row: {
@@ -101,7 +103,7 @@ const getStyles = ({ colors, radius, spacing, typography }: any) => StyleSheet.c
         alignItems: "center",
         gap: spacing.sm,
         paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.sm,
+        paddingVertical: spacing.md,
     },
 
     label: {

@@ -90,7 +90,7 @@ export const timetableService = {
                 }
             }
 
-            const response = await fetch(`${BASE_URL}/courses`);
+            const response = await fetch(`${BASE_URL}/timetable`);
             if (!response.ok) throw new Error('Failed to fetch courses');
 
             const rawData = await response.json();
@@ -133,24 +133,36 @@ export const timetableService = {
             return [];
         }
 
+        const codes = courses.map(extractCourseCode);
+        const url = `${BASE_URL}/timetable`;
+
         try {
-            const response = await fetch(`${BASE_URL}/timetable`, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ courses }),
+                body: JSON.stringify({ courses: codes }),
             });
 
-            if (!response.ok) throw new Error('Failed to fetch timetable');
+            const bodyText = await response.text();
 
-            const rawData: RawTimetableGrid = await response.json();
+            if (!response.ok) throw new Error(`Failed to fetch timetable (${response.status})`);
+
+            const rawData: RawTimetableGrid = JSON.parse(bodyText);
+
             const sessions = transformGridToSessions(rawData);
 
             AsyncStorage.setItem(SCHEDULE_CACHE_KEY, JSON.stringify(sessions));
 
             return sessions;
         } catch (error) {
-            console.error('Network failed, falling back to cached schedule:', error);
-            return await timetableService.getLocalTimetable();
+            console.error('[timetable] fetch/parse failed:', error);
+            const cached = await timetableService.getLocalTimetable();
+            if (cached.length > 0) return cached;
+            throw error;
         }
     },
 };
+
+export function extractCourseCode(courseListItem: string): string {
+    return courseListItem.split(' - ')[0].trim();
+}

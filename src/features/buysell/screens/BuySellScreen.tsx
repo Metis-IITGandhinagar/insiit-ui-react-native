@@ -24,12 +24,13 @@ import { useAuthGate } from '@/core/auth/useAuthGate';
 import { formatBackendDateTime } from '@/core/api/backendTime';
 import { resolveBackendAsset } from '@/core/api/apiClient';
 import { fetchImageAsBase64, pickImagesAsBase64 } from '@/shared/media/pickImages';
+import ImageZoomModal from '@/shared/components/ImageZoomModal';
 import { useBuySell } from '../hooks/useBuySell';
 import { BuySellEntry, buySellService } from '../services/buySellService';
 
 export default function BuySellScreen() {
     const theme = useTheme();
-    const { colors } = theme;
+    const { colors, spacing } = theme;
     const styles = getStyles(theme);
     const { user } = useAuth();
     const { ensureSignedIn } = useAuthGate();
@@ -50,6 +51,7 @@ export default function BuySellScreen() {
     const [isLoadingImages, setLoadingImages] = useState(false);
     const [isSubmitting, setSubmitting] = useState(false);
     const [busyId, setBusyId] = useState<number | null>(null);
+    const [zoomImage, setZoomImage] = useState<string | null>(null);
 
     const resetSheet = useCallback(() => {
         setSheet(null);
@@ -117,9 +119,9 @@ export default function BuySellScreen() {
             Alert.alert(
                 'Error',
                 err?.message ||
-                    (sheet.mode === 'edit'
-                        ? 'Could not update your listing.'
-                        : 'Could not create your listing.')
+                (sheet.mode === 'edit'
+                    ? 'Could not update your listing.'
+                    : 'Could not create your listing.')
             );
         } finally {
             setSubmitting(false);
@@ -133,8 +135,6 @@ export default function BuySellScreen() {
         setImages([]);
         setSheet({ mode: 'edit', entry });
 
-        // The edit endpoint replaces img_urls with whatever base64 it receives, so the
-        // existing photos have to be pulled back down to survive the save.
         if (entry.img_urls.length === 0) return;
         setLoadingImages(true);
         try {
@@ -202,8 +202,6 @@ export default function BuySellScreen() {
                     contentContainerStyle={styles.content}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
-                        // Only spin here for a pull-to-refresh; the first load is already
-                        // covered by the centred indicator below.
                         <RefreshControl
                             refreshing={loading && entries.length > 0}
                             onRefresh={refresh}
@@ -271,13 +269,21 @@ export default function BuySellScreen() {
                                             showsHorizontalScrollIndicator={false}
                                             contentContainerStyle={styles.thumbRow}
                                         >
-                                            {entry.img_urls.map((url) => (
-                                                <Image
-                                                    key={url}
-                                                    source={{ uri: resolveBackendAsset(url) }}
-                                                    style={styles.thumb}
-                                                />
-                                            ))}
+                                            {entry.img_urls.map((url) => {
+                                                const resolved = resolveBackendAsset(url);
+                                                return (
+                                                    <TouchableOpacity
+                                                        key={url}
+                                                        activeOpacity={0.85}
+                                                        onPress={() => resolved && setZoomImage(resolved)}
+                                                    >
+                                                        <Image
+                                                            source={{ uri: resolved }}
+                                                            style={styles.thumb}
+                                                        />
+                                                    </TouchableOpacity>
+                                                );
+                                            })}
                                         </ScrollView>
                                     )}
 
@@ -355,119 +361,134 @@ export default function BuySellScreen() {
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 >
                     <View style={styles.modalCard}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>
-                                {sheet?.mode === 'bid'
-                                    ? `Bid on ${sheet.entry.item_name}`
-                                    : sheet?.mode === 'edit'
-                                        ? 'Edit listing'
-                                        : 'List an item'}
-                            </Text>
-                            <TouchableOpacity onPress={closeSheet} hitSlop={8}>
-                                <X size={20} color={colors.textSecondary} />
-                            </TouchableOpacity>
-                        </View>
-
-                        {sheet?.mode !== 'bid' ? (
-                            <>
-                                <Text style={styles.label}>Item</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    value={itemName}
-                                    onChangeText={setItemName}
-                                    placeholder="Study desk"
-                                    placeholderTextColor={colors.textSecondary}
-                                />
-
-                                <Text style={styles.label}>Description</Text>
-                                <TextInput
-                                    style={[styles.input, styles.inputMultiline]}
-                                    value={description}
-                                    onChangeText={setDescription}
-                                    placeholder="Condition, age, asking price…"
-                                    placeholderTextColor={colors.textSecondary}
-                                    multiline
-                                />
-
-                                <Text style={styles.label}>Photos (optional)</Text>
-                                <View style={styles.thumbRow}>
-                                    {images.map((uri, index) => (
-                                        <TouchableOpacity
-                                            key={`${uri.slice(-16)}-${index}`}
-                                            onPress={() =>
-                                                setImages((prev) => prev.filter((_, i) => i !== index))
-                                            }
-                                        >
-                                            <Image source={{ uri }} style={styles.thumb} />
-                                            <View style={styles.thumbRemove}>
-                                                <X size={12} color="#FFFFFF" />
-                                            </View>
-                                        </TouchableOpacity>
-                                    ))}
-
-                                    {images.length < 4 && (
-                                        <TouchableOpacity
-                                            style={styles.thumbAdd}
-                                            onPress={handleAttachImages}
-                                        >
-                                            <ImagePlus size={20} color={colors.textSecondary} />
-                                        </TouchableOpacity>
-                                    )}
+                        <SafeAreaView edges={['bottom']}>
+                            <ScrollView
+                                keyboardShouldPersistTaps="handled"
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ gap: spacing.xs, paddingBottom: spacing.sm }}
+                            >
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>
+                                        {sheet?.mode === 'bid'
+                                            ? `Bid on ${sheet.entry.item_name}`
+                                            : sheet?.mode === 'edit'
+                                                ? 'Edit listing'
+                                                : 'List an item'}
+                                    </Text>
+                                    <TouchableOpacity onPress={closeSheet} hitSlop={8}>
+                                        <X size={20} color={colors.textSecondary} />
+                                    </TouchableOpacity>
                                 </View>
 
-                                {sheet?.mode === 'edit' && (
-                                    <Text style={styles.hint}>
-                                        {isLoadingImages
-                                            ? 'Loading the current photos…'
-                                            : 'Saving replaces every photo on this listing — remove any you no longer want.'}
-                                    </Text>
+                                {sheet?.mode !== 'bid' ? (
+                                    <>
+                                        <Text style={styles.label}>Item</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            value={itemName}
+                                            onChangeText={setItemName}
+                                            placeholder="Study desk"
+                                            placeholderTextColor={colors.textSecondary}
+                                        />
+
+                                        <Text style={styles.label}>Description</Text>
+                                        <TextInput
+                                            style={[styles.input, styles.inputMultiline]}
+                                            value={description}
+                                            onChangeText={setDescription}
+                                            placeholder="Condition, age, asking price…"
+                                            placeholderTextColor={colors.textSecondary}
+                                            multiline
+                                        />
+
+                                        <Text style={styles.label}>Photos (optional)</Text>
+                                        <View style={styles.thumbRow}>
+                                            {images.map((uri, index) => (
+                                                <TouchableOpacity
+                                                    key={`${uri.slice(-16)}-${index}`}
+                                                    onPress={() =>
+                                                        setImages((prev) => prev.filter((_, i) => i !== index))
+                                                    }
+                                                >
+                                                    <Image source={{ uri }} style={styles.thumb} />
+                                                    <View style={styles.thumbRemove}>
+                                                        <X size={12} color="#FFFFFF" />
+                                                    </View>
+                                                </TouchableOpacity>
+                                            ))}
+
+                                            {images.length < 4 && (
+                                                <TouchableOpacity
+                                                    style={styles.thumbAdd}
+                                                    onPress={handleAttachImages}
+                                                >
+                                                    <ImagePlus size={20} color={colors.textSecondary} />
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+
+                                        {sheet?.mode === 'edit' && (
+                                            <Text style={styles.hint}>
+                                                {isLoadingImages
+                                                    ? 'Loading the current photos…'
+                                                    : 'Saving replaces every photo on this listing — remove any you no longer want.'}
+                                            </Text>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Text style={styles.label}>Your bid (₹)</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            value={amount}
+                                            onChangeText={setAmount}
+                                            placeholder="1200"
+                                            placeholderTextColor={colors.textSecondary}
+                                            keyboardType="numeric"
+                                        />
+
+                                        <Text style={styles.label}>Remarks (optional)</Text>
+                                        <TextInput
+                                            style={[styles.input, styles.inputMultiline]}
+                                            value={description}
+                                            onChangeText={setDescription}
+                                            placeholder="Can collect this weekend…"
+                                            placeholderTextColor={colors.textSecondary}
+                                            multiline
+                                        />
+                                    </>
                                 )}
-                            </>
-                        ) : (
-                            <>
-                                <Text style={styles.label}>Your bid (₹)</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    value={amount}
-                                    onChangeText={setAmount}
-                                    placeholder="1200"
-                                    placeholderTextColor={colors.textSecondary}
-                                    keyboardType="numeric"
-                                />
 
-                                <Text style={styles.label}>Remarks (optional)</Text>
-                                <TextInput
-                                    style={[styles.input, styles.inputMultiline]}
-                                    value={description}
-                                    onChangeText={setDescription}
-                                    placeholder="Can collect this weekend…"
-                                    placeholderTextColor={colors.textSecondary}
-                                    multiline
-                                />
-                            </>
-                        )}
-
-                        <TouchableOpacity
-                            style={[
-                                styles.actionButton,
-                                (isSubmitting || isLoadingImages) && styles.buttonDisabled,
-                            ]}
-                            onPress={handleSubmitSheet}
-                            disabled={isSubmitting || isLoadingImages}
-                        >
-                            <Text style={styles.actionButtonText}>
-                                {isSubmitting
-                                    ? 'Submitting…'
-                                    : sheet?.mode === 'bid'
-                                        ? 'Place bid'
-                                        : sheet?.mode === 'edit'
-                                            ? 'Save changes'
-                                            : 'List item'}
-                            </Text>
-                        </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.actionButton,
+                                        (isSubmitting || isLoadingImages) && styles.buttonDisabled,
+                                        { marginTop: spacing.md },
+                                    ]}
+                                    onPress={handleSubmitSheet}
+                                    disabled={isSubmitting || isLoadingImages}
+                                >
+                                    <Text style={styles.actionButtonText}>
+                                        {isSubmitting
+                                            ? 'Submitting…'
+                                            : sheet?.mode === 'bid'
+                                                ? 'Place bid'
+                                                : sheet?.mode === 'edit'
+                                                    ? 'Save changes'
+                                                    : 'List item'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </ScrollView>
+                        </SafeAreaView>
                     </View>
                 </KeyboardAvoidingView>
             </Modal>
+
+            <ImageZoomModal
+                visible={!!zoomImage}
+                imageUri={zoomImage}
+                onClose={() => setZoomImage(null)}
+            />
         </>
     );
 }
@@ -676,8 +697,9 @@ const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
         backgroundColor: colors.surface,
         borderTopLeftRadius: radius.lg,
         borderTopRightRadius: radius.lg,
-        padding: spacing.lg,
-        gap: spacing.xs,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.lg,
+        maxHeight: '85%',
     },
     modalHeader: {
         flexDirection: 'row',

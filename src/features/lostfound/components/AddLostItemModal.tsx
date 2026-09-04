@@ -5,7 +5,7 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    TouchableWithoutFeedback,
+    Pressable,
     ScrollView,
     TextInput,
     Image,
@@ -24,7 +24,6 @@ interface Props {
     visible: boolean;
     onClose: () => void;
     onSubmit: (request: LostFoundRequest) => Promise<void>;
-    // When set, the modal edits this entry instead of creating a new one.
     editingEntry?: LostFoundEntry | null;
 }
 
@@ -53,8 +52,6 @@ const AddLostItemModal = ({
             setItemName(editingEntry?.item_name ?? "");
             setDescription(editingEntry?.description ?? "");
             setImageBase64(null);
-            // img_urls are relative paths; resolve so the preview loads and so an
-            // unchanged photo can be fetched back on submit.
             setImagePreviewUri(resolveBackendAsset(editingEntry?.img_urls?.[0]) ?? null);
         }
     }, [visible, editingEntry]);
@@ -80,13 +77,14 @@ const AddLostItemModal = ({
         }
 
         const result = await ImagePicker.launchImageLibraryAsync({
-            // MediaTypeOptions is deprecated in SDK 54+; the array form is current.
             mediaTypes: ['images'],
             allowsEditing: true,
+            aspect: [4, 3],
             quality: 0.7,
             base64: true,
+            ...({ cropperChooseText: "Done" } as any),
         });
-
+        
         if (!result.canceled && result.assets?.[0]) {
             const asset = result.assets[0];
             setImagePreviewUri(asset.uri);
@@ -112,7 +110,6 @@ const AddLostItemModal = ({
             return;
         }
 
-        // On create, an image is required by convention (cards look for img_urls[0]).
         if (!isEditing && !imageBase64) {
             Alert.alert(
                 "Add a photo",
@@ -124,8 +121,6 @@ const AddLostItemModal = ({
         try {
             setSubmitting(true);
 
-            // The edit endpoint REPLACES img_urls with whatever base64 it receives, so
-            // an unchanged photo has to be fetched back and resent or it gets wiped.
             let images: string[] = imageBase64 ? [imageBase64] : [];
             if (!imageBase64 && imagePreviewUri) {
                 images = [await fetchImageAsBase64(imagePreviewUri)];
@@ -142,7 +137,7 @@ const AddLostItemModal = ({
             Alert.alert(
                 "Error",
                 e?.message ??
-                    `Couldn't ${isEditing ? "update" : "submit"} the report. Please try again.`
+                `Couldn't ${isEditing ? "update" : "submit"} the report. Please try again.`
             );
         } finally {
             setSubmitting(false);
@@ -156,108 +151,110 @@ const AddLostItemModal = ({
             animationType="fade"
             onRequestClose={resetAndClose}
         >
-            <TouchableOpacity
-                style={styles.overlay}
-                activeOpacity={1}
-                onPress={resetAndClose}
-            >
-                <TouchableWithoutFeedback>
-                    <View style={styles.modal}>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={resetAndClose}
-                        >
-                            <Ionicons
-                                name="close"
-                                size={24}
-                                color={colors.text}
-                            />
-                        </TouchableOpacity>
+            <View style={styles.overlay}>
+                <Pressable style={StyleSheet.absoluteFill} onPress={resetAndClose} />
 
-                        <ScrollView contentContainerStyle={styles.body}>
-                            <Text style={styles.title}>
-                                {isEditing
-                                    ? "Edit Report"
-                                    : "Report Lost Item"}
-                            </Text>
+                <View style={styles.modal}>
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={resetAndClose}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <Ionicons
+                            name="close"
+                            size={24}
+                            color={colors.text}
+                        />
+                    </TouchableOpacity>
 
-                            <Text style={styles.label}>Photo</Text>
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.body}
+                        nestedScrollEnabled={true}
+                    >
+                        <Text style={styles.title}>
+                            {isEditing
+                                ? "Edit Report"
+                                : "Report Lost Item"}
+                        </Text>
 
-                            {imagePreviewUri ? (
-                                <View style={styles.imageWrap}>
-                                    <Image
-                                        source={{ uri: imagePreviewUri }}
-                                        style={styles.imagePreview}
-                                    />
-                                    <TouchableOpacity
-                                        style={styles.removeImageButton}
-                                        onPress={handleRemoveImage}
-                                    >
-                                        <Ionicons
-                                            name="close-circle"
-                                            size={24}
-                                            color="#FFF"
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            ) : (
+                        <Text style={styles.label}>Photo</Text>
+
+                        {imagePreviewUri ? (
+                            <View style={styles.imageWrap}>
+                                <Image
+                                    source={{ uri: imagePreviewUri }}
+                                    style={styles.imagePreview}
+                                    resizeMode="cover"
+                                />
                                 <TouchableOpacity
-                                    style={styles.imagePickerButton}
-                                    onPress={handlePickImage}
+                                    style={styles.removeImageButton}
+                                    onPress={handleRemoveImage}
                                 >
                                     <Ionicons
-                                        name="camera-outline"
-                                        size={28}
-                                        color={colors.textSecondary}
+                                        name="close-circle"
+                                        size={24}
+                                        color="#FFF"
                                     />
-                                    <Text style={styles.imagePickerText}>
-                                        Add a photo
-                                    </Text>
                                 </TouchableOpacity>
-                            )}
-
-                            <Text style={styles.label}>Item Name</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="e.g. Black water bottle"
-                                placeholderTextColor={colors.textSecondary}
-                                value={itemName}
-                                onChangeText={setItemName}
-                            />
-
-                            <Text style={styles.label}>Description</Text>
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    styles.textArea,
-                                ]}
-                                placeholder="Describe the item, where you last saw it, any identifying marks..."
-                                placeholderTextColor={colors.textSecondary}
-                                value={description}
-                                onChangeText={setDescription}
-                                multiline
-                                numberOfLines={4}
-                            />
-
+                            </View>
+                        ) : (
                             <TouchableOpacity
-                                style={styles.primaryButton}
-                                onPress={handleSubmit}
-                                disabled={submitting}
+                                style={styles.imagePickerButton}
+                                onPress={handlePickImage}
                             >
-                                {submitting ? (
-                                    <ActivityIndicator color="#FFF" />
-                                ) : (
-                                    <Text style={styles.primaryButtonText}>
-                                        {isEditing
-                                            ? "Save Changes"
-                                            : "Submit Report"}
-                                    </Text>
-                                )}
+                                <Ionicons
+                                    name="image-outline"
+                                    size={28}
+                                    color={colors.textSecondary}
+                                />
+                                <Text style={styles.imagePickerText}>
+                                    Choose from Library
+                                </Text>
                             </TouchableOpacity>
-                        </ScrollView>
-                    </View>
-                </TouchableWithoutFeedback>
-            </TouchableOpacity>
+                        )}
+
+                        <Text style={styles.label}>Item Name</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="e.g. Black water bottle"
+                            placeholderTextColor={colors.textSecondary}
+                            value={itemName}
+                            onChangeText={setItemName}
+                        />
+
+                        <Text style={styles.label}>Description</Text>
+                        <TextInput
+                            style={[
+                                styles.input,
+                                styles.textArea,
+                            ]}
+                            placeholder="Describe the item, where you last saw it, any identifying marks..."
+                            placeholderTextColor={colors.textSecondary}
+                            value={description}
+                            onChangeText={setDescription}
+                            multiline
+                            numberOfLines={4}
+                        />
+
+                        <TouchableOpacity
+                            style={styles.primaryButton}
+                            onPress={handleSubmit}
+                            disabled={submitting}
+                        >
+                            {submitting ? (
+                                <ActivityIndicator color="#FFF" />
+                            ) : (
+                                <Text style={styles.primaryButtonText}>
+                                    {isEditing
+                                        ? "Save Changes"
+                                        : "Submit Report"}
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    </ScrollView>
+                </View>
+            </View>
         </Modal>
     );
 };
@@ -285,6 +282,7 @@ const getStyles = ({
             backgroundColor: colors.surface,
             borderRadius: radius.xl,
             overflow: "hidden",
+            zIndex: 1,
         },
 
         closeButton: {
@@ -298,6 +296,10 @@ const getStyles = ({
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: colors.background,
+        },
+
+        scrollView: {
+            width: "100%",
         },
 
         body: {

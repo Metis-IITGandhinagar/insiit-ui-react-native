@@ -60,78 +60,113 @@ export const MessMenuManagementScreen: React.FC = () => {
         return rows;
     };
 
-    const mapDayToInt = (dayStr: string): number => {
-        const d = dayStr.toLowerCase().trim();
-        if (d.includes('mon')) return 1;
-        if (d.includes('tue')) return 2;
-        if (d.includes('wed')) return 3;
-        if (d.includes('thu')) return 4;
-        if (d.includes('fri')) return 5;
-        if (d.includes('sat')) return 6;
-        if (d.includes('sun')) return 7;
-        return parseInt(d) || 0;
+    const MEAL_KEYWORDS: { pattern: RegExp; key: keyof Omit<BackendMessMenuEntry, 'day'> }[] = [
+        { pattern: /breakfast/i, key: 'breakfast' },
+        { pattern: /lunch/i, key: 'lunch' },
+        { pattern: /snacks?/i, key: 'snacks' },
+        { pattern: /dinner/i, key: 'dinner' },
+    ];
+
+    const DAY_NAME_TO_INT: Record<string, number> = {
+        monday: 1, tuesday: 2, wednesday: 3, thursday: 4,
+        friday: 5, saturday: 6, sunday: 7,
+    };
+
+    const isBlankOrDash = (v?: string) => {
+        if (!v) return true;
+        const t = v.trim().toLowerCase();
+        return t === '' || t === '-' || t === 'nan';
+    };
+
+    const parseMessMenuRows = (rows: string[][]): BackendMessMenuEntry[] => {
+        type MealKey = 'breakfast' | 'lunch' | 'snacks' | 'dinner';
+        const dayItems: Record<number, Record<MealKey, string[]>> = {};
+        for (let d = 1; d <= 7; d++) {
+            dayItems[d] = { breakfast: [], lunch: [], snacks: [], dinner: [] };
+        }
+
+        let currentMeal: MealKey | null = null;
+        let dayColumnMap: Record<number, number> | null = null;
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const label = (row[0] || '').trim();
+            if (!label) continue;
+
+            const nextRow = rows[i + 1];
+            const nextIsDayHeader = nextRow && (nextRow[0] || '').trim().toLowerCase() === 'day';
+
+            if (nextIsDayHeader) {
+                const matched = MEAL_KEYWORDS.find(m => m.pattern.test(label));
+                if (matched) {
+                    currentMeal = matched.key;
+                    dayColumnMap = {};
+                    nextRow.forEach((cell, colIdx) => {
+                        const dayInt = DAY_NAME_TO_INT[(cell || '').trim().toLowerCase()];
+                        if (dayInt) dayColumnMap![colIdx] = dayInt;
+                    });
+                    i++;
+                    continue;
+                }
+            }
+
+            if (currentMeal && dayColumnMap) {
+                const hasAnyValue = Object.keys(dayColumnMap).some(
+                    colIdx => !isBlankOrDash(row[Number(colIdx)])
+                );
+                if (!hasAnyValue) continue;
+
+                for (const [colIdxStr, dayInt] of Object.entries(dayColumnMap)) {
+                    const value = (row[Number(colIdxStr)] || '').trim();
+                    if (isBlankOrDash(value)) continue;
+                    dayItems[dayInt][currentMeal].push(`${label}: ${value}`);
+                }
+            }
+        }
+
+        return Array.from({ length: 7 }, (_, idx) => {
+            const day = idx + 1;
+            return { day, ...dayItems[day] };
+        });
+    };
+
+    const extractSheetInfo = (rawUrl: string): { id: string; gid: string } | null => {
+        const url = rawUrl.trim();
+        const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (!idMatch) return null;
+
+        const gidMatch = url.match(/[?#&]gid=(\d+)/);
+        const gid = gidMatch ? gidMatch[1] : '0';
+
+        return { id: idMatch[1], gid };
     };
 
     const handleFetchAndParse = async () => {
         if (!sheetUrl) return Alert.alert('Error', 'Please enter a Google Sheets URL');
 
-        const match = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-        if (!match) return Alert.alert('Error', 'Invalid Google Sheets URL. Make sure it contains /d/DOCUMENT_ID');
+        const sheetInfo = extractSheetInfo(sheetUrl);
+        if (!sheetInfo) return Alert.alert('Error', 'Invalid Google Sheets URL. Make sure it contains /d/DOCUMENT_ID');
 
         setIsProcessing(true);
         setParsedMenu(null);
 
         try {
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetInfo.id}/export?format=csv&gid=${sheetInfo.gid}`;
             const response = await fetch(csvUrl);
 
             if (!response.ok) throw new Error('Failed to fetch the spreadsheet. Ensure link sharing is turned on.');
             const csvText = await response.text();
             const rows = parseCSVText(csvText);
 
-            if (rows.length < 40) throw new Error('Spreadsheet seems incomplete or malformed.');
+            const formattedData = parseMessMenuRows(rows);
 
-            const formattedData: BackendMessMenuEntry[] = [];
-
-            for (let dayCol = 1; dayCol <= 7; dayCol++) {
-
-                const breakfast: string[] = [];
-                for (let r = 3; r <= 12; r++) {
-                    const val = rows[r]?.[dayCol]?.trim();
-                    if (val && val !== '-' && val.toLowerCase() !== 'nan') breakfast.push(val);
-                }
-
-                const lunch: string[] = [];
-                for (let r = 15; r <= 23; r++) {
-                    const val = rows[r]?.[dayCol]?.trim();
-                    if (val && val !== '-' && val.toLowerCase() !== 'nan') lunch.push(val);
-                }
-
-                const snacks: string[] = [];
-                for (let r = 26; r <= 29; r++) {
-                    const val = rows[r]?.[dayCol]?.trim();
-                    if (val && val !== '-' && val.toLowerCase() !== 'nan') snacks.push(val);
-                }
-
-                const dinner: string[] = [];
-                for (let r = 32; r <= 39; r++) {
-                    const val = rows[r]?.[dayCol]?.trim();
-                    if (val && val !== '-' && val.toLowerCase() !== 'nan') dinner.push(val);
-                }
-
-                formattedData.push({
-                    day: dayCol,
-                    breakfast,
-                    lunch,
-                    snacks,
-                    dinner,
-                });
+            const totalItems = formattedData.reduce(
+                (sum, d) => sum + d.breakfast.length + d.lunch.length + d.snacks.length + d.dinner.length,
+                0
+            );
+            if (totalItems === 0) {
+                throw new Error("Couldn't find any meal sections. Check that section rows (e.g. 'Breakfast - ...') are followed directly by a 'Day' row.");
             }
-
-            if (formattedData.length === 0) {
-                throw new Error("Could not parse menu data. Ensure the spreadsheet follows the exact row/column layout.");
-            }
-
             setParsedMenu(formattedData);
             Alert.alert('Success', `Parsed ${formattedData.length} days of menu data, ignoring extra forms.`);
 
