@@ -49,7 +49,7 @@ const LostFoundCard = ({ entry, onPress }: Props) => {
         resolveBackendAsset(entry.img_urls?.[0]) ??
         "https://placehold.co/800x500?text=Lost+%26+Found";
     return (
-        <TouchableOpacity activeOpacity={0.92} onPress={onPress}>
+        <TouchableOpacity activeOpacity={0.92} delayPressIn={50} onPress={onPress}>
             <Card variant="surface" style={styles.cardOverrides}>
                 <View style={styles.imageContainer}>
                     <Image

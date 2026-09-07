@@ -9,7 +9,10 @@ export const LINKS = {
         academic: "https://iitgn.ac.in/academics",
         guest_house:"https://guesthouse.iitgn.ac.in/",
         academic_officials:"https://iitgn.ac.in/about/academic-officials",
-        
+        room_booking:"https://rbs.iitgn.ac.in",
+        tl_booking:"https://docs.google.com/forms/d/1XVCpPXMlnXQFq7vvneKeuyBKSvescLvvc3N44-stPaU/viewform?edit_requested=true",
+        booking_schedule:"https://docs.google.com/spreadsheets/d/1wHKN83kQQGmdQ2eig3jtZtFR07R9h8a-msZVmEbvlzc/edit?usp=sharing",
+
         bhopal_mess:"https://docs.google.com/forms/d/e/1FAIpQLSe14dvwv6ulxYOIKY_o074DRqc0Q3YnjcNf-6NRKOgG9przQw/viewform",
         rgouras_mess:"https://docs.google.com/forms/d/1V5-3xvFkZlNdOvqdDO-X9IFBmLK3zRmQguWcRGzsvbY/viewform",
         jaiswal_mess:"https://docs.google.com/forms/d/e/1FAIpQLSfcTE3RaSzwrx7B2lqoyULTOJP5iC7jKSPdss-hZVeiV84zJw/viewform",

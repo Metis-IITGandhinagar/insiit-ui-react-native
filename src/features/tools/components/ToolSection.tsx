@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Users, LucideIcon } from "lucide-react-native";
+import { Users, DoorOpen, LucideIcon } from "lucide-react-native";
 
 import { useTheme } from "@/core/theme";
 import { Card } from "@shared/components/Card";
@@ -16,6 +16,12 @@ type Tool = {
 };
 
 const tools: Tool[] = [
+    {
+        title: "Room Booking",
+        description: "Book your room from 8 AM - 8 PM",
+        icon: DoorOpen, // Updated to a distinct icon
+        link: LINKS.room_booking,
+    },
     {
         title: "Academic Officials",
         description: "Faculty & administration contacts",
@@ -36,8 +42,10 @@ const ToolSection = () => {
             </Text>
 
             <Card variant="surface" style={{ padding: 0 }}>
-                {tools.map((tool) => {
+                {tools.map((tool, index) => {
                     const Icon = tool.icon;
+                    // Only show the divider if it's NOT the last item in the list
+                    const isLastItem = index === tools.length - 1;
 
                     return (
                         <View key={tool.title} style={styles.rowWrapper}>
@@ -53,7 +61,7 @@ const ToolSection = () => {
                                 title={tool.title}
                                 subtitle={tool.description}
                                 onPress={() => openLink(tool.link)}
-                                showDivider={false}
+                                showDivider={!isLastItem} // Adds the missing line
                             />
                         </View>
                     );
@@ -76,7 +84,7 @@ const getStyles = ({ colors, radius, spacing }: any) => StyleSheet.create({
         marginBottom: spacing.md,
     },
     rowWrapper: {
-        height: 78, 
+        height: 78,
         justifyContent: "center",
     },
     iconContainer: {

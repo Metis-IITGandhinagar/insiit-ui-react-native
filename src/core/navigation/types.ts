@@ -20,6 +20,7 @@ export type RootStackParamList = {
     Profile: undefined;
     Settings: undefined;
     CampusMap: undefined;
+    AdminEventsApproval:undefined;
 };
 /**
  * Mirrors `AdminPermissions` in the backend (src/schemas/admin_schemas.rs) and the
@@ -41,7 +42,8 @@ export interface AppPermissions {
     post_outlet: boolean;
     delete_outlet: boolean;
     put_outlet: boolean;
-
+    approve_event?: boolean;
+    manage_events?: boolean;
     post_announcement: boolean;
 }
 
@@ -58,6 +60,8 @@ export const NO_PERMISSIONS: AppPermissions = {
     delete_outlet: false,
     put_outlet: false,
     post_announcement: false,
+    approve_event: false,
+    manage_events: false,
 };
 
 export interface UserSessionProfile {

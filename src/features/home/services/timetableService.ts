@@ -90,7 +90,8 @@ export const timetableService = {
                 }
             }
 
-            const response = await fetch(`${BASE_URL}/timetable`);
+            // Fixed: Changed endpoint from /timetable to /courses to match the web app API route /api/courses
+            const response = await fetch(`${BASE_URL}/courses`);
             if (!response.ok) throw new Error('Failed to fetch courses');
 
             const rawData = await response.json();

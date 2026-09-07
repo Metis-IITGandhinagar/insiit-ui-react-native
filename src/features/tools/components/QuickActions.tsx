@@ -1,14 +1,19 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { MessageSquareText, GraduationCap, ClipboardList, Building2, LucideIcon } from "lucide-react-native";
-import { useNavigation } from "@react-navigation/native";
+import {
+    MessageSquareText,
+    GraduationCap,
+    ClipboardList,
+    Building2,
+    CalendarCheck, 
+    MonitorPlay,
+    LucideIcon
+} from "lucide-react-native"; import { useNavigation } from "@react-navigation/native";
 
 import { useTheme } from "@/core/theme";
 import { Card } from "@shared/components/Card";
 import { openLink } from "@/utils/linking";
 import { LINKS } from '@/constants/links';
-import MessFeedbackScreen from "../screens/MessFeedbackScreen";
-
 
 
 type ActionItem = {
@@ -26,7 +31,7 @@ const actions: ActionItem[] = [
         title: "Mess",
         subtitle: "Feedback",
         icon: MessageSquareText,
-        color: "#DBEAFE",
+        color: "#DBEAFE", 
         iconColor: "#2563EB",
         type: "screen",
         target: "MessFeedback",
@@ -35,10 +40,10 @@ const actions: ActionItem[] = [
         title: "Academic",
         subtitle: "Portal",
         icon: GraduationCap,
-        color: "#F3E8FF",
+        color: "#F3E8FF", 
         iconColor: "#7C3AED",
         type: "link",
-        target: LINKS.academic, 
+        target: LINKS.academic,
     },
     {
         title: "IMS",
@@ -47,16 +52,34 @@ const actions: ActionItem[] = [
         color: "#DCFCE7",
         iconColor: "#16A34A",
         type: "link",
-        target: LINKS.ims, 
+        target: LINKS.ims,
     },
     {
         title: "Guest",
         subtitle: "House",
         icon: Building2,
-        color: "#FEF3C7",
+        color: "#FEF3C7", 
         iconColor: "#D97706",
         type: "link",
         target: LINKS.guest_house,
+    },
+    {
+        title: "TL",
+        subtitle: "Booking",
+        icon: MonitorPlay, 
+        color: "#FFE4E6", 
+        iconColor: "#E11D48", 
+        type: "link",
+        target: LINKS.tl_booking,
+    },
+    {
+        title: "Booking",
+        subtitle: "Schedule",
+        icon: CalendarCheck, 
+        color: "#CCFBF1", 
+        iconColor: "#0D9488", 
+        type: "link",
+        target: LINKS.booking_schedule,
     },
 ];
 

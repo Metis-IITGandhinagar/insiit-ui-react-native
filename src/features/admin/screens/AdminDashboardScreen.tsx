@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Megaphone, Utensils, Users, RefreshCw } from 'lucide-react-native';
+import { Megaphone, Utensils, Users, RefreshCw, CalendarCheck } from 'lucide-react-native';
 import { useTheme } from '@core/theme';
 import { useAdminPermissions } from '../hooks/useAdminPermissions';
 import { AdminSectionCard } from '../components/AdminSectionCard';
@@ -34,6 +34,7 @@ export const AdminDashboardScreen: React.FC = () => {
         refetch,
         canManageAnnouncements,
         canManageMessMenu,
+        canManageEvents,
         hasAnyAdminPermission,
     } = useAdminPermissions();
 
@@ -43,6 +44,10 @@ export const AdminDashboardScreen: React.FC = () => {
 
     const handleNavigateMessMenu = useCallback(() => {
         navigation.navigate('MessMenuManagement');
+    }, [navigation]);
+
+    const handleNavigateEvents = useCallback(() => {
+        navigation.navigate('AdminEventsApproval');
     }, [navigation]);
 
     const handleNavigateUsers = useCallback(() => {
@@ -72,6 +77,16 @@ export const AdminDashboardScreen: React.FC = () => {
             });
         }
 
+        if (canManageEvents) {
+            items.push({
+                id: 'events',
+                title: 'Event Approvals',
+                description: 'Review and approve events submitted by users',
+                icon: <CalendarCheck size={22} color={colors.primary} />,
+                onPress: handleNavigateEvents,
+            });
+        }
+
         if (permissions?.get_admin) {
             items.push({
                 id: 'users',
@@ -86,9 +101,11 @@ export const AdminDashboardScreen: React.FC = () => {
     }, [
         canManageAnnouncements,
         canManageMessMenu,
+        canManageEvents,
         colors.primary,
         handleNavigateAnnouncements,
         handleNavigateMessMenu,
+        handleNavigateEvents,
         handleNavigateUsers,
         permissions?.get_admin,
     ]);

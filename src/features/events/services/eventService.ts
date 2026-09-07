@@ -134,5 +134,38 @@ export const eventService = {
             console.error("Network DELETE Exception:", error);
             throw error;
         }
-    }
+    },
+
+fetchPendingEvents: async (): Promise<Event[]> => {
+        try {
+            const response = await apiClient.get('/events/pending');
+            return Array.isArray(response.data)
+                ? response.data.map((item, index) => mapApiEventToUi(item, index))
+                : [];
+        } catch (error) {
+            console.error("Network Fetch Exception (pending):", error);
+            throw error;
+        }
+    },
+
+    /** Admin only — flips the event to approved so it appears in getAllEvents(). */
+    approveEvent: async (id: string): Promise<void> => {
+        try {
+            await apiClient.put(`/events/${id}/approve`);
+        } catch (error) {
+            console.error("Network PUT Exception (approve):", error);
+            throw error;
+        }
+    },
+
+    /** Admin only — rejects (deletes) a pending submission. */
+    rejectEvent: async (id: string): Promise<boolean> => {
+        try {
+            const response = await apiClient.delete(`/events/${id}`);
+            return response.status === 200 || response.status === 204;
+        } catch (error) {
+            console.error("Network DELETE Exception (reject):", error);
+            throw error;
+        }
+    },
 };

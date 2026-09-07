@@ -25,7 +25,7 @@ export default function SearchScreen() {
     const { colors, spacing } = theme;
     const styles = getStyles(theme);
 
-    const { hasPermission, user } = useAuth();
+    const { user } = useAuth();
     const { eventsList, loading, refreshEvents } = useEventData();
 
     const filteredEvents = useMemo(() => {
@@ -80,7 +80,8 @@ export default function SearchScreen() {
                                 : `Results (${filteredEvents.length})`}
                         </Text>
 
-                        {hasPermission('post_event') && (
+                        {/* Allow any authenticated user to add an event */}
+                        {user && (
                             <TouchableOpacity
                                 style={[styles.addButton, { backgroundColor: colors.primary }]}
                                 onPress={() => {
@@ -108,8 +109,6 @@ export default function SearchScreen() {
                         />
                     }
                     renderItem={({ item }) => {
-                        // The backend scopes edit/delete to the author, so only show the
-                        // controls that would actually succeed.
                         const isAuthor = !!user?.email && user.email === item.addedByEmail;
 
                         return (

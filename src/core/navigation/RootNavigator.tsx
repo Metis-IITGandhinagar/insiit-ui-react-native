@@ -28,6 +28,8 @@ import { AdminDashboardScreen } from "@/features/admin/screens/AdminDashboardScr
 import { AnnouncementManagementScreen } from "@/features/admin/screens/AnnouncementManagementScreen";
 import { MessMenuManagementScreen } from "@/features/admin/screens/MessMenuManagementScreen";
 import { UserManagementScreen } from "@/features/admin/screens/UserManagementScreen";
+// Add the new import
+import AdminEventsApprovalScreen from "@/features/admin/screens/AdminEventsApprovalScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -65,13 +67,9 @@ export default function RootNavigator() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
-            {/* Without this the container falls back to react-navigation's DefaultTheme,
-                whose background is a light grey that flashes during transitions. */}
             <NavigationContainer theme={navigationTheme}>
                 <Stack.Navigator
                     screenOptions={{
-                        // Pushed screens use the built-in header, so every one of them
-                        // gets a back button without each screen rolling its own.
                         headerShown: true,
                         headerTitleAlign: "left",
                         headerShadowVisible: false,
@@ -83,16 +81,12 @@ export default function RootNavigator() {
                             color: colors.text,
                         },
                         contentStyle: { backgroundColor: colors.background },
-                        // One transition for the whole stack, tuned to feel as quick as
-                        // the tab pager. animationDuration only affects iOS; Android uses
-                        // its own (already brisk) push timing.
                         animation: "simple_push",
                         animationDuration: 200,
                     }}
                 >
                     {user || isGuest ? (
                         <>
-                            {/* The tab host draws its own floating navbar and pages. */}
                             <Stack.Screen
                                 name="MainTabs"
                                 component={MainTabsScreen}
@@ -108,9 +102,7 @@ export default function RootNavigator() {
                                 component={SettingsScreen}
                                 options={{ title: "Settings" }}
                             />
-                            {/* Grouped rather than nested: a child stack would only be
-                                organising code, and would cost a hidden parent header
-                                plus a hand-rolled back button on its first screen. */}
+
                             <Stack.Group>
                                 <Stack.Screen
                                     name="AdminDashboard"
@@ -132,10 +124,14 @@ export default function RootNavigator() {
                                     component={UserManagementScreen}
                                     options={{ title: "User Permissions" }}
                                 />
+                                {/* Add the new admin screen here */}
+                                <Stack.Screen
+                                    name="AdminEventsApproval"
+                                    component={AdminEventsApprovalScreen}
+                                    options={{ title: "Event Approvals" }}
+                                />
                             </Stack.Group>
 
-                            {/* Reachable from guest mode so a guest can sign in without
-                                being thrown out of whatever they were looking at. */}
                             {isGuest && (
                                 <Stack.Screen
                                     name="Login"

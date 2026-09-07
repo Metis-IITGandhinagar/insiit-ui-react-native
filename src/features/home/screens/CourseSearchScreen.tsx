@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Activity
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Check, Plus } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/core/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { timetableService } from '../services/timetableService';
@@ -109,14 +110,36 @@ export default function CourseSearchScreen() {
     return (
         <SafeAreaView style={styles.container} edges={["left", "right"]}>
             <View style={styles.header}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search courses (e.g., ES 101)..."
-                    placeholderTextColor="#999"
-                    value={search}
-                    onChangeText={setSearch}
-                    autoFocus
-                />
+                <View style={styles.searchBarContainer}>
+                    <Ionicons
+                        name="search"
+                        size={20}
+                        color={colors.text}
+                        style={styles.searchIcon}
+                    />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search courses (e.g., ES 101)..."
+                        placeholderTextColor={colors.text}
+                        value={search}
+                        onChangeText={setSearch}
+                        autoCorrect={false}
+                        returnKeyType="search"
+                        autoFocus
+                    />
+                    {search.length > 0 && (
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => setSearch("")}
+                        >
+                            <Ionicons
+                                name="close-circle"
+                                size={20}
+                                color={colors.text}
+                            />
+                        </TouchableOpacity>
+                    )}
+                </View>
                 <TouchableOpacity onPress={handleSave} style={styles.saveButton} disabled={saving}>
                     <Text style={styles.saveText}>{saving ? 'Saving...' : 'Done'}</Text>
                 </TouchableOpacity>
@@ -140,7 +163,7 @@ export default function CourseSearchScreen() {
                         {loading ? (
                             <ActivityIndicator size="large" color={colors.primary} />
                         ) : (
-                            <Text style={styles.emptyText}>No courses match "{search}"</Text>
+                            <Text style={styles.emptyText}>No courses match : {search}</Text>
                         )}
                     </View>
                 }
@@ -150,19 +173,36 @@ export default function CourseSearchScreen() {
     );
 }
 
-const getStyles = ({ colors, spacing, radius, typography }: any) => StyleSheet.create({
+const getStyles = ({ colors, spacing, radius, typography, shadows }: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: {
-        flexDirection: 'row', padding: spacing.md, alignItems: 'center',
-        borderBottomWidth: 1, borderBottomColor: '#EEE'
+        flexDirection: 'row',
+        padding: spacing.md,
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#EEE',
+        gap: spacing.md,
+    },
+    searchBarContainer: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: colors.surface,
+        borderRadius: radius.lg,
+        height: 56,
+        paddingHorizontal: spacing.md,
+        ...(shadows?.card || {}),
+    },
+    searchIcon: {
+        marginRight: 10,
     },
     searchInput: {
-        flex: 1, backgroundColor: '#F5F5F5', padding: 12, borderRadius: 12,
-        fontSize: 16, color: colors.text
+        flex: 1,
+        fontSize: 16,
+        color: colors.text,
     },
     saveButton: {
-        paddingLeft: spacing.md,
-        paddingVertical: 8
+        paddingVertical: 8,
     },
     saveText: { color: colors.primary, fontSize: 16, fontWeight: '700' },
     selectedCountBar: { backgroundColor: colors.primary + '15', padding: 10, alignItems: 'center' },

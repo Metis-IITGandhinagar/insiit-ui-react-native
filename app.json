@@ -20,7 +20,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.metis.insiitjanil",
+      "bundleIdentifier": "com.metis.insiit",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
@@ -28,7 +28,7 @@
       }
     },
     "android": {
-      "package": "com.metis.insiitjanil",
+      "package": "com.metis.insiit",
       "versionCode": 16,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
@@ -76,7 +76,8 @@
           "RNMapboxMapsVersion": "11.20.1"
         }
       ],
-      "expo-image"
+      "expo-image",
+      "@react-native-community/datetimepicker"
     ]
   }
 }
