@@ -37,7 +37,7 @@ export const useAdminPermissions = (): UseAdminPermissionsResult => {
 
     const canManageEvents = useMemo(() => {
         if (!permissions) return false;
-        return Boolean(permissions.approve_event || permissions.manage_events);
+        return Boolean(permissions.manage_events);
     }, [permissions]);
 
     const canManageAnnouncements = useMemo(() => {
