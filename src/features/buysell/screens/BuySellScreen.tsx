@@ -47,6 +47,7 @@ export default function BuySellScreen() {
     const [itemName, setItemName] = useState('');
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
+    const [askingPrice, setAskingPrice] = useState('');
     const [images, setImages] = useState<string[]>([]);
     const [isLoadingImages, setLoadingImages] = useState(false);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -58,6 +59,7 @@ export default function BuySellScreen() {
         setItemName('');
         setDescription('');
         setAmount('');
+        setAskingPrice('');
         setImages([]);
     }, []);
 
@@ -101,12 +103,20 @@ export default function BuySellScreen() {
             Alert.alert('Missing details', 'Item name and description are both required.');
             return;
         }
+
+        const trimmedAskingPrice = askingPrice.trim();
+        const parsedAskingPrice = trimmedAskingPrice ? Number(trimmedAskingPrice) : null;
+        if (parsedAskingPrice !== null && (!Number.isFinite(parsedAskingPrice) || parsedAskingPrice < 0)) {
+            Alert.alert('Invalid price', 'Enter the asking price as a positive number, or leave it blank.');
+            return;
+        }
         setSubmitting(true);
         try {
             const payload = {
                 item_name: itemName.trim(),
                 description: description.trim(),
                 base64_images: images,
+                asking_price_in_rs: parsedAskingPrice,
             };
             if (sheet.mode === 'edit') {
                 await buySellService.edit(sheet.entry.id, payload);
@@ -126,12 +136,15 @@ export default function BuySellScreen() {
         } finally {
             setSubmitting(false);
         }
-    }, [sheet, itemName, description, amount, images, refresh, resetSheet]);
+    }, [sheet, itemName, description, amount, askingPrice, images, refresh, resetSheet]);
 
     const handleEdit = useCallback(async (entry: BuySellEntry) => {
         setItemName(entry.item_name);
         setDescription(entry.description);
         setAmount('');
+        setAskingPrice(
+            typeof entry.asking_price_in_rs === 'number' ? String(entry.asking_price_in_rs) : ''
+        );
         setImages([]);
         setSheet({ mode: 'edit', entry });
 
@@ -293,6 +306,12 @@ export default function BuySellScreen() {
                                             ` · ${formatBackendDateTime(entry.added_on_timestamp)}`}
                                     </Text>
 
+                                    {typeof entry.asking_price_in_rs === 'number' && (
+                                        <Text style={styles.askingPrice}>
+                                            Asking ₹{entry.asking_price_in_rs}
+                                        </Text>
+                                    )}
+
                                     {top !== null && (
                                         <Text style={styles.bidSummary}>
                                             {entry.bids.length} bid{entry.bids.length === 1 ? '' : 's'} · highest ₹{top}
@@ -399,6 +418,16 @@ export default function BuySellScreen() {
                                             placeholder="Condition, age, asking price…"
                                             placeholderTextColor={colors.textSecondary}
                                             multiline
+                                        />
+
+                                        <Text style={styles.label}>Asking price (₹, optional)</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            value={askingPrice}
+                                            onChangeText={setAskingPrice}
+                                            placeholder="1200"
+                                            placeholderTextColor={colors.textSecondary}
+                                            keyboardType="numeric"
                                         />
 
                                         <Text style={styles.label}>Photos (optional)</Text>
@@ -606,6 +635,12 @@ const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
     metaText: {
         color: colors.textSecondary,
         fontSize: 12,
+    },
+    askingPrice: {
+        color: colors.text,
+        fontSize: 13,
+        fontWeight: '700',
+        marginTop: 4,
     },
     bidSummary: {
         color: colors.primary,

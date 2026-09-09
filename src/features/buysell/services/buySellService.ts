@@ -24,6 +24,8 @@ export interface BuySellEntry {
     status: BuySellStatus;
     bids: BidEntry[];
     img_urls: string[];
+    /** Seller's asking price. Null when they didn't set one. */
+    asking_price_in_rs: number | null;
 }
 
 export interface BuySellRequest {
@@ -31,6 +33,8 @@ export interface BuySellRequest {
     description: string;
     /** Raw base64 payloads; the backend saves them and returns img_urls. */
     base64_images: string[];
+    /** Optional — omitted or null leaves the listing without an asking price. */
+    asking_price_in_rs: number | null;
 }
 
 export const buySellService = {
