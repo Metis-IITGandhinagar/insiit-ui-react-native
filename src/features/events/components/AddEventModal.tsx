@@ -14,7 +14,6 @@ import {
     Image
 } from 'react-native';
 import { ImagePlus, X } from 'lucide-react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { eventService, splitEventDateTime } from '../services/eventService';
 import { Event } from '../services/searchTypes';
@@ -47,10 +46,6 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState(EMPTY_FORM);
 
-    const [pickerDate, setPickerDate] = useState(new Date());
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showTimePicker, setShowTimePicker] = useState(false);
-
     useEffect(() => {
         if (!visible) return;
 
@@ -64,42 +59,13 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
                 image: event.image,
                 description: event.description,
             });
-            if (event.startDateTime) {
-                const parsedDate = new Date(event.startDateTime);
-                if (!isNaN(parsedDate.getTime())) setPickerDate(parsedDate);
-            }
         } else {
             setFormData(EMPTY_FORM);
-            setPickerDate(new Date());
         }
     }, [visible, event]);
 
     const handleChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleDateChange = (event: any, selectedDate?: Date) => {
-        setShowDatePicker(false);
-        if (selectedDate) {
-            setPickerDate(selectedDate);
-            const yyyy = selectedDate.getFullYear();
-            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(selectedDate.getDate()).padStart(2, '0');
-            handleChange('date', `${yyyy}-${mm}-${dd}`);
-        }
-    };
-
-    const handleTimeChange = (event: any, selectedDate?: Date) => {
-        setShowTimePicker(false);
-        if (selectedDate) {
-            setPickerDate(selectedDate);
-            let hours = selectedDate.getHours();
-            const minutes = String(selectedDate.getMinutes()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            handleChange('time', `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`);
-        }
     };
 
     const handlePickPoster = async () => {
@@ -213,42 +179,21 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
                     )}
 
                     <View style={styles.row}>
-                        <TouchableOpacity
-                            style={[styles.input, styles.pickerInput, { flex: 1, marginRight: 8 }]}
-                            onPress={() => setShowDatePicker(true)}
-                        >
-                            <Text style={{ color: formData.date ? colors.text : colors.textSecondary }}>
-                                {formData.date || "Date of event"}
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.input, styles.pickerInput, { flex: 1, marginLeft: 8 }]}
-                            onPress={() => setShowTimePicker(true)}
-                        >
-                            <Text style={{ color: formData.time ? colors.text : colors.textSecondary }}>
-                                {formData.time || "Time"}
-                            </Text>
-                        </TouchableOpacity>
+                        <TextInput
+                            style={[styles.input, { flex: 1, marginRight: 8 }]}
+                            placeholder="Date (YYYY-MM-DD)"
+                            placeholderTextColor="#999"
+                            value={formData.date}
+                            onChangeText={(val) => handleChange('date', val)}
+                        />
+                        <TextInput
+                            style={[styles.input, { flex: 1, marginLeft: 8 }]}
+                            placeholder="Time (HH:MM AM/PM)"
+                            placeholderTextColor="#999"
+                            value={formData.time}
+                            onChangeText={(val) => handleChange('time', val)}
+                        />
                     </View>
-
-                    {showDatePicker && (
-                        <DateTimePicker
-                            value={pickerDate}
-                            mode="date"
-                            display="default"
-                            minimumDate={new Date()}
-                            onChange={handleDateChange}
-                        />
-                    )}
-
-                    {showTimePicker && (
-                        <DateTimePicker
-                            value={pickerDate}
-                            mode="time"
-                            display="default"
-                            onChange={handleTimeChange}
-                        />
-                    )}
 
                     <TextInput
                         style={styles.input}

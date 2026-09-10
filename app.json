@@ -75,9 +75,7 @@
         {
           "RNMapboxMapsVersion": "11.20.1"
         }
-      ],
-      "expo-image",
-      "@react-native-community/datetimepicker"
+      ]
     ]
   }
 }
