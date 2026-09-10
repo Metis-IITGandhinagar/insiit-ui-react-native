@@ -8,7 +8,6 @@ interface ListItemProps {
     leadingIcon: React.ReactNode;
     title: string;
     subtitle?: string;
-    /** Omit for a purely informational row — it then renders as non-tappable. */
     onPress?: () => void;
     showChevron?: boolean;
     showDivider?: boolean;

@@ -34,12 +34,22 @@ const NavItem = ({
     iconContainerStyle,
 }: NavItemProps) => {
     const inactiveIconStyle = useAnimatedStyle(() => {
-        const t = interpolate(progress.value, [index - 1, index, index + 1], [0, 1, 0], Extrapolation.CLAMP);
+        const t = interpolate(
+            progress.value ?? 0, 
+            [index - 1, index, index + 1],
+            [0.001, 1, 0.001],   
+            Extrapolation.CLAMP
+        );
         return { opacity: 1 - t };
     });
 
     const activeIconStyle = useAnimatedStyle(() => {
-        const t = interpolate(progress.value, [index - 1, index, index + 1], [0, 1, 0], Extrapolation.CLAMP);
+        const t = interpolate(
+            progress.value ?? 0,
+            [index - 1, index, index + 1],
+            [0.001, 1, 0.001],  
+            Extrapolation.CLAMP
+        );
         return { opacity: t };
     });
 
@@ -99,10 +109,7 @@ const FloatingNavbar = () => {
                         progress={progress}
                         activeColor={colors.surface}
                         inactiveColor={colors.primary}
-                        onPress={() => {
-                            if (Math.round(activeIndex.value) === index) return;
-                            goToIndex(index);
-                        }}
+                        onPress={() => goToIndex(index)}
                         style={styles.item}
                         iconContainerStyle={styles.iconContainer}
                     />

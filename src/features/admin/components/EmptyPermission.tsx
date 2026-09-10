@@ -49,7 +49,7 @@ export const EmptyPermission: React.FC<EmptyPermissionProps> = memo(({
                     styles.title,
                     {
                         color: colors.text,
-                        fontSize: typography.h3?.fontSize || 20,
+                        fontSize: typography.h2?.fontSize ,
                         fontWeight: typography.h3?.fontWeight || '700',
                         marginBottom: spacing.xs,
                     },
@@ -63,7 +63,7 @@ export const EmptyPermission: React.FC<EmptyPermissionProps> = memo(({
                     styles.message,
                     {
                         color: colors.textSecondary,
-                        fontSize: typography.h2?.fontSize || 14,
+                        fontSize: typography.h3?.fontSize || 14,
                     },
                 ]}
             >

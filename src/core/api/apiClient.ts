@@ -13,7 +13,7 @@ export const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL as string).replace
  */
 export const resolveBackendAsset = (path?: string | null): string | undefined => {
     if (!path) return undefined;
-    if (/^https?:\/\//i.test(path)) return path;
+    if (/^(?:https?:\/\/|data:|file:|content:)/i.test(path)) return path;
     return `${BASE_URL}/${path.replace(/^\/+/, '')}`;
 };
 

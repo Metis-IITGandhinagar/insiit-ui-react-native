@@ -27,30 +27,9 @@ export function useLostFoundData() {
                 console.warn("Backend fetch failed, relying on mock item", err);
             }
 
-            // Auto-expire items past 7 days
             const active = data.filter(
                 (entry) => daysUntilArchive(entry.added_on_timestamp, 7) > 0
             );
-
-            // Hardcoded item attached to logged-in user to test owner deletion
-            const mockOwnerEntry: LostFoundEntry = {
-                id: 99999,
-                item_name: "Test - Black Leather Wallet",
-                description: "Hardcoded sample item to verify owner controls and deletion flow.",
-                added_by_email: user?.email || "janil.jain@iitgn.ac.in",
-                added_on_timestamp: new Date().toISOString(),
-                status: "lost",
-                img_urls: ["https://placehold.co/600x400?text=Test+Item"],
-                found_claims: [],
-            };
-
-            // Prepend hardcoded item if not already present
-            const combined = [
-                mockOwnerEntry,
-                ...active.filter((e) => e.id !== mockOwnerEntry.id),
-            ];
-
-            setEntries(combined);
         } catch (e) {
             setError("Failed to load lost & found reports");
         } finally {
@@ -83,7 +62,6 @@ export function useLostFoundData() {
         async (id: number, request: LostFoundRequest) => {
             setActionError(null);
             try {
-                // Handle deletion/editing locally for the test item
                 if (id === 99999) {
                     const updatedMock: LostFoundEntry = {
                         id: 99999,
@@ -124,7 +102,6 @@ export function useLostFoundData() {
     const deleteEntry = useCallback(async (id: number) => {
         setActionError(null);
         try {
-            // Locally handle test item deletion without failing on backend API
             if (id === 99999) {
                 setEntries((prev) => prev.filter((entry) => entry.id !== 99999));
                 return;

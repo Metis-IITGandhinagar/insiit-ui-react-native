@@ -102,6 +102,8 @@ export const MessMenuManagementScreen: React.FC = () => {
                     currentMeal = matched.key;
                     dayColumnMap = {};
                     nextRow.forEach((cell, colIdx) => {
+                        // Explicitly ignore column 0 (row labels / category headers)
+                        if (colIdx === 0) return;
                         const dayInt = DAY_NAME_TO_INT[(cell || '').trim().toLowerCase()];
                         if (dayInt) dayColumnMap![colIdx] = dayInt;
                     });
@@ -117,9 +119,11 @@ export const MessMenuManagementScreen: React.FC = () => {
                 if (!hasAnyValue) continue;
 
                 for (const [colIdxStr, dayInt] of Object.entries(dayColumnMap)) {
-                    const value = (row[Number(colIdxStr)] || '').trim();
+                    const colIdx = Number(colIdxStr);
+                    if (colIdx === 0) continue; // Safety check: never parse the first column
+                    const value = (row[colIdx] || '').trim();
                     if (isBlankOrDash(value)) continue;
-                    dayItems[dayInt][currentMeal].push(`${label}: ${value}`);
+                    dayItems[dayInt][currentMeal].push(value);
                 }
             }
         }
@@ -168,7 +172,7 @@ export const MessMenuManagementScreen: React.FC = () => {
                 throw new Error("Couldn't find any meal sections. Check that section rows (e.g. 'Breakfast - ...') are followed directly by a 'Day' row.");
             }
             setParsedMenu(formattedData);
-            Alert.alert('Success', `Parsed ${formattedData.length} days of menu data, ignoring extra forms.`);
+            Alert.alert('Success', `Parsed ${formattedData.length} days of menu data (excluding category headers).`);
 
         } catch (err: any) {
             Alert.alert('Parsing Error', err?.message || 'Failed to process spreadsheet.');
@@ -206,7 +210,7 @@ export const MessMenuManagementScreen: React.FC = () => {
                             Google Sheets URL
                         </Text>
                         <Text style={[styles.subText, { color: colors.textSecondary }]}>
-                            Ensure the spreadsheet is set to "Anyone with the link can view". Expected columns: Day, Breakfast, Lunch, Snacks, Dinner.
+                            Ensure the spreadsheet is set to "Anyone with the link can view". Row category labels in the first column are automatically excluded.
                         </Text>
 
                         <TextInput
@@ -253,8 +257,8 @@ export const MessMenuManagementScreen: React.FC = () => {
                             <ActivityIndicator size="small" color="#FFFFFF" />
                         ) : (
                             <>
-                                <Save size={18} color={'#FFFFFF' } style={{ marginRight: 8 }} />
-                                <Text style={{ color:'#FFFFFF', fontWeight: '700', fontSize: 16 }}>
+                                <Save size={18} color={'#FFFFFF'} style={{ marginRight: 8 }} />
+                                <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 16 }}>
                                     Save to Database
                                 </Text>
                             </>

@@ -19,9 +19,10 @@ export const pickImagesAsBase64 = async (limit = 4): Promise<string[]> => {
 };
 
 
-export const fetchImageAsBase64 = (url: string): Promise<string> =>
-    
-    new Promise<string>((resolve, reject) => {
+export const fetchImageAsBase64 = (url: string): Promise<string> => {
+    if (/^data:/i.test(url)) return Promise.resolve(url);
+
+    return new Promise<string>((resolve, reject) => {
         const request = new XMLHttpRequest();
         request.responseType = 'blob';
 
@@ -46,3 +47,4 @@ export const fetchImageAsBase64 = (url: string): Promise<string> =>
         request.open('GET', url);
         request.send();
     });
+};

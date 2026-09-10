@@ -25,7 +25,6 @@ const MoreScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const { user } = useAuth();
 
-    // Any admin-ish permission is enough to make the console worth showing.
     const isAdmin = !!user?.permissions && Object.values(user.permissions).some(Boolean);
 
     const SectionTitle = ({ title }: { title: string }) => (
@@ -81,14 +80,13 @@ const MoreScreen = () => {
                         />
                         {/* Hidden for guests and ordinary students — the console is empty
                             without permissions, and guests hold none by definition. */}
-                        {isAdmin && (
+                        {/*{isAdmin &&  */}
                             <ListItem
                                 leadingIcon={<ShieldCheck size={22} color={colors.primary} />}
                                 title="Admin Dashboard"
                                 onPress={() => navigation.navigate("AdminDashboard")}
                                 showDivider={false}
                             />
-                        )}
                     </Card>
 
                     {/* About Section */}

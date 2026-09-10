@@ -111,9 +111,38 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
         }
     };
 
+    const parseDateTime = (dateStr: string, timeStr: string) => {
+        if (!dateStr) return null;
+        const [year, month, day] = dateStr.split('-').map(Number);
+        let hours = 0;
+        let minutes = 0;
+
+        if (timeStr) {
+            const parts = timeStr.split(' ');
+            if (parts.length === 2) {
+                const [timePart, modifier] = parts;
+                const timeSubParts = timePart.split(':').map(Number);
+                if (timeSubParts.length === 2) {
+                    let [h, m] = timeSubParts;
+                    if (modifier === 'PM' && h < 12) h += 12;
+                    if (modifier === 'AM' && h === 12) h = 0;
+                    hours = h;
+                    minutes = m;
+                }
+            }
+        }
+        return new Date(year, month - 1, day, hours, minutes, 0);
+    };
+
     const handleSubmit = async () => {
         if (!formData.title || !formData.date || !formData.venue) {
             Alert.alert("Missing Fields", "Please fill in the title, date, and venue.");
+            return;
+        }
+
+        const selectedDateTime = parseDateTime(formData.date, formData.time);
+        if (selectedDateTime && selectedDateTime.getTime() < Date.now()) {
+            Alert.alert("Invalid Date & Time", "Event date and time cannot be in the past.");
             return;
         }
 
@@ -185,19 +214,19 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
 
                     <View style={styles.row}>
                         <TouchableOpacity
-                            style={[styles.input, { flex: 1, marginRight: 8, justifyContent: 'center' }]}
+                            style={[styles.input, styles.pickerInput, { flex: 1, marginRight: 8 }]}
                             onPress={() => setShowDatePicker(true)}
                         >
-                            <Text style={{ color: formData.date ? colors.text : '#999' }}>
-                                {formData.date || "Date (YYYY-MM-DD)"}
+                            <Text style={{ color: formData.date ? colors.text : colors.textSecondary }}>
+                                {formData.date || "Date of event"}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.input, { flex: 1, marginLeft: 8, justifyContent: 'center' }]}
+                            style={[styles.input, styles.pickerInput, { flex: 1, marginLeft: 8 }]}
                             onPress={() => setShowTimePicker(true)}
                         >
-                            <Text style={{ color: formData.time ? colors.text : '#999' }}>
-                                {formData.time || "Time (HH:MM AM/PM)"}
+                            <Text style={{ color: formData.time ? colors.text : colors.textSecondary }}>
+                                {formData.time || "Time"}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -207,6 +236,7 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
                             value={pickerDate}
                             mode="date"
                             display="default"
+                            minimumDate={new Date()}
                             onChange={handleDateChange}
                         />
                     )}
@@ -223,21 +253,21 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
                     <TextInput
                         style={styles.input}
                         placeholder="Event Title"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         value={formData.title}
                         onChangeText={(val) => handleChange('title', val)}
                     />
                     <TextInput
                         style={styles.input}
                         placeholder="Venue"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         value={formData.venue}
                         onChangeText={(val) => handleChange('venue', val)}
                     />
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="Event Description..."
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         multiline
                         value={formData.description}
                         onChangeText={(val) => handleChange('description', val)}
@@ -290,6 +320,9 @@ const getStyles = ({ colors, spacing, typography, radius }: any) => StyleSheet.c
         borderColor: colors.border,
         marginBottom: 16,
     },
+    pickerInput: {
+        justifyContent: 'center',
+    },
     posterPickerText: {
         color: colors.textSecondary,
         fontSize: 14,
@@ -315,12 +348,14 @@ const getStyles = ({ colors, spacing, typography, radius }: any) => StyleSheet.c
         alignItems: 'center',
     },
     input: {
-        backgroundColor: '#F5F5F5',
-        borderRadius: 8,
+        backgroundColor: colors.surface,
+        borderRadius: radius.md,
         padding: 14,
         marginBottom: 16,
         fontSize: 16,
         color: colors.text,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     row: {
         flexDirection: 'row',

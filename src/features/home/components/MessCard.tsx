@@ -18,45 +18,49 @@ type PrioritizedItems = {
     item3: string;
 };
 
+const cleanItemText = (text: string): string => {
+    if (!text) return "-";
+    // Remove labels like "Vegetable: ", "Special item: ", etc., if present
+    return text.replace(/^(vegetable|special item|side item|salad|egg-item):\s*/i, "").trim();
+};
+
 const getMealHighlights = (mealName: string, itemsList: string[]): PrioritizedItems => {
     const defaultData = { item1: "Menu Standby", item2: "-", item3: "-" };
     if (!itemsList || itemsList.length === 0) return defaultData;
 
     const normalizedName = mealName.toLowerCase();
 
+    let raw1 = "-";
+    let raw2 = "-";
+    let raw3 = "-";
+
     if (normalizedName.includes("breakfast")) {
-        return {
-            item1: itemsList[0] || "-",
-            item2: itemsList[1] || "-",
-            item3: itemsList[9] || "-",
-        };
+        raw1 = itemsList[0] || "-";
+        raw2 = itemsList[1] || "-";
+        raw3 = itemsList[9] || "-";
+    } else if (normalizedName.includes("lunch")) {
+        raw1 = itemsList[1] || "-";
+        raw2 = itemsList[2] || "-";
+        raw3 = itemsList[3] || "-";
+    } else if (normalizedName.includes("snack")) {
+        raw1 = itemsList[0] || "-";
+        raw2 = itemsList[2] || "-";
+        raw3 = itemsList[1] || "-";
+    } else if (normalizedName.includes("dinner")) {
+        raw1 = itemsList[2] || "No vegetable";
+        raw2 = itemsList[7] || "No non-veg item";
+        raw3 = itemsList[6] || "-";
+    } else {
+        raw1 = itemsList[0] || "-";
+        raw2 = itemsList[1] || "-";
+        raw3 = itemsList[2] || "-";
     }
 
-    if (normalizedName.includes("lunch")) {
-        return {
-            item1: itemsList[1] || "-",
-            item2: itemsList[2] || "-",
-            item3: itemsList[3] || "-",
-        };
-    }
-
-    if (normalizedName.includes("snack")) {
-        return {
-            item1: itemsList[0] || "-",
-            item2: itemsList[2] || "-",
-            item3: itemsList[1] || "-",
-        };
-    }
-
-    if (normalizedName.includes("dinner")) {
-        return {
-            item1: itemsList[2] || "-",
-            item2: itemsList[7] && itemsList[7] !== "-" ? itemsList[7] : "Standard Day Option",
-            item3: itemsList[6] || "-",
-        };
-    }
-
-    return defaultData;
+    return {
+        item1: cleanItemText(raw1),
+        item2: cleanItemText(raw2),
+        item3: cleanItemText(raw3),
+    };
 };
 
 const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
@@ -66,9 +70,6 @@ const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
 
     const MAX_FONT_SCALE = 1.3;
 
-    // No menu published (the API returns [] when the mess table is empty). Say so and
-    // keep the QR reachable — the dining QR comes from the mess portal and doesn't
-    // depend on the menu at all.
     if (!meal) {
         return (
             <Card variant="surface">
@@ -104,7 +105,6 @@ const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
         );
     }
     const isServingNow = meal.countdown === "Serving Now";
-
     const highlights = getMealHighlights(meal.mealName, meal.itemsList);
 
     return (
@@ -150,7 +150,7 @@ const MessCard = ({ meal, onShowQR, onShowMenu }: Props) => {
                 </View>
             </View>
 
-            {/* 📋 Stacked Bullet List */}
+            {/*Stacked Bullet List */}
             <View style={styles.menuContainer}>
                 <View style={styles.bulletRow}>
                     <Text style={styles.bulletDot} maxFontSizeMultiplier={MAX_FONT_SCALE}>•</Text>

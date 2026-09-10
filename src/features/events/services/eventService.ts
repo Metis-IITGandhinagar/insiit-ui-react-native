@@ -2,7 +2,6 @@ import { apiClient, resolveBackendAsset } from '@/core/api/apiClient';
 import { parseBackendInstant, toBackendTimestamp } from '@/core/api/backendTime';
 import { Event } from "./searchTypes";
 
-/** `YYYY-MM-DD` + `HH:MM AM/PM` -> Date, without relying on engine-specific parsing. */
 export const parseEventDateTime = (date: string, time: string): Date | null => {
     const dateMatch = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(date.trim());
     if (!dateMatch) return null;
