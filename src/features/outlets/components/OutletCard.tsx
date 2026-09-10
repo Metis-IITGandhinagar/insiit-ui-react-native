@@ -18,18 +18,58 @@ interface Props {
     onPress?: () => void;
 }
 
-const formatTime = (time: string) =>
-    new Date(time).toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-    });
+const formatTime = (time: string) => {
+    if (!time) return "";
+    const parsed = new Date(time);
+    if (!isNaN(parsed.getTime())) {
+        return parsed.toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+        });
+    }
+    return time;
+};
+
+export const checkIsOpen = (openTime: string, closeTime: string): boolean => {
+    if (!openTime || !closeTime) return true;
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const openDate = new Date(openTime);
+    const closeDate = new Date(closeTime);
+
+    let openMinutes = 0;
+    let closeMinutes = 0;
+
+    if (!isNaN(openDate.getTime()) && !isNaN(closeDate.getTime())) {
+        openMinutes = openDate.getHours() * 60 + openDate.getMinutes();
+        closeMinutes = closeDate.getHours() * 60 + closeDate.getMinutes();
+    } else {
+        // Fallback parser if strings are like "09:00" or "23:00"
+        const [oH, oM] = openTime.split(":").map(Number);
+        const [cH, cM] = closeTime.split(":").map(Number);
+        openMinutes = (oH || 0) * 60 + (oM || 0);
+        closeMinutes = (cH || 0) * 60 + (cM || 0);
+    }
+
+    if (openMinutes === closeMinutes) return true; // Open 24 Hours
+
+    // Handles overnight hours (e.g. 11:00 PM to 3:00 AM)
+    if (closeMinutes < openMinutes) {
+        return currentMinutes >= openMinutes || currentMinutes < closeMinutes;
+    }
+
+    return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+};
 
 const OutletCard = ({ outlet, onPress }: Props) => {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
 
-    const previewItems = outlet.menu.slice(0, 3);
+    const isOpen = checkIsOpen(outlet.open_time, outlet.close_time);
+    const previewItems = outlet.menu ? outlet.menu.slice(0, 3) : [];
 
     return (
         <TouchableOpacity activeOpacity={0.92} onPress={onPress}>
@@ -44,8 +84,8 @@ const OutletCard = ({ outlet, onPress }: Props) => {
                         style={styles.image}
                     />
 
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>OPEN</Text>
+                    <View style={[styles.badge, isOpen ? styles.badgeOpen : styles.badgeClosed]}>
+                        <Text style={styles.badgeText}>{isOpen ? "OPEN" : "CLOSED"}</Text>
                     </View>
                 </View>
 
@@ -65,7 +105,7 @@ const OutletCard = ({ outlet, onPress }: Props) => {
                         <Ionicons
                             name="location-outline"
                             size={18}
-                            color="#6B7280"
+                            color={colors.textSecondary || "#6B7280"}
                         />
                         <Text style={styles.infoText}>
                             {outlet.landmark || "Campus"}
@@ -76,11 +116,10 @@ const OutletCard = ({ outlet, onPress }: Props) => {
                         <Ionicons
                             name="time-outline"
                             size={18}
-                            color="#6B7280"
+                            color={colors.textSecondary || "#6B7280"}
                         />
                         <Text style={styles.infoText}>
-                            {formatTime(outlet.open_time)} -{" "}
-                            {formatTime(outlet.close_time)}
+                            {formatTime(outlet.open_time)} - {formatTime(outlet.close_time)}
                         </Text>
                     </View>
 
@@ -93,7 +132,7 @@ const OutletCard = ({ outlet, onPress }: Props) => {
                             </View>
                         ))}
 
-                        {outlet.menu.length > 3 && (
+                        {outlet.menu && outlet.menu.length > 3 && (
                             <View style={styles.moreChip}>
                                 <Text style={styles.moreChipText}>
                                     +{outlet.menu.length - 3} more
@@ -130,10 +169,17 @@ const getStyles = ({ colors, spacing, typography, radius }: any) =>
             position: "absolute",
             right: 14,
             top: 14,
-            backgroundColor: "#16A34A",
             paddingHorizontal: 10,
             paddingVertical: 6,
             borderRadius: 50,
+        },
+
+        badgeOpen: {
+            backgroundColor: "#16A34A",
+        },
+
+        badgeClosed: {
+            backgroundColor: "#DC2626",
         },
 
         badgeText: {

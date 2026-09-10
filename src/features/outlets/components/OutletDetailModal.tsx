@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/core/theme";
 import { resolveBackendAsset } from "@/core/api/apiClient";
 import { Outlet } from "../services/outletTypes";
+import { checkIsOpen } from "./OutletCard";
 
 interface Props {
     visible: boolean;
@@ -21,11 +22,17 @@ interface Props {
     onClose: () => void;
 }
 
-const formatTime = (time: string) =>
-    new Date(time).toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-    });
+const formatTime = (time: string) => {
+    if (!time) return "";
+    const parsed = new Date(time);
+    if (!isNaN(parsed.getTime())) {
+        return parsed.toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+        });
+    }
+    return time;
+};
 
 const OutletDetailModal = ({
     visible,
@@ -38,6 +45,8 @@ const OutletDetailModal = ({
 
     if (!outlet) return null;
 
+    const isOpen = checkIsOpen(outlet.open_time, outlet.close_time);
+
     return (
         <Modal
             transparent
@@ -46,10 +55,8 @@ const OutletDetailModal = ({
             onRequestClose={onClose}
         >
             <View style={styles.overlay}>
-                {/* Backdrop press listener isolated as absolute sibling */}
                 <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
-                {/* Modal Container */}
                 <View style={styles.modal}>
                     <TouchableOpacity
                         style={styles.closeButton}
@@ -70,14 +77,19 @@ const OutletDetailModal = ({
                         nestedScrollEnabled={true}
                         overScrollMode="never"
                     >
-                        <Image
-                            source={{
-                                uri:
-                                    resolveBackendAsset(outlet.image_url) ||
-                                    "https://placehold.co/800x500?text=Outlet",
-                            }}
-                            style={styles.image}
-                        />
+                        <View style={styles.imageContainer}>
+                            <Image
+                                source={{
+                                    uri:
+                                        resolveBackendAsset(outlet.image_url) ||
+                                        "https://placehold.co/800x500?text=Outlet",
+                                }}
+                                style={styles.image}
+                            />
+                            <View style={[styles.badge, isOpen ? styles.badgeOpen : styles.badgeClosed]}>
+                                <Text style={styles.badgeText}>{isOpen ? "OPEN" : "CLOSED"}</Text>
+                            </View>
+                        </View>
 
                         <View style={styles.contentWrap}>
                             <Text style={styles.title}>
@@ -108,8 +120,7 @@ const OutletDetailModal = ({
                                     color={colors.textSecondary}
                                 />
                                 <Text style={styles.infoText}>
-                                    {formatTime(outlet.open_time)} -{" "}
-                                    {formatTime(outlet.close_time)}
+                                    {formatTime(outlet.open_time)} - {formatTime(outlet.close_time)}
                                 </Text>
                             </View>
 
@@ -119,7 +130,7 @@ const OutletDetailModal = ({
                                 Menu
                             </Text>
 
-                            {outlet.menu.map((item) => (
+                            {outlet.menu && outlet.menu.map((item) => (
                                 <View
                                     key={item.name}
                                     style={styles.menuRow}
@@ -184,9 +195,36 @@ const getStyles = ({
             backgroundColor: colors.surface,
         },
 
+        imageContainer: {
+            position: "relative",
+        },
+
         image: {
             width: "100%",
             height: 200,
+        },
+
+        badge: {
+            position: "absolute",
+            right: 14,
+            bottom: 14,
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 50,
+        },
+
+        badgeOpen: {
+            backgroundColor: "#16A34A",
+        },
+
+        badgeClosed: {
+            backgroundColor: "#DC2626",
+        },
+
+        badgeText: {
+            color: "#fff",
+            fontWeight: "700",
+            fontSize: 11,
         },
 
         body: {
