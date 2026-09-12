@@ -66,7 +66,7 @@ export default function SearchScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+        <SafeAreaView style={styles.container} edges={["top", "bottom", "left", "right"]}>
             <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
 
             <View style={styles.content}>

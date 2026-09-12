@@ -25,7 +25,7 @@ export default function CabshareScreen() {
                 barStyle={theme.isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={colors.background}
             />
-            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+            <SafeAreaView style={styles.container} edges={["top", "bottom", "left", "right"]}>
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                         <ArrowLeft size={18} color={colors.text} />

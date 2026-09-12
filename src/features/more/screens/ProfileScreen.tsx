@@ -24,7 +24,7 @@ const ProfileScreen = () => {
                 barStyle={theme.isDark ? "light-content" : "dark-content"}
                 backgroundColor={colors.background}
             />
-            <SafeAreaView style={styles.container} edges={["left", "right"]}>
+            <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
                 <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
 
                     {/* Avatar + identity */}

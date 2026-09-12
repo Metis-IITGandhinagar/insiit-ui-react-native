@@ -108,7 +108,7 @@ export default function CourseSearchScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={["left", "right"]}>
+        <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
             <View style={styles.header}>
                 <View style={styles.searchBarContainer}>
                     <Ionicons
