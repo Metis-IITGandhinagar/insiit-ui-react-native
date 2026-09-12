@@ -7,6 +7,7 @@ import Animated, {
     Extrapolation,
     SharedValue,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { LucideIcon } from "lucide-react-native";
 import { useTheme } from "@/core/theme";
 import { TABS, TAB_COUNT } from "@/core/navigation/tabs";
@@ -70,7 +71,8 @@ const NavItem = ({
 const FloatingNavbar = () => {
     const theme = useTheme();
     const { colors } = theme;
-    const styles = getStyles(theme);
+    const insets = useSafeAreaInsets();
+    const styles = getStyles(theme, insets);
     const { progress, activeIndex, goToIndex } = useSwipeAnimation();
 
     const [containerWidth, setContainerWidth] = useState(0);
@@ -121,12 +123,12 @@ const FloatingNavbar = () => {
 
 export default FloatingNavbar;
 
-const getStyles = ({ colors, radius, spacing }: any) => StyleSheet.create({
+const getStyles = ({ colors, radius, spacing }: any, insets: any) => StyleSheet.create({
     wrapper: {
         position: "absolute",
         left: spacing.lg,
         right: spacing.lg,
-        bottom: 60,
+        bottom: spacing.lg,
     },
     container: {
         height: 72,

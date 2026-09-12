@@ -27,7 +27,7 @@ export default function CabshareScreen() {
                 barStyle={theme.isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={colors.background}
             />
-            <SafeAreaView style={styles.container} edges={["left", "right"]}>
+            <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
                 <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                     <View style={styles.heroCard}>
                         <Users size={32} color={colors.primary} style={{ marginBottom: 12 }} />

@@ -33,7 +33,7 @@ const HomeScreen = () => {
         <>
             <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
 
-            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+            <SafeAreaView style={styles.container} edges={["top", "bottom", "left", "right"]}>
                 {loading && !menuData ? (
                     <View style={styles.centeredView}>
                         <ActivityIndicator size="large" color={colors.primary} />

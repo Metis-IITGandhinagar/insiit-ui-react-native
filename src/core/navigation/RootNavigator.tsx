@@ -4,6 +4,7 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackParamList } from "./types";
 import { useAuth } from '@/core/auth/useAuth';
 
@@ -67,6 +68,7 @@ export default function RootNavigator() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['bottom']}>
             <NavigationContainer theme={navigationTheme}>
                 <Stack.Navigator
                     screenOptions={{
@@ -209,6 +211,7 @@ export default function RootNavigator() {
                     />
                 </Stack.Navigator>
             </NavigationContainer>
+            </SafeAreaView>
         </GestureHandlerRootView>
     );
 }

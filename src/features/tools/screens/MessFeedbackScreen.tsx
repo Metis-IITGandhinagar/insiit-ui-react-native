@@ -34,7 +34,7 @@ const MessFeedbackScreen = () => {
     const styles = getStyles(theme);
 
     return (
-        <SafeAreaView style={styles.container} edges={["left", "right"]}>
+        <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
             <View style={styles.headerContainer}>
                 <Text style={styles.subtitle}>
                     Select your dining hall to open the institutional feedback forms

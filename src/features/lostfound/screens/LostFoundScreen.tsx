@@ -104,7 +104,7 @@ export default function LostFoundScreen() {
                 button (see notes.md, "Navigation"). */}
             <SafeAreaView
                 style={styles.container}
-                edges={["left", "right"]}
+                edges={["bottom", "left", "right"]}
             >
                 {loading && entries.length === 0 ? (
                     <View style={styles.center}>

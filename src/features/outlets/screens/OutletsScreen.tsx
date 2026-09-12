@@ -47,7 +47,7 @@ export default function OutletsScreen() {
                 button (see notes.md, "Navigation"). */}
             <SafeAreaView
                 style={styles.container}
-                edges={["left", "right"]}
+                edges={["bottom", "left", "right"]}
             >
                 {loading && outlets.length === 0 ? (
                     <View style={styles.center}>
