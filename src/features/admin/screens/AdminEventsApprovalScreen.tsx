@@ -9,9 +9,8 @@ import { Event } from '@/features/events/services/searchTypes'
 import { Ionicons } from '@expo/vector-icons';
 import { eventService } from '@/features/events/services/eventService';
 
-export default function AdminEventsApprovalScreen() {
+export const AdminEventsApprovalScreen: React.FC = () => {
     const theme = useTheme();
-    const { colors, spacing, typography } = theme;
     const styles = getStyles(theme);
 
     const { canManageEvents, isLoading: permissionsLoading } = useAdminPermissions();
@@ -21,7 +20,6 @@ export default function AdminEventsApprovalScreen() {
     const fetchPendingEvents = async () => {
         try {
             setLoading(true);
-            // Fetch events filtered by pending status
             const data = await eventService.fetchPendingEvents();
             setPendingEvents(data);
         } catch (error: any) {
@@ -121,7 +119,7 @@ export default function AdminEventsApprovalScreen() {
 
 const getStyles = ({ colors, spacing, typography }: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { padding: spacing.lg, borderBottomWidth: 1, borderBottomColor: '#EEE' },
+    header: { padding: spacing.md, borderBottomWidth: 1, borderBottomColor: '#EEE' },
     title: { ...typography.h2, color: colors.text },
     list: { padding: spacing.lg },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },

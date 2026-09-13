@@ -28,8 +28,7 @@ import { AdminDashboardScreen } from "@/features/admin/screens/AdminDashboardScr
 import { AnnouncementManagementScreen } from "@/features/admin/screens/AnnouncementManagementScreen";
 import { MessMenuManagementScreen } from "@/features/admin/screens/MessMenuManagementScreen";
 import { UserManagementScreen } from "@/features/admin/screens/UserManagementScreen";
-// Add the new import
-import AdminEventsApprovalScreen from "@/features/admin/screens/AdminEventsApprovalScreen";
+import {AdminEventsApprovalScreen} from "@/features/admin/screens/AdminEventsApprovalScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -124,7 +123,6 @@ export default function RootNavigator() {
                                     component={UserManagementScreen}
                                     options={{ title: "User Permissions" }}
                                 />
-                                {/* Add the new admin screen here */}
                                 <Stack.Screen
                                     name="AdminEventsApproval"
                                     component={AdminEventsApprovalScreen}
