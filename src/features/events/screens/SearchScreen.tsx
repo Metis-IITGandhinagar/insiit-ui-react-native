@@ -8,6 +8,7 @@ import EventDetailModal from "../components/EventDetailModal";
 import AddEventModal from "../components/AddEventModal";
 
 import OfflineNotice from "@/shared/components/OfflineNotice";
+import ScreenHeader from "@/shared/components/ScreenHeader";
 import { useEventData } from "../hooks/useEventData";
 import { eventService } from "../services/eventService";
 import { Event } from "../services/searchTypes";
@@ -73,28 +74,34 @@ export default function SearchScreen() {
 
             <View style={styles.content}>
                 <View style={styles.header}>
-                    <SearchBar value={search} onChangeText={setSearch} />
+                    <ScreenHeader
+                        title="Events"
+                        subtitle="What's happening on campus"
+                        right={
+                            // Any authenticated user may add an event.
+                            user ? (
+                                <TouchableOpacity
+                                    style={[styles.addButton, { backgroundColor: colors.primary }]}
+                                    onPress={() => {
+                                        setEditingEvent(null);
+                                        setAddModalVisible(true);
+                                    }}
+                                >
+                                    <Text style={styles.addButtonText}>+ Add</Text>
+                                </TouchableOpacity>
+                            ) : null
+                        }
+                    />
 
-                    <View style={styles.headerRow}>
-                        <Text style={styles.heading}>
-                            {search.length === 0
-                                ? `Upcoming Events (${filteredEvents.length})`
-                                : `Results (${filteredEvents.length})`}
-                        </Text>
-
-                        {/* Allow any authenticated user to add an event */}
-                        {user && (
-                            <TouchableOpacity
-                                style={[styles.addButton, { backgroundColor: colors.primary }]}
-                                onPress={() => {
-                                    setEditingEvent(null);
-                                    setAddModalVisible(true);
-                                }}
-                            >
-                                <Text style={styles.addButtonText}>+ Add</Text>
-                            </TouchableOpacity>
-                        )}
+                    <View style={styles.searchWrap}>
+                        <SearchBar value={search} onChangeText={setSearch} />
                     </View>
+
+                    <Text style={styles.heading}>
+                        {search.length === 0
+                            ? `Upcoming (${filteredEvents.length})`
+                            : `Results (${filteredEvents.length})`}
+                    </Text>
                 </View>
 
                 <FlatList
@@ -155,10 +162,12 @@ const getStyles = ({ colors, spacing, typography }: any) =>
     StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background },
         content: { flex: 1 },
-        header: { backgroundColor: colors.background, paddingHorizontal: spacing.lg, paddingTop: 10, paddingBottom: spacing.md },
-        headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.lg },
+        // No paddingTop: ScreenHeader owns the gap below the safe-area inset so every
+        // tab starts at the same height.
+        header: { backgroundColor: colors.background, paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
+        searchWrap: { marginTop: spacing.lg },
         listContent: { paddingHorizontal: spacing.lg, paddingBottom: 120 },
-        heading: { ...typography.h2, color: colors.text, marginBottom: 5 },
+        heading: { ...typography.h3, color: colors.textSecondary, marginTop: spacing.lg },
         addButton: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
         addButtonText: { color: '#FFF', fontWeight: 'bold' }
     });

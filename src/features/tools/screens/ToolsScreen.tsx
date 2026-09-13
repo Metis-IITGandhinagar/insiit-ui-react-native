@@ -1,11 +1,11 @@
 // src/screens/tools/ToolsScreen.tsx
 import React from "react";
 import {
-    SafeAreaView,
     ScrollView,
     StatusBar,
     StyleSheet,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import ToolsHeader from "../components/ToolsHeader";
 import ToolSection from "../components/ToolSection";
@@ -19,7 +19,7 @@ const ToolsScreen = () => {
 
     return (
         <>
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.content}
@@ -46,7 +46,6 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
     },
     content: {
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
         paddingBottom: 120,
         gap: spacing.lg,
     },

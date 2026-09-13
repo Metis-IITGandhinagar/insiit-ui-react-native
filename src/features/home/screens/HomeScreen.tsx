@@ -79,6 +79,9 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
     },
     contentScroll: {
         paddingHorizontal: spacing.lg,
+        // Matches ScreenHeader's paddingTop so the greeting sits at the same height
+        // as every other tab's title.
+        paddingTop: spacing.md,
         paddingBottom: 120,
         gap: spacing.lg,
     },

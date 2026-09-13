@@ -1,5 +1,7 @@
 import React from "react";
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import ScreenHeader from "@/shared/components/ScreenHeader";
 import { Map, Users, Settings, Info, ShieldCheck, Bug, Megaphone } from "lucide-react-native";
 
 import { useNavigation } from "@react-navigation/native";
@@ -34,14 +36,14 @@ const MoreScreen = () => {
     return (
         <>
             <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
                 <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
 
-                    {/* Screen Header */}
-                    <View style={styles.headerContainer}>
-                        <Text style={styles.screenTitle}>More</Text>
-                        <Text style={styles.screenSubtitle}>Account, campus & app settings</Text>
-                    </View>
+                    <ScreenHeader
+                        title="More"
+                        subtitle="Account, campus & app settings"
+                        style={styles.header}
+                    />
 
                     {/* Top Hero Card */}
                     <ProfileHeroCard />
@@ -149,23 +151,10 @@ const getStyles = ({ colors, spacing, typography }: any) => StyleSheet.create({
     },
     contentScroll: {
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
         paddingBottom: 100, // Accounts for bottom nav bar
     },
-    headerContainer: {
-        alignItems: 'center',
+    header: {
         marginBottom: spacing.lg,
-        marginTop: spacing.sm,
-    },
-    screenTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: colors.text,
-        marginBottom: 4,
-    },
-    screenSubtitle: {
-        fontSize: 14,
-        color: colors.textSecondary,
     },
     sectionTitle: {
         fontSize: 18,

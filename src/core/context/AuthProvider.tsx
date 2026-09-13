@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { nativeAuth } from '../auth/firebase';
 import { authService } from '../auth/authService';
 import { userService } from '../api/userService';
@@ -204,10 +204,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await signOut();
     };
 
-    const refreshPermissions = async () => {
-        if (!user?.email) return;
-        await syncPermissionsInBackground(user.email, sessionRef.current);
-    };
+    // Memoised on the email alone: a permissions sync calls setUser, so an identity
+    // that changed every render would make any effect depending on this re-fire in a
+    // loop. The email is what actually decides whose permissions get fetched.
+    const refreshPermissions = useCallback(async () => {
+        const email = user?.email;
+        if (!email) return;
+        await syncPermissionsInBackground(email, sessionRef.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.email]);
 
     // Guests hold no permissions: every write route on the backend requires a
     // Firebase token, so nothing gated by this could succeed anyway.

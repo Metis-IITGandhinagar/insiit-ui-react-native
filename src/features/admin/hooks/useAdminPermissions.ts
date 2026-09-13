@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/core/auth/useAuth';
 import { AdminPermissions } from '../services/adminService';
 
@@ -43,6 +43,23 @@ export const useAdminPermissions = (): UseAdminPermissionsResult => {
             setIsRefreshing(false);
         }
     }, [refreshPermissions]);
+
+    /**
+     * Revalidate every time the console is opened.
+     *
+     * The cached permissions render instantly, but they're only synced on auth state
+     * changes — so a permission granted after the app launched stayed invisible until
+     * the next cold start, which reads as "my admin rights don't work". The hook this
+     * replaced fetched on every mount; this keeps that guarantee while still painting
+     * from cache first. Failure is silent: the cached copy stands.
+     */
+    useEffect(() => {
+        if (!user?.email) return;
+
+        refreshPermissions().catch(() => {
+            // Offline or server down — the cached permissions remain correct enough.
+        });
+    }, [refreshPermissions, user?.email]);
 
     const canManageEvents = useMemo(() => {
         if (!permissions) return false;

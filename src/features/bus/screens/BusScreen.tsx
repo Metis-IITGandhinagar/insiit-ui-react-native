@@ -1,6 +1,7 @@
 // src/screens/bus/BusScreen.tsx
 import React from "react";
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, ActivityIndicator, Text, View, RefreshControl } from "react-native";
+import { ScrollView, StatusBar, StyleSheet, ActivityIndicator, Text, View, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import BusHeader from "../components/BusHeader";
 import BusRouteTabs from "../components/BusRouteTabs";
@@ -36,7 +37,7 @@ const BusScreen = () => {
         <>
             <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
 
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.content}
@@ -86,7 +87,7 @@ export default BusScreen;
 
 const getStyles = ({ colors, spacing }: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: 130, gap: spacing.lg },
+    content: { paddingHorizontal: spacing.lg, paddingBottom: 130, gap: spacing.lg },
     centered: { paddingVertical: spacing.xxl, justifyContent: "center", alignItems: "center" },
     errorText: { color: colors.danger || 'red', fontWeight: "600", fontSize: 16 },
     emptyText: { color: colors.textSecondary, fontWeight: "600", fontSize: 16 }
