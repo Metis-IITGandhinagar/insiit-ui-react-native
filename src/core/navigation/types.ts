@@ -1,7 +1,10 @@
 // src/navigation/types.ts
+import type { TabName } from "./tabs";
+
 export type RootStackParamList = {
     Login: undefined;
-    MainTabs: undefined;
+    /** `tab` jumps the pager to that tab; see MainTabsScreen's RequestedTabBridge. */
+    MainTabs: { tab?: TabName } | undefined;
     AdminDashboard: undefined;
     AnnouncementManagement: undefined;
     MessMenuManagement: undefined;
@@ -21,6 +24,7 @@ export type RootStackParamList = {
     Settings: undefined;
     CampusMap: undefined;
     AdminEventsApproval:undefined;
+    GlobalSearch: undefined;
 };
 /**
  * Mirrors `AdminPermissions` in the backend (src/schemas/admin_schemas.rs) and the

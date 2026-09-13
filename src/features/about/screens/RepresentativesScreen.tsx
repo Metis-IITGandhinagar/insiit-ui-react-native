@@ -1,17 +1,37 @@
 import React from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    ActivityIndicator,
+    RefreshControl,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Mail, Phone, Users } from 'lucide-react-native';
 
 import { useTheme } from '@/core/theme';
 import { Card } from '@/shared/components/Card';
 import { makecall, openLink } from '@/utils/linking';
-import { STUDENT_COUNCIL } from '../data/representatives';
+import OfflineNotice from '@/shared/components/OfflineNotice';
+import { useRepresentatives } from '../hooks/useRepresentatives';
 
 export default function RepresentativesScreen() {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
+
+    const {
+        representatives,
+        loading,
+        refreshing,
+        error,
+        usingCachedData,
+        lastUpdatedAt,
+        refresh,
+    } = useRepresentatives();
 
     return (
         <>
@@ -20,8 +40,30 @@ export default function RepresentativesScreen() {
                 backgroundColor={colors.background}
             />
             <SafeAreaView style={styles.container} edges={['left', 'right']}>
-                <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                    {STUDENT_COUNCIL.length === 0 ? (
+                <ScrollView
+                    contentContainerStyle={styles.content}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={refresh}
+                            tintColor={colors.primary}
+                        />
+                    }
+                >
+                    <OfflineNotice visible={usingCachedData} lastUpdatedAt={lastUpdatedAt} />
+
+                    {loading && representatives.length === 0 ? (
+                        <View style={styles.empty}>
+                            <ActivityIndicator size="large" color={colors.primary} />
+                        </View>
+                    ) : error && representatives.length === 0 ? (
+                        <View style={styles.empty}>
+                            <Users size={32} color={colors.textSecondary} />
+                            <Text style={styles.emptyTitle}>Couldn't load contacts</Text>
+                            <Text style={styles.emptyHint}>{error}</Text>
+                        </View>
+                    ) : representatives.length === 0 ? (
                         <View style={styles.empty}>
                             <Users size={32} color={colors.textSecondary} />
                             <Text style={styles.emptyTitle}>Not published yet</Text>
@@ -36,8 +78,8 @@ export default function RepresentativesScreen() {
                                 Reach the Student Council directly about anything they oversee.
                             </Text>
 
-                            {STUDENT_COUNCIL.map((rep) => (
-                                <Card key={rep.position} style={styles.card}>
+                            {representatives.map((rep) => (
+                                <Card key={rep.id} style={styles.card}>
                                     <Text style={styles.position}>{rep.position}</Text>
                                     <Text style={styles.name}>{rep.name}</Text>
 
@@ -55,14 +97,14 @@ export default function RepresentativesScreen() {
                                             </TouchableOpacity>
                                         )}
 
-                                        {!!rep.mobile && (
+                                        {!!rep.phone && (
                                             <TouchableOpacity
                                                 style={styles.action}
-                                                onPress={() => makecall(rep.mobile!)}
+                                                onPress={() => makecall(rep.phone)}
                                                 activeOpacity={0.7}
                                             >
                                                 <Phone size={16} color={colors.primary} />
-                                                <Text style={styles.actionText}>{rep.mobile}</Text>
+                                                <Text style={styles.actionText}>{rep.phone}</Text>
                                             </TouchableOpacity>
                                         )}
                                     </View>

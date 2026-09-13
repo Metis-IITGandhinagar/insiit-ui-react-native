@@ -15,13 +15,15 @@ import { Megaphone } from 'lucide-react-native';
 import { useTheme } from '@/core/theme';
 import { formatBackendDateTime } from '@/core/api/backendTime';
 import { resolveBackendAsset } from '@/core/api/apiClient';
+import OfflineNotice from '@/shared/components/OfflineNotice';
 import { useAnnouncements } from '../hooks/useAnnouncements';
 
 export default function AnnouncementsScreen() {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
-    const { announcements, loading, error, refresh } = useAnnouncements();
+    const { announcements, loading, refreshing, error, usingCachedData, lastUpdatedAt, refresh } =
+        useAnnouncements();
 
     return (
         <>
@@ -35,12 +37,14 @@ export default function AnnouncementsScreen() {
                     showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl
-                            refreshing={loading && announcements.length > 0}
+                            refreshing={refreshing}
                             onRefresh={refresh}
                             tintColor={colors.primary}
                         />
                     }
                 >
+                    <OfflineNotice visible={usingCachedData} lastUpdatedAt={lastUpdatedAt} />
+
                     {loading && announcements.length === 0 ? (
                         <View style={styles.centered}>
                             <ActivityIndicator size="large" color={colors.primary} />

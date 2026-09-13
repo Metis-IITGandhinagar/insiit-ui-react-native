@@ -1,26 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import { CACHE_POLICIES, useCachedResource } from '@/core/cache';
 import { AnnouncementEntry, announcementsService } from '../services/announcementsService';
 
+const fetchAnnouncements = () => announcementsService.getAll();
+
 export const useAnnouncements = () => {
-    const [announcements, setAnnouncements] = useState<AnnouncementEntry[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    // Cached so a notice someone read this morning is still readable in a basement
+    // lecture hall. The service already sorts newest-first before it's stored.
+    const { data, loading, refreshing, error, usingCachedData, lastUpdatedAt, refresh } =
+        useCachedResource<AnnouncementEntry[]>({
+            policy: CACHE_POLICIES.announcements,
+            fetcher: fetchAnnouncements,
+        });
 
-    const refresh = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            setAnnouncements(await announcementsService.getAll());
-        } catch (err: any) {
-            setError(err?.message || 'Failed to load announcements');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        refresh();
-    }, [refresh]);
-
-    return { announcements, loading, error, refresh };
+    return {
+        announcements: data ?? [],
+        loading,
+        refreshing,
+        error,
+        usingCachedData,
+        lastUpdatedAt,
+        refresh,
+    };
 };

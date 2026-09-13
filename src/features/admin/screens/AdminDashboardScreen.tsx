@@ -30,6 +30,7 @@ export const AdminDashboardScreen: React.FC = () => {
     const {
         permissions,
         isLoading,
+        isRefreshing,
         error,
         refetch,
         canManageAnnouncements,
@@ -149,7 +150,7 @@ export const AdminDashboardScreen: React.FC = () => {
         <ScrollView
             style={styles.container}
             contentContainerStyle={styles.contentScroll}
-            refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={colors.primary} />}
+            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refetch} tintColor={colors.primary} />}
             showsVerticalScrollIndicator={false}
         >
             <Text style={styles.headerSubtitle}>

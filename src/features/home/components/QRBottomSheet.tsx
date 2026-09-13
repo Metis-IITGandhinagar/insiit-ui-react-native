@@ -1,18 +1,16 @@
 import React, { forwardRef, useImperativeHandle, useState, useEffect } from "react";
 import {
-    Modal,
     Pressable,
     StyleSheet,
     Text,
     View,
     TextInput,
     ActivityIndicator,
-    KeyboardAvoidingView,
     Platform
 } from "react-native";
-import { BlurView } from "expo-blur";
 import { QrCode, LogOut, X, KeyRound, User, Eye, EyeOff } from "lucide-react-native";
 import { useTheme } from "@/core/theme";
+import SheetModal from "@/shared/components/SheetModal";
 import QRCode from "react-native-qrcode-svg";
 import { qrService } from "../services/qrService";
 import { QRSession } from "../services/qrTypes";
@@ -84,16 +82,8 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
     const styles = getStyles(theme);
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={styles.absoluteViewContainer}
-            >
-                <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill}>
-                    <Pressable style={styles.dismissalCatch} onPress={() => setVisible(false)} />
-                </BlurView>
-
-                <View style={styles.sheetLayout}>
+        <SheetModal visible={visible} onClose={() => setVisible(false)} backdrop="blur" avoidKeyboard>
+            <View style={styles.sheetLayout}>
                     <View style={styles.headerRow}>
                         <View style={styles.titleGroup}>
                             <QrCode size={22} color={colors.primary} />
@@ -177,21 +167,13 @@ const QRBottomSheet = forwardRef<QRBottomSheetRef>((_, ref) => {
                         </View>
                     )}
                 </View>
-            </KeyboardAvoidingView>
-        </Modal>
+        </SheetModal>
     );
 });
 
 export default QRBottomSheet;
 
 const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
-    absoluteViewContainer: {
-        flex: 1,
-        justifyContent: "flex-end",
-    },
-    dismissalCatch: {
-        flex: 1,
-    },
     sheetLayout: {
         backgroundColor: colors.surface,
         borderTopLeftRadius: radius.xl,

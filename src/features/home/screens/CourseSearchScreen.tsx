@@ -42,11 +42,20 @@ export default function CourseSearchScreen() {
     }, []);
 
     const filteredCourses = useMemo(() => {
-        if (!search.trim()) return allCourses;
-        return allCourses.filter(course =>
-            course.toLowerCase().includes(search.toLowerCase())
-        );
-    }, [search, allCourses]);
+        const matching = !search.trim()
+            ? allCourses
+            : allCourses.filter(course =>
+                  course.toLowerCase().includes(search.toLowerCase())
+              );
+
+        // Selected courses float to the top so your picks stay visible instead of
+        // scattering through a catalogue of hundreds. Partitioning rather than sorting
+        // keeps the catalogue order intact within each group.
+        const selected = matching.filter(course => selectedCourses.has(course));
+        const unselected = matching.filter(course => !selectedCourses.has(course));
+
+        return [...selected, ...unselected];
+    }, [search, allCourses, selectedCourses]);
 
     const toggleCourse = (courseCode: string) => {
         setSelectedCourses(prev => {

@@ -1,8 +1,8 @@
 import React, { forwardRef, useImperativeHandle, useState, useEffect } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { BlurView } from "expo-blur";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { UtensilsCrossed, X } from "lucide-react-native";
 import { useTheme } from "@/core/theme";
+import SheetModal from "@/shared/components/SheetModal";
 import { MessMenuResponse } from "../services/messTypes";
 
 export type WeeklyMenuSheetRef = {
@@ -69,13 +69,13 @@ const WeeklyMenuSheet = forwardRef<WeeklyMenuSheetRef, Props>(({ data }, ref) =>
     const styles = getStyles(theme);
 
     return (
-        <Modal visible={visible} animationType="slide" transparent onRequestClose={() => setVisible(false)}>
-            <View style={styles.absoluteWrap}>
-                <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill}>
-                    <Pressable style={styles.dismissCatch} onPress={() => setVisible(false)} />
-                </BlurView>
-
-                <View style={styles.sheetCore}>
+        <SheetModal
+            visible={visible}
+            onClose={() => setVisible(false)}
+            backdrop="blur"
+            sheetStyle={styles.sheetHeight}
+        >
+            <View style={styles.sheetCore}>
                     <View style={styles.header}>
                         <View style={styles.headerLeft}>
                             <UtensilsCrossed size={22} color={colors.primary} />
@@ -121,25 +121,21 @@ const WeeklyMenuSheet = forwardRef<WeeklyMenuSheetRef, Props>(({ data }, ref) =>
                             </View>
                         )}
                     </ScrollView>
-                </View>
             </View>
-        </Modal>
+        </SheetModal>
     );
 });
 
 export default WeeklyMenuSheet;
 
 const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => StyleSheet.create({
-    absoluteWrap: {
-        flex: 1,
-        justifyContent: "flex-end",
-    },
-    dismissCatch: {
-        flex: 1,
+    // Lives on the sliding layer so the percentage resolves against the full screen.
+    sheetHeight: {
+        height: "85%",
     },
     sheetCore: {
         width: "100%",
-        height: "85%",
+        height: "100%",
         backgroundColor: colors.surface,
         borderTopLeftRadius: radius.xl,
         borderTopRightRadius: radius.xl,

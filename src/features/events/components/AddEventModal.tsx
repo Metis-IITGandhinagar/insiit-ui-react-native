@@ -181,15 +181,17 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
                     <View style={styles.row}>
                         <TextInput
                             style={[styles.input, { flex: 1, marginRight: 8 }]}
-                            placeholder="Date (YYYY-MM-DD)"
+                            placeholder="YYYY-MM-DD"
                             placeholderTextColor="#999"
+                            numberOfLines={1}
                             value={formData.date}
                             onChangeText={(val) => handleChange('date', val)}
                         />
                         <TextInput
                             style={[styles.input, { flex: 1, marginLeft: 8 }]}
-                            placeholder="Time (HH:MM AM/PM)"
+                            placeholder="HH:MM AM/PM"
                             placeholderTextColor="#999"
+                            numberOfLines={1}
                             value={formData.time}
                             onChangeText={(val) => handleChange('time', val)}
                         />

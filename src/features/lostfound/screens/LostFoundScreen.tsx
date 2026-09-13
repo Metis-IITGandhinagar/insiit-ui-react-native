@@ -16,6 +16,7 @@ import { ArrowLeft, Plus } from "lucide-react-native";
 import { useTheme } from "@/core/theme";
 import { useAuthGate } from "@/core/auth/useAuthGate";
 
+import OfflineNotice from "@/shared/components/OfflineNotice";
 import { useLostFoundData } from "../hooks/useLostFoundData";
 import { LostFoundEntry } from "../services/lostFoundTypes";
 import LostFoundCard from "../components/LostFoundCard";
@@ -34,7 +35,10 @@ export default function LostFoundScreen() {
     const {
         entries,
         loading,
+        refreshing,
         error,
+        usingCachedData,
+        lastUpdatedAt,
         refresh,
         addEntry,
         editEntry,
@@ -136,11 +140,16 @@ export default function LostFoundScreen() {
                         showsVerticalScrollIndicator={false}
                         refreshControl={
                             <RefreshControl
-                                refreshing={loading && entries.length > 0}
+                                refreshing={refreshing}
                                 onRefresh={refresh}
                             />
                         }
                         ListHeaderComponent={
+                            <View>
+                            <OfflineNotice
+                                visible={usingCachedData}
+                                lastUpdatedAt={lastUpdatedAt}
+                            />
                             <View style={styles.heroCard}>
                                 <Text style={styles.heroTitle}>
                                     Lost something on campus?
@@ -165,6 +174,7 @@ export default function LostFoundScreen() {
                                         Report Lost Item
                                     </Text>
                                 </TouchableOpacity>
+                            </View>
                             </View>
                         }
                         ListEmptyComponent={

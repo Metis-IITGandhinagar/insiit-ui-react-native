@@ -1,29 +1,38 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { CACHE_POLICIES, useCachedResource } from "@/core/cache";
 import { BusRoute, ApiBusResponse, BusDeparture } from "../services/busTypes";
 import { busService, calculateMinutesLeft, formatCountdown, formatDepartureTime } from "../services/busServices";
 
+/** Module-level so its identity is stable across renders and can't re-trigger the fetch effect. */
+const fetchBuses = () => busService.getAllBuses();
+
 export const useBusData = () => {
     const [selectedRoute, setSelectedRoute] = useState<BusRoute | null>(null);
-    const [rawBuses, setRawBuses] = useState<ApiBusResponse[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
 
-    const refreshBuses = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await busService.getAllBuses();
-            setRawBuses(data);
-        } catch (err: any) {
-            setError(err.message || "Failed to load schedules");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    /**
+     * Departure times are the most static data in the app and the most useful to have
+     * without signal, so this is cached to disk and rendered before the network is
+     * touched at all. `revalidateWhenFresh: false` skips the request entirely while
+     * the cached copy is inside its day-long TTL.
+     *
+     * Countdowns stay correct on stale data because they're computed from the clock at
+     * render time, not stored — a week-old cache still says the right "12m".
+     */
+    const {
+        data,
+        loading,
+        refreshing,
+        error,
+        usingCachedData,
+        lastUpdatedAt,
+        refresh,
+    } = useCachedResource<ApiBusResponse[]>({
+        policy: CACHE_POLICIES.buses,
+        fetcher: fetchBuses,
+        revalidateWhenFresh: false,
+    });
 
-    useEffect(() => {
-        refreshBuses();
-    }, [refreshBuses]);
+    const rawBuses = useMemo(() => data ?? [], [data]);
 
     /**
      * The routes to offer as tabs, derived from the data rather than hardcoded: the
@@ -105,13 +114,19 @@ export const useBusData = () => {
         };
     }, [filteredBuses, selectedRoute]);
 
+    // Pull-to-refresh must hit the network even when the cache is still fresh.
+    const refreshBuses = useCallback(() => refresh(), [refresh]);
+
     return {
         routes,
         selectedRoute,
         setSelectedRoute,
         loading,
+        refreshing,
         error,
-        refreshBuses, 
+        usingCachedData,
+        lastUpdatedAt,
+        refreshBuses,
         ...scheduleData
     };
 };

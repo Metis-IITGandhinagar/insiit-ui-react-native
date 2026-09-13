@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Megaphone, Settings2 } from "lucide-react-native";
+import { Megaphone, Search } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "@/core/theme";
 import { useAuth } from "@/core/auth/useAuth";
@@ -52,12 +52,15 @@ const GreetingSection = ({ onRefresh, refreshing = false }: Props) => {
                 </TouchableOpacity>
             )}
 
+            {/* Settings moved out of the header — it's still one tap away under More. */}
             <TouchableOpacity
                 style={styles.settingsButton}
                 activeOpacity={0.75}
-                onPress={() => navigation.navigate("Settings")}
+                onPress={() => navigation.navigate("GlobalSearch")}
+                accessibilityLabel="Search"
+                accessibilityRole="button"
             >
-                <Settings2
+                <Search
                     size={22}
                     color={colors.primary}
                     strokeWidth={2}

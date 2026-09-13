@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { X } from 'lucide-react-native'; 
 import { useTheme } from '@/core/theme';
+import SheetModal from '@/shared/components/SheetModal';
 import { TimetableSession } from '../services/timetableService';
 
 interface Props {
@@ -66,9 +67,8 @@ export default function WeeklyTimetableSheet({ visible, onClose, schedule }: Pro
     const hasAnyClasses = (schedule ?? []).length > 0;
 
     return (
-        <Modal visible={visible} animationType="slide" transparent={true}>
-            <View style={styles.overlay}>
-                <View style={styles.sheet}>
+        <SheetModal visible={visible} onClose={onClose} sheetStyle={styles.sheetHeight}>
+            <View style={styles.sheet}>
                     <View style={styles.header}>
                         <Text style={styles.title}>Weekly Schedule</Text>
                         <TouchableOpacity
@@ -127,21 +127,22 @@ export default function WeeklyTimetableSheet({ visible, onClose, schedule }: Pro
                             })
                         )}
                     </ScrollView>
-                </View>
             </View>
-        </Modal>
+        </SheetModal>
     );
 }
 
 const getStyles = ({ colors, spacing, typography }: any) => StyleSheet.create({
-    overlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.5)'
+    // The height lives on the sliding layer: a percentage only resolves against a
+    // parent with a definite height, and the sheet wrapper sizes to its content. Left
+    // here it was ignored, so the sheet ended above the screen edge and the scrim
+    // showed through beneath it.
+    sheetHeight: {
+        height: '85%',
     },
     sheet: {
         backgroundColor: colors.background,
-        height: '85%',
+        height: '100%',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: spacing.lg,

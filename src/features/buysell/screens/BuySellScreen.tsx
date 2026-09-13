@@ -3,9 +3,6 @@ import {
     ActivityIndicator,
     Alert,
     Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
     RefreshControl,
     ScrollView,
     StatusBar,
@@ -25,6 +22,8 @@ import { formatBackendDateTime } from '@/core/api/backendTime';
 import { resolveBackendAsset } from '@/core/api/apiClient';
 import { fetchImageAsBase64, pickImagesAsBase64 } from '@/shared/media/pickImages';
 import ImageZoomModal from '@/shared/components/ImageZoomModal';
+import OfflineNotice from '@/shared/components/OfflineNotice';
+import SheetModal from '@/shared/components/SheetModal';
 import { useBuySell } from '../hooks/useBuySell';
 import { BuySellEntry, buySellService } from '../services/buySellService';
 
@@ -34,7 +33,7 @@ export default function BuySellScreen() {
     const styles = getStyles(theme);
     const { user } = useAuth();
     const { ensureSignedIn } = useAuthGate();
-    const { entries, loading, error, refresh } = useBuySell();
+    const { entries, loading, refreshing, error, usingCachedData, lastUpdatedAt, refresh } = useBuySell();
 
     // One sheet serves three flows: listing an item, editing your own listing, and
     // bidding on someone else's.
@@ -47,6 +46,7 @@ export default function BuySellScreen() {
     const [itemName, setItemName] = useState('');
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
+    const [askingPrice, setAskingPrice] = useState('');
     const [images, setImages] = useState<string[]>([]);
     const [isLoadingImages, setLoadingImages] = useState(false);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -58,6 +58,7 @@ export default function BuySellScreen() {
         setItemName('');
         setDescription('');
         setAmount('');
+        setAskingPrice('');
         setImages([]);
     }, []);
 
@@ -101,12 +102,20 @@ export default function BuySellScreen() {
             Alert.alert('Missing details', 'Item name and description are both required.');
             return;
         }
+
+        const trimmedAskingPrice = askingPrice.trim();
+        const parsedAskingPrice = trimmedAskingPrice ? Number(trimmedAskingPrice) : null;
+        if (parsedAskingPrice !== null && (!Number.isFinite(parsedAskingPrice) || parsedAskingPrice < 0)) {
+            Alert.alert('Invalid price', 'Enter the asking price as a positive number, or leave it blank.');
+            return;
+        }
         setSubmitting(true);
         try {
             const payload = {
                 item_name: itemName.trim(),
                 description: description.trim(),
                 base64_images: images,
+                asking_price_in_rs: parsedAskingPrice,
             };
             if (sheet.mode === 'edit') {
                 await buySellService.edit(sheet.entry.id, payload);
@@ -126,12 +135,15 @@ export default function BuySellScreen() {
         } finally {
             setSubmitting(false);
         }
-    }, [sheet, itemName, description, amount, images, refresh, resetSheet]);
+    }, [sheet, itemName, description, amount, askingPrice, images, refresh, resetSheet]);
 
     const handleEdit = useCallback(async (entry: BuySellEntry) => {
         setItemName(entry.item_name);
         setDescription(entry.description);
         setAmount('');
+        setAskingPrice(
+            typeof entry.asking_price_in_rs === 'number' ? String(entry.asking_price_in_rs) : ''
+        );
         setImages([]);
         setSheet({ mode: 'edit', entry });
 
@@ -203,12 +215,14 @@ export default function BuySellScreen() {
                     showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl
-                            refreshing={loading && entries.length > 0}
+                            refreshing={refreshing}
                             onRefresh={refresh}
                             tintColor={colors.primary}
                         />
                     }
                 >
+                    <OfflineNotice visible={usingCachedData} lastUpdatedAt={lastUpdatedAt} />
+
                     <View style={styles.heroCard}>
                         <ShoppingBag size={32} color={colors.primary} style={{ marginBottom: 12 }} />
                         <Text style={styles.heroTitle}>Campus Marketplace</Text>
@@ -293,6 +307,12 @@ export default function BuySellScreen() {
                                             ` · ${formatBackendDateTime(entry.added_on_timestamp)}`}
                                     </Text>
 
+                                    {typeof entry.asking_price_in_rs === 'number' && (
+                                        <Text style={styles.askingPrice}>
+                                            Asking ₹{entry.asking_price_in_rs}
+                                        </Text>
+                                    )}
+
                                     {top !== null && (
                                         <Text style={styles.bidSummary}>
                                             {entry.bids.length} bid{entry.bids.length === 1 ? '' : 's'} · highest ₹{top}
@@ -355,13 +375,17 @@ export default function BuySellScreen() {
                 </ScrollView>
             </SafeAreaView>
 
-            <Modal visible={sheet !== null} animationType="slide" transparent onRequestClose={closeSheet}>
-                <KeyboardAvoidingView
-                    style={styles.modalBackdrop}
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                >
-                    <View style={styles.modalCard}>
-                        <SafeAreaView edges={['bottom']}>
+            {/* No tap-to-dismiss: this sheet holds a half-filled form, and the old Modal
+                didn't dismiss on backdrop press either. */}
+            <SheetModal
+                visible={sheet !== null}
+                onClose={closeSheet}
+                avoidKeyboard
+                dismissOnBackdropPress={false}
+                sheetStyle={styles.modalSheet}
+            >
+                <View style={styles.modalCard}>
+                        <SafeAreaView edges={['bottom']} style={styles.modalSafeArea}>
                             <ScrollView
                                 keyboardShouldPersistTaps="handled"
                                 showsVerticalScrollIndicator={false}
@@ -399,6 +423,16 @@ export default function BuySellScreen() {
                                             placeholder="Condition, age, asking price…"
                                             placeholderTextColor={colors.textSecondary}
                                             multiline
+                                        />
+
+                                        <Text style={styles.label}>Asking price (₹, optional)</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            value={askingPrice}
+                                            onChangeText={setAskingPrice}
+                                            placeholder="1200"
+                                            placeholderTextColor={colors.textSecondary}
+                                            keyboardType="numeric"
                                         />
 
                                         <Text style={styles.label}>Photos (optional)</Text>
@@ -480,9 +514,8 @@ export default function BuySellScreen() {
                                 </TouchableOpacity>
                             </ScrollView>
                         </SafeAreaView>
-                    </View>
-                </KeyboardAvoidingView>
-            </Modal>
+                </View>
+            </SheetModal>
 
             <ImageZoomModal
                 visible={!!zoomImage}
@@ -607,6 +640,12 @@ const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
         color: colors.textSecondary,
         fontSize: 12,
     },
+    askingPrice: {
+        color: colors.text,
+        fontSize: 13,
+        fontWeight: '700',
+        marginTop: 4,
+    },
     bidSummary: {
         color: colors.primary,
         fontSize: 12,
@@ -688,10 +727,10 @@ const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
         fontSize: 13,
         fontWeight: '700',
     },
-    modalBackdrop: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.45)',
-        justifyContent: 'flex-end',
+    // The cap lives on the sliding layer: a percentage only resolves against a parent
+    // with a definite height, and the sheet wrapper sizes itself to its content.
+    modalSheet: {
+        maxHeight: '85%',
     },
     modalCard: {
         backgroundColor: colors.surface,
@@ -699,7 +738,12 @@ const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
         borderTopRightRadius: radius.lg,
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.lg,
-        maxHeight: '85%',
+        // Lets the card shrink to the sheet's 85% cap so the ScrollView inside gets a
+        // bounded height and actually scrolls, instead of overflowing the sheet.
+        flexShrink: 1,
+    },
+    modalSafeArea: {
+        flexShrink: 1,
     },
     modalHeader: {
         flexDirection: 'row',
