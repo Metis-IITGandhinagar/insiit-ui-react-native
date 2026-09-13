@@ -1,0 +1,6 @@
+{
+  "react-native": {
+    "_comment": "Point RNFirebase messaging at the same notification colour resource that expo-notifications generates from app.json (plugins -> expo-notifications -> color). Both libraries declare com.google.firebase.messaging.default_notification_color in their manifests; if the values differ the manifest merger fails. Agreeing on one resource is preferable to a tools:replace override, which would silently let one win.",
+    "messaging_android_notification_color": "@color/notification_icon_color"
+  }
+}

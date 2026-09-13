@@ -16,7 +16,7 @@ import ProfileHeroCard from "../components/ProfileHeroCard";
 import { useAuth } from "@/core/auth/useAuth";
 import { openLink } from "@/utils/linking";
 import { LINKS } from "@/constants/links";
-import appConfig from "../../../../app.json";
+import { DISPLAY_VERSION } from "@/constants/appVersion";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -123,7 +123,7 @@ const MoreScreen = () => {
                         <ListItem
                             leadingIcon={<Info size={22} color={colors.primary} />}
                             title="Version"
-                            subtitle={appConfig.expo.version}
+                            subtitle={DISPLAY_VERSION}
                             showChevron={false}
                             showDivider={false}
                         />
