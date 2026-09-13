@@ -9,6 +9,8 @@ import {
     Image,
     ActivityIndicator,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -83,7 +85,7 @@ const AddLostItemModal = ({
             base64: true,
             ...({ cropperChooseText: "Done" } as any),
         });
-        
+
         if (!result.canceled && result.assets?.[0]) {
             const asset = result.assets[0];
             setImagePreviewUri(asset.uri);
@@ -147,10 +149,14 @@ const AddLostItemModal = ({
         <SheetModal
             visible={visible}
             onClose={resetAndClose}
-            avoidKeyboard
+            avoidKeyboard={Platform.OS === "ios"}
             sheetStyle={styles.sheetCap}
         >
-            <View style={styles.modal}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                style={styles.keyboardContainer}
+            >
+                <View style={styles.modal}>
                     <TouchableOpacity
                         style={styles.closeButton}
                         onPress={resetAndClose}
@@ -167,6 +173,8 @@ const AddLostItemModal = ({
                         style={styles.scrollView}
                         contentContainerStyle={styles.body}
                         nestedScrollEnabled={true}
+                        automaticallyAdjustKeyboardInsets={true}
+                        keyboardShouldPersistTaps="handled"
                     >
                         <Text style={styles.title}>
                             {isEditing
@@ -249,7 +257,8 @@ const AddLostItemModal = ({
                             )}
                         </TouchableOpacity>
                     </ScrollView>
-            </View>
+                </View>
+            </KeyboardAvoidingView>
         </SheetModal>
     );
 };
@@ -263,10 +272,13 @@ const getStyles = ({
     radius,
 }: any) =>
     StyleSheet.create({
-        // The cap sits on the sliding layer: a percentage needs a parent with a
-        // definite height, and the sheet wrapper sizes itself to its content.
         sheetCap: {
             maxHeight: "88%",
+        },
+
+        keyboardContainer: {
+            width: "100%",
+            flexShrink: 1,
         },
 
         modal: {
@@ -299,6 +311,7 @@ const getStyles = ({
         body: {
             padding: spacing.lg,
             paddingTop: spacing.xl + spacing.md,
+            paddingBottom: spacing.xl * 2,
         },
 
         title: {
@@ -374,7 +387,7 @@ const getStyles = ({
             alignItems: "center",
             justifyContent: "center",
             marginTop: spacing.md,
-            marginBottom:spacing.md,
+            marginBottom: spacing.md,
         },
 
         primaryButtonText: {
