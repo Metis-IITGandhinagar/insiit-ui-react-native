@@ -14,6 +14,7 @@ import MessFeedbackScreen from "@/features/tools/screens/MessFeedbackScreen";
 import ProfileScreen from "@/features/more/screens/ProfileScreen";
 import SettingsScreen from "@/features/more/screens/SettingsScreen";
 import CampusMapScreen from "@/features/map/screens/CampusMapScreen";
+import GlobalSearchScreen from "@/features/search/screens/GlobalSearchScreen";
 import OutletsScreen from "@/features/outlets/screens/OutletsScreen";
 import AnnouncementsScreen from "@/features/announcements/screens/AnnouncementsScreen";
 import AboutScreen from "@/features/about/screens/AboutScreen";
@@ -147,6 +148,11 @@ export default function RootNavigator() {
                             options={{ headerShown: false }}
                         />
                     )}
+                    <Stack.Screen
+                        name="GlobalSearch"
+                        component={GlobalSearchScreen}
+                        options={{ title: "Search" }}
+                    />
                     <Stack.Screen
                         name="CourseSearch"
                         component={CourseSearchScreen}

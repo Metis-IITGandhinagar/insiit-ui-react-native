@@ -8,11 +8,25 @@ import NextBusHero from "../components/NextBusHero";
 import TodaySchedule from "../components/TodaySchedule";
 import RouteCard from "../components/RouteCard";
 
+import OfflineNotice from "@/shared/components/OfflineNotice";
 import { useBusData } from "../hooks/useBusData";
 import { useTheme } from "@/core/theme";
 
 const BusScreen = () => {
-    const { routes, selectedRoute, setSelectedRoute, departures, nextBus, stops, loading, error, refreshBuses } = useBusData();
+    const {
+        routes,
+        selectedRoute,
+        setSelectedRoute,
+        departures,
+        nextBus,
+        stops,
+        loading,
+        refreshing,
+        error,
+        usingCachedData,
+        lastUpdatedAt,
+        refreshBuses,
+    } = useBusData();
 
     const theme = useTheme();
     const { colors } = theme;
@@ -28,7 +42,7 @@ const BusScreen = () => {
                     contentContainerStyle={styles.content}
                     refreshControl={
                         <RefreshControl
-                            refreshing={loading && departures.length > 0}
+                            refreshing={refreshing}
                             onRefresh={refreshBuses}
                             tintColor={colors.primary}
                         />
@@ -37,6 +51,8 @@ const BusScreen = () => {
                     <BusHeader />
 
                     <BusRouteTabs routes={routes} selected={selectedRoute} onSelect={setSelectedRoute} />
+
+                    <OfflineNotice visible={usingCachedData} lastUpdatedAt={lastUpdatedAt} />
 
                     {loading && departures.length === 0 ? (
                         <View style={styles.centered}>

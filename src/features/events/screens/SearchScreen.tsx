@@ -7,6 +7,7 @@ import EventCard from "../components/EventCard";
 import EventDetailModal from "../components/EventDetailModal";
 import AddEventModal from "../components/AddEventModal";
 
+import OfflineNotice from "@/shared/components/OfflineNotice";
 import { useEventData } from "../hooks/useEventData";
 import { eventService } from "../services/eventService";
 import { Event } from "../services/searchTypes";
@@ -26,7 +27,8 @@ export default function SearchScreen() {
     const styles = getStyles(theme);
 
     const { user } = useAuth();
-    const { eventsList, loading, refreshEvents } = useEventData();
+    const { eventsList, loading, refreshing, usingCachedData, lastUpdatedAt, refreshEvents } =
+        useEventData();
 
     const filteredEvents = useMemo(() => {
         if (!search.trim()) return eventsList;
@@ -100,9 +102,12 @@ export default function SearchScreen() {
                     keyExtractor={(item) => item.id}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.listContent}
+                    ListHeaderComponent={
+                        <OfflineNotice visible={usingCachedData} lastUpdatedAt={lastUpdatedAt} />
+                    }
                     refreshControl={
                         <RefreshControl
-                            refreshing={loading}
+                            refreshing={refreshing}
                             onRefresh={refreshEvents}
                             colors={[colors.primary]}
                             tintColor={colors.primary}

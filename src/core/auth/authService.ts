@@ -75,9 +75,18 @@ export const authService = {
     return nativeAuth.currentUser;
   },
 
+  /**
+   * The cached ID token, refreshed by the SDK only when it has actually expired.
+   *
+   * Deliberately NOT forceRefresh: this runs in the apiClient request interceptor, so
+   * forcing it made every single API call wait on a round-trip to Google's token
+   * endpoint before the real request could even leave the device. Firebase already
+   * refreshes proactively an hour before expiry, and offline it returns the cached
+   * token instead of hanging.
+   */
   getIdToken: async () => {
     const user = nativeAuth.currentUser;
     if (!user) return null;
-    return await user.getIdToken(true);
+    return await user.getIdToken();
   },
 };

@@ -1,16 +1,15 @@
 import React from "react";
 import {
-    Modal,
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
     ScrollView,
     Image,
-    Pressable,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
+import SheetModal from "@/shared/components/SheetModal";
 import { useTheme } from "@/core/theme";
 import { resolveBackendAsset } from "@/core/api/apiClient";
 import { Outlet } from "../services/outletTypes";
@@ -48,16 +47,8 @@ const OutletDetailModal = ({
     const isOpen = checkIsOpen(outlet.open_time, outlet.close_time);
 
     return (
-        <Modal
-            transparent
-            visible={visible}
-            animationType="fade"
-            onRequestClose={onClose}
-        >
-            <View style={styles.overlay}>
-                <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-
-                <View style={styles.modal}>
+        <SheetModal visible={visible} onClose={onClose} sheetStyle={styles.sheetCap}>
+            <View style={styles.modal}>
                     <TouchableOpacity
                         style={styles.closeButton}
                         onPress={onClose}
@@ -146,9 +137,8 @@ const OutletDetailModal = ({
                             ))}
                         </View>
                     </ScrollView>
-                </View>
             </View>
-        </Modal>
+        </SheetModal>
     );
 };
 
@@ -161,19 +151,18 @@ const getStyles = ({
     radius,
 }: any) =>
     StyleSheet.create({
-        overlay: {
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: spacing.xl,
+        // The cap sits on the sliding layer: a percentage needs a parent with a
+        // definite height, and the sheet wrapper sizes itself to its content.
+        sheetCap: {
+            maxHeight: "85%",
         },
 
         modal: {
             width: "100%",
-            maxHeight: "85%",
+            flexShrink: 1,
             backgroundColor: colors.surface,
-            borderRadius: radius.xl,
+            borderTopLeftRadius: radius.xl,
+            borderTopRightRadius: radius.xl,
             overflow: "hidden",
             zIndex: 1,
         },

@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { X } from 'lucide-react-native'; 
 import { useTheme } from '@/core/theme';
+import SheetModal from '@/shared/components/SheetModal';
 import { TimetableSession } from '../services/timetableService';
 
 interface Props {
@@ -66,9 +67,8 @@ export default function WeeklyTimetableSheet({ visible, onClose, schedule }: Pro
     const hasAnyClasses = (schedule ?? []).length > 0;
 
     return (
-        <Modal visible={visible} animationType="slide" transparent={true}>
-            <View style={styles.overlay}>
-                <View style={styles.sheet}>
+        <SheetModal visible={visible} onClose={onClose}>
+            <View style={styles.sheet}>
                     <View style={styles.header}>
                         <Text style={styles.title}>Weekly Schedule</Text>
                         <TouchableOpacity
@@ -127,18 +127,12 @@ export default function WeeklyTimetableSheet({ visible, onClose, schedule }: Pro
                             })
                         )}
                     </ScrollView>
-                </View>
             </View>
-        </Modal>
+        </SheetModal>
     );
 }
 
 const getStyles = ({ colors, spacing, typography }: any) => StyleSheet.create({
-    overlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.5)'
-    },
     sheet: {
         backgroundColor: colors.background,
         height: '85%',

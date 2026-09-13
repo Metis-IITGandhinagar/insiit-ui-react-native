@@ -3,9 +3,6 @@ import {
     ActivityIndicator,
     Alert,
     Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
     RefreshControl,
     ScrollView,
     StatusBar,
@@ -25,6 +22,8 @@ import { formatBackendDateTime } from '@/core/api/backendTime';
 import { resolveBackendAsset } from '@/core/api/apiClient';
 import { fetchImageAsBase64, pickImagesAsBase64 } from '@/shared/media/pickImages';
 import ImageZoomModal from '@/shared/components/ImageZoomModal';
+import OfflineNotice from '@/shared/components/OfflineNotice';
+import SheetModal from '@/shared/components/SheetModal';
 import { useBuySell } from '../hooks/useBuySell';
 import { BuySellEntry, buySellService } from '../services/buySellService';
 
@@ -34,7 +33,7 @@ export default function BuySellScreen() {
     const styles = getStyles(theme);
     const { user } = useAuth();
     const { ensureSignedIn } = useAuthGate();
-    const { entries, loading, error, refresh } = useBuySell();
+    const { entries, loading, refreshing, error, usingCachedData, lastUpdatedAt, refresh } = useBuySell();
 
     // One sheet serves three flows: listing an item, editing your own listing, and
     // bidding on someone else's.
@@ -216,12 +215,14 @@ export default function BuySellScreen() {
                     showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl
-                            refreshing={loading && entries.length > 0}
+                            refreshing={refreshing}
                             onRefresh={refresh}
                             tintColor={colors.primary}
                         />
                     }
                 >
+                    <OfflineNotice visible={usingCachedData} lastUpdatedAt={lastUpdatedAt} />
+
                     <View style={styles.heroCard}>
                         <ShoppingBag size={32} color={colors.primary} style={{ marginBottom: 12 }} />
                         <Text style={styles.heroTitle}>Campus Marketplace</Text>
@@ -374,13 +375,17 @@ export default function BuySellScreen() {
                 </ScrollView>
             </SafeAreaView>
 
-            <Modal visible={sheet !== null} animationType="slide" transparent onRequestClose={closeSheet}>
-                <KeyboardAvoidingView
-                    style={styles.modalBackdrop}
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                >
-                    <View style={styles.modalCard}>
-                        <SafeAreaView edges={['bottom']}>
+            {/* No tap-to-dismiss: this sheet holds a half-filled form, and the old Modal
+                didn't dismiss on backdrop press either. */}
+            <SheetModal
+                visible={sheet !== null}
+                onClose={closeSheet}
+                avoidKeyboard
+                dismissOnBackdropPress={false}
+                sheetStyle={styles.modalSheet}
+            >
+                <View style={styles.modalCard}>
+                        <SafeAreaView edges={['bottom']} style={styles.modalSafeArea}>
                             <ScrollView
                                 keyboardShouldPersistTaps="handled"
                                 showsVerticalScrollIndicator={false}
@@ -509,9 +514,8 @@ export default function BuySellScreen() {
                                 </TouchableOpacity>
                             </ScrollView>
                         </SafeAreaView>
-                    </View>
-                </KeyboardAvoidingView>
-            </Modal>
+                </View>
+            </SheetModal>
 
             <ImageZoomModal
                 visible={!!zoomImage}
@@ -723,10 +727,10 @@ const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
         fontSize: 13,
         fontWeight: '700',
     },
-    modalBackdrop: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.45)',
-        justifyContent: 'flex-end',
+    // The cap lives on the sliding layer: a percentage only resolves against a parent
+    // with a definite height, and the sheet wrapper sizes itself to its content.
+    modalSheet: {
+        maxHeight: '85%',
     },
     modalCard: {
         backgroundColor: colors.surface,
@@ -734,7 +738,12 @@ const getStyles = ({ colors, spacing, radius }: any) => StyleSheet.create({
         borderTopRightRadius: radius.lg,
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.lg,
-        maxHeight: '85%',
+        // Lets the card shrink to the sheet's 85% cap so the ScrollView inside gets a
+        // bounded height and actually scrolls, instead of overflowing the sheet.
+        flexShrink: 1,
+    },
+    modalSafeArea: {
+        flexShrink: 1,
     },
     modalHeader: {
         flexDirection: 'row',

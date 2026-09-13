@@ -15,6 +15,7 @@ import { ArrowLeft } from "lucide-react-native";
 
 import { useTheme } from "@/core/theme";
 
+import OfflineNotice from "@/shared/components/OfflineNotice";
 import { useOutletData } from "../hooks/useOutletData";
 import { Outlet } from "../services/outletTypes";
 import OutletCard from "../components/OutletCard";
@@ -30,7 +31,10 @@ export default function OutletsScreen() {
     const {
         outlets,
         loading,
+        refreshing,
         error,
+        usingCachedData,
+        lastUpdatedAt,
         refresh,
     } = useOutletData();
 
@@ -77,11 +81,17 @@ export default function OutletsScreen() {
                         keyExtractor={(item) => item.id.toString()}
                         contentContainerStyle={styles.content}
                         showsVerticalScrollIndicator={false}
+                        ListHeaderComponent={
+                            <OfflineNotice
+                                visible={usingCachedData}
+                                lastUpdatedAt={lastUpdatedAt}
+                            />
+                        }
                         refreshControl={
                             // Only spin here for a pull-to-refresh; the first load is
                             // already covered by the centred indicator above.
                             <RefreshControl
-                                refreshing={loading && outlets.length > 0}
+                                refreshing={refreshing}
                                 onRefresh={refresh}
                             />
                         }

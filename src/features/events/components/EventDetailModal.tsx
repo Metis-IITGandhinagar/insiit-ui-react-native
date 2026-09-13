@@ -1,16 +1,15 @@
 import React from 'react';
 import {
-    Modal,
     View,
     Text,
     StyleSheet,
     Image,
     TouchableOpacity,
     ScrollView,
-    TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@core/theme';
+import SheetModal from '@shared/components/SheetModal';
 import { Event } from '../services/searchTypes';
 
 interface EventDetailModalProps {
@@ -27,19 +26,8 @@ const EventDetailModal = ({ visible, event, onClose }: EventDetailModalProps) =>
     if (!event) return null;
 
     return (
-        <Modal
-            animationType="fade"
-            transparent={true}
-            visible={visible}
-            onRequestClose={onClose}
-        >
-            <TouchableOpacity
-                style={styles.modalOverlay}
-                activeOpacity={1}
-                onPress={onClose}
-            >
-                <TouchableWithoutFeedback>
-                    <View style={styles.modalContent}>
+        <SheetModal visible={visible} onClose={onClose} sheetStyle={styles.sheetCap}>
+            <View style={styles.modalContent}>
                         <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
                             <Ionicons name="close" size={24} color={colors.text} />
                         </TouchableOpacity>
@@ -68,10 +56,8 @@ const EventDetailModal = ({ visible, event, onClose }: EventDetailModalProps) =>
                                 {event.description || 'No description provided for this event.'}
                             </Text>
                         </ScrollView>
-                    </View>
-                </TouchableWithoutFeedback>
-            </TouchableOpacity>
-        </Modal>
+            </View>
+        </SheetModal>
     );
 };
 
@@ -79,18 +65,17 @@ export default EventDetailModal;
 
 const getStyles = ({ colors, radius, spacing, typography }: any) =>
     StyleSheet.create({
-        modalOverlay: {
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: spacing.xl,
+        // The cap sits on the sliding layer: a percentage needs a parent with a
+        // definite height, and the sheet wrapper sizes itself to its content.
+        sheetCap: {
+            maxHeight: '80%',
         },
         modalContent: {
             width: '100%',
-            maxHeight: '80%',
+            flexShrink: 1,
             backgroundColor: colors.surface,
-            borderRadius: radius.xl,
+            borderTopLeftRadius: radius.xl,
+            borderTopRightRadius: radius.xl,
             overflow: 'hidden',
             position: 'relative',
             elevation: 24,

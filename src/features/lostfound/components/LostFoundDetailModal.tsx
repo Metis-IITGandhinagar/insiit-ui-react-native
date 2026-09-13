@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import {
-    Modal,
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
-    Pressable,
     ScrollView,
     Image,
     TextInput,
@@ -18,6 +16,7 @@ import { useTheme } from "@/core/theme";
 import { resolveBackendAsset } from "@/core/api/apiClient";
 import { useAuth } from "@/core/auth/useAuth";
 import ImageZoomModal from "@/shared/components/ImageZoomModal";
+import SheetModal from "@/shared/components/SheetModal";
 import { LostFoundEntry } from "../services/lostFoundTypes";
 import { formatRelativeDate } from "../utils/formatDate";
 
@@ -145,15 +144,7 @@ const LostFoundDetailModal = ({
 
     return (
         <>
-        <Modal
-            transparent
-            visible={visible}
-            animationType="fade"
-            onRequestClose={handleClose}
-        >
-            <View style={styles.overlay}>
-                {/* Backdrop press listener isolated as absolute sibling to allow internal scrolling */}
-                <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
+        <SheetModal visible={visible} onClose={handleClose} sheetStyle={styles.sheetCap}>
 
                 <View style={styles.modal}>
                     <TouchableOpacity
@@ -377,8 +368,7 @@ const LostFoundDetailModal = ({
                         )}
                     </ScrollView>
                 </View>
-            </View>
-        </Modal>
+        </SheetModal>
 
         <ImageZoomModal
             visible={zoomVisible}
@@ -398,19 +388,18 @@ const getStyles = ({
     radius,
 }: any) =>
     StyleSheet.create({
-        overlay: {
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: spacing.xl,
+        // The cap sits on the sliding layer: a percentage needs a parent with a
+        // definite height, and the sheet wrapper sizes itself to its content.
+        sheetCap: {
+            maxHeight: "88%",
         },
 
         modal: {
             width: "100%",
-            maxHeight: "88%",
+            flexShrink: 1,
             backgroundColor: colors.surface,
-            borderRadius: radius.xl,
+            borderTopLeftRadius: radius.xl,
+            borderTopRightRadius: radius.xl,
             overflow: "hidden",
             zIndex: 1,
         },

@@ -1,7 +1,8 @@
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { nativeAuth } from '../auth/firebase';
 import { authService } from '../auth/authService';
 import { userService } from '../api/userService';
+import { readCache, writeCache, removeCacheByPrefix, adminPermissionsPolicy, USER_SCOPED_PREFIX } from '../cache';
 import { UserSessionProfile, AppPermissions, NO_PERMISSIONS } from '../navigation/types';
 
 interface AuthContextType {
@@ -16,25 +17,49 @@ interface AuthContextType {
     /** Ends the anonymous session and returns to the login screen. */
     exitGuestMode: () => Promise<void>;
     hasPermission: (permissionKey: keyof AppPermissions) => boolean;
+    /**
+     * Re-fetches admin permissions for the current user. The single place that call is
+     * made, so the admin screens can't drift from what the rest of the app believes.
+     * Resolves either way — a failure keeps the cached value.
+     */
+    refreshPermissions: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const DEFAULT_STUDENT_PERMISSIONS: AppPermissions = NO_PERMISSIONS;
 
-async function buildProfile(firebaseUser: any): Promise<UserSessionProfile> {
-    const backendPermissions = await userService.fetchUserPermissions();
-
+/** The parts of the profile that come straight off the local Firebase session. */
+function localProfileFields(firebaseUser: any) {
     const providerData = firebaseUser.providerData?.[0] || {};
-    const email = firebaseUser.email || providerData.email || '';
-    const displayName = firebaseUser.displayName || providerData.displayName || 'IITGN Student';
-    const photoURL = firebaseUser.photoURL || providerData.photoURL || null;
 
     return {
-        email,
-        displayName,
-        photoURL,
-        permissions: backendPermissions || DEFAULT_STUDENT_PERMISSIONS,
+        email: firebaseUser.email || providerData.email || '',
+        displayName: firebaseUser.displayName || providerData.displayName || 'IITGN Student',
+        photoURL: firebaseUser.photoURL || providerData.photoURL || null,
+    };
+}
+
+/**
+ * The profile to render immediately, built entirely from local state: the Firebase
+ * session is already on disk, and permissions come from the synchronous cache.
+ *
+ * This used to `await` the permissions endpoint before the app could render anything
+ * at all, which meant every cold start blocked on a network round-trip — up to the
+ * full axios timeout on bad wifi — to fetch a value that is null for almost every
+ * user. It's now fetched in the background and merged in when it lands.
+ */
+function buildLocalProfile(firebaseUser: any): UserSessionProfile {
+    const fields = localProfileFields(firebaseUser);
+    const cached = fields.email
+        ? readCache<AppPermissions>(adminPermissionsPolicy(fields.email).key, {
+              version: adminPermissionsPolicy(fields.email).version,
+          })
+        : null;
+
+    return {
+        ...fields,
+        permissions: cached?.data ?? DEFAULT_STUDENT_PERMISSIONS,
     };
 }
 
@@ -43,8 +68,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isGuest, setIsGuest] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
 
+    // Incremented on every auth transition so a permissions response that arrives
+    // after a sign-out (or a switch to another account) is discarded instead of
+    // granting the wrong person admin rights.
+    const sessionRef = useRef(0);
+
+    /**
+     * Refreshes permissions without blocking the UI. Failure is silent and expected:
+     * offline, or simply not an admin, both leave the cached/default value in place.
+     */
+    const syncPermissionsInBackground = async (email: string, session: number) => {
+        if (!email) return;
+
+        try {
+            const permissions = await userService.fetchUserPermissions();
+            if (sessionRef.current !== session) return;
+
+            const policy = adminPermissionsPolicy(email);
+            const resolved = permissions || DEFAULT_STUDENT_PERMISSIONS;
+            writeCache(policy.key, resolved, { version: policy.version });
+
+            setUser((current) =>
+                current && current.email === email ? { ...current, permissions: resolved } : current
+            );
+        } catch (error) {
+            console.warn('Could not refresh admin permissions; keeping the cached copy.', error);
+        }
+    };
+
     useEffect(() => {
         const unsubscribe = nativeAuth.onAuthStateChanged(async (firebaseUser) => {
+            const session = ++sessionRef.current;
+
             try {
                 if (!firebaseUser) {
                     setUser(null);
@@ -69,15 +124,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     return;
                 }
 
-                const profile = await buildProfile(firebaseUser);
-                setUser(profile);
+                setUser(buildLocalProfile(firebaseUser));
                 setIsGuest(false);
+
+                // Deliberately not awaited — the app is already interactive by here.
+                syncPermissionsInBackground(email, session);
             } catch (error) {
                 console.error('Failed to restore session on boot:', error);
                 await authService.logout();
                 setUser(null);
                 setIsGuest(false);
             } finally {
+                // Every branch above is local-only, so this now runs within a frame or
+                // two of launch rather than after a network call.
                 setLoading(false);
             }
         });
@@ -100,8 +159,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 throw new Error('Only official @iitgn.ac.in accounts are permitted to log in.');
             }
 
-            const profile = await buildProfile(loggedInUser);
-            setUser(profile);
+            setUser(buildLocalProfile(loggedInUser));
+
+            // An interactive sign-in is the one moment the network is known to work,
+            // so this one is awaited: it makes the admin tabs correct on first paint.
+            await syncPermissionsInBackground(email, sessionRef.current);
         } catch (error) {
             await authService.logout();
             setUser(null);
@@ -115,6 +177,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(true);
         try {
             await authService.logout();
+            sessionRef.current++;
+            // Shared reference data (bus timings, outlets) is deliberately kept: it
+            // isn't the user's, and re-downloading it on the next login is wasteful.
+            removeCacheByPrefix(USER_SCOPED_PREFIX);
             setUser(null);
             setIsGuest(false);
         } finally {
@@ -138,6 +204,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await signOut();
     };
 
+    const refreshPermissions = async () => {
+        if (!user?.email) return;
+        await syncPermissionsInBackground(user.email, sessionRef.current);
+    };
+
     // Guests hold no permissions: every write route on the backend requires a
     // Firebase token, so nothing gated by this could succeed anyway.
     const hasPermission = (permissionKey: keyof AppPermissions): boolean => {
@@ -155,6 +226,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 continueAsGuest,
                 exitGuestMode,
                 hasPermission,
+                refreshPermissions,
             }}
         >
             {children}
