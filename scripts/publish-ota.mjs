@@ -21,6 +21,7 @@ import zlib from 'node:zlib';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const EXPORT_DIR = path.join(ROOT, '.ota-export'); // raw `expo export` output
 const STAGE_DIR = path.join(ROOT, '.ota-publish'); // local mirror of the server's docroot
+const BUILD_FILE = path.join(ROOT, 'ota-build.json'); // JS build counter, committed
 
 const MIME = {
   '.png': 'image/png',
@@ -104,8 +105,27 @@ console.log(`▸ platforms        ${platforms.join(', ')}`);
 
 // --- export -----------------------------------------------------------------------
 
+// The JS build number shown in-app as the patch segment ("3.1.67").
+//
+// Written to disk BEFORE the export, because src/constants/appVersion.ts imports
+// ota-build.json — the bundle only carries the new number if the file already has it.
+// Restored on the staged-only path below so a dry run doesn't burn a number.
+const previousBuild = Number(readJson(BUILD_FILE).jsBuild ?? 0);
+if (!Number.isInteger(previousBuild) || previousBuild < 0) {
+  die(`ota-build.json has a bad jsBuild value (${previousBuild}) — expected a non-negative integer.`);
+}
+const jsBuild = previousBuild + 1;
+
+function writeBuildNumber(value) {
+  fs.writeFileSync(BUILD_FILE, `${JSON.stringify({ jsBuild: value }, null, 2)}\n`);
+}
+
+console.log(`▸ js build         ${previousBuild} -> ${jsBuild}`);
+if (!skipExport) writeBuildNumber(jsBuild);
+
 if (skipExport) {
   console.log('\n▸ reusing existing .ota-export (--skip-export)');
+  console.log('  NOTE: that bundle carries whichever js build it was exported with.');
 } else {
   console.log('\n▸ expo export');
   // Note: EXPO_PUBLIC_* variables from .env are inlined into this bundle.
@@ -178,7 +198,12 @@ for (const p of published) {
 const target = process.env.OTA_DEPLOY_TARGET;
 
 if (!deploy || !target) {
+  // Nothing shipped, so the number wasn't spent. Put it back, or a dry run would
+  // silently skip a build number in the committed file.
+  if (!skipExport) writeBuildNumber(previousBuild);
+
   console.log(`\n▸ payload staged in ${path.relative(ROOT, STAGE_DIR)}/ — not uploaded.`);
+  console.log(`  ota-build.json restored to ${previousBuild}; the staged bundle reports ${jsBuild}.`);
   if (deploy && !target) {
     console.log('  Set OTA_DEPLOY_TARGET=user@host:/var/www/insiit-ota to rsync it automatically,');
     console.log('  or copy blobs/ first and manifests/ second by hand.');
@@ -194,7 +219,10 @@ rsync(`${blobsDir}/`, `${target.replace(/\/$/, '')}/blobs/`, ['--ignore-existing
 console.log(`▸ rsync manifests → ${target}`);
 rsync(`${path.join(STAGE_DIR, 'manifests')}/`, `${target.replace(/\/$/, '')}/manifests/`, []);
 
+console.log(`▸ ota-build.json   jsBuild = ${jsBuild} — commit this alongside the release.`);
+
 console.log('\n✔ published. Clients on runtime version ' + runtimeVersion + ' pick it up on next launch.');
+console.log(`  They will report their version as ${appVersionLabel(config, jsBuild)}.`);
 
 // --- helpers ----------------------------------------------------------------------
 
@@ -232,6 +260,12 @@ function resolveRuntimeVersion(cfg) {
     `unsupported runtimeVersion ${JSON.stringify(rv)} — this script handles a literal string or ` +
       `the appVersion policy. See docs/ota-updates.md.`
   );
+}
+
+/** Mirrors src/constants/appVersion.ts: major.minor from the binary, patch from JS. */
+function appVersionLabel(cfg, build) {
+  const [major, minor] = String(cfg.version ?? '0.0.0').split('.');
+  return `${major}.${minor}.${build}`;
 }
 
 function rsync(from, to, extra) {
