@@ -374,6 +374,7 @@ const getStyles = ({
             alignItems: "center",
             justifyContent: "center",
             marginTop: spacing.md,
+            marginBottom:spacing.md,
         },
 
         primaryButtonText: {
