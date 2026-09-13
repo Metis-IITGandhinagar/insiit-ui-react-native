@@ -2,16 +2,17 @@ import React from "react";
 import { ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Check, LogIn, LogOut } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 
 import { useTheme } from "../../../core/theme";
-import { themeOptions, ThemeMode } from "../../../core/theme/colors";
+import { themeOptions, ThemePreference, SYSTEM_PREFERENCE } from "../../../core/theme/colors";
 import { Card } from "../../../shared/components/Card";
 import { useAuth } from "../../../core/auth/useAuth";
 
 const SettingsScreen = () => {
     const theme = useTheme();
-    const { themeKey, setThemeKey, colors } = theme;
+    const { preference, setThemeKey, colors } = theme;
     const { signOut, isGuest } = useAuth();
     const navigation = useNavigation<any>();
 
@@ -20,6 +21,9 @@ const SettingsScreen = () => {
 
     // Pass insets to the styles function for dynamic padding calculation
     const styles = getStyles(theme, insets);
+
+    const selectedOption =
+        themeOptions.find((option) => option.id === preference) ?? themeOptions[0];
 
     const handleLogout = () => {
         Alert.alert(
@@ -43,33 +47,56 @@ const SettingsScreen = () => {
 
                 {/* Appearance & Theme */}
                 <Text style={[styles.sectionTitle, { marginTop: 0 }]}>Appearance & Theme</Text>
-                <View style={styles.themeGrid}>
+
+                <View style={styles.themeSummary}>
+                    <Text style={styles.themeSummaryName}>{selectedOption.label}</Text>
+                    <Text style={styles.themeSummaryDesc}>
+                        {preference === SYSTEM_PREFERENCE
+                            ? `${selectedOption.description} — currently ${theme.isDark ? "dark" : "light"}`
+                            : selectedOption.description}
+                    </Text>
+                </View>
+
+                <View style={styles.swatchRow}>
                     {themeOptions.map((option) => {
-                        const isSelected = themeKey === option.id;
+                        const isSelected = preference === option.id;
+
                         return (
                             <TouchableOpacity
                                 key={option.id}
-                                style={[
-                                    styles.themeCard,
-                                    { backgroundColor: option.previewBg, borderColor: isSelected ? option.primaryColor : colors.border },
-                                    isSelected && styles.themeCardSelected,
-                                ]}
-                                onPress={() => setThemeKey(option.id as ThemeMode)}
+                                style={styles.swatchItem}
+                                onPress={() => setThemeKey(option.id as ThemePreference)}
                                 activeOpacity={0.8}
+                                accessibilityRole="button"
+                                accessibilityLabel={option.label}
+                                accessibilityState={{ selected: isSelected }}
                             >
-                                <View style={styles.themeHeader}>
-                                    <View style={[styles.colorBubble, { backgroundColor: option.primaryColor }]} />
-                                    {isSelected && (
-                                        <View style={[styles.checkBadge, { backgroundColor: option.primaryColor }]}>
-                                            <Check size={12} color="#FFFFFF" />
-                                        </View>
-                                    )}
+                                <View
+                                    style={[
+                                        styles.swatchRing,
+                                        {
+                                            borderColor: isSelected ? option.primaryColor : "transparent",
+                                        },
+                                    ]}
+                                >
+                                    <LinearGradient
+                                        colors={option.swatch}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 1 }}
+                                        style={styles.swatch}
+                                    >
+                                        {isSelected && <Check size={20} color="#FFFFFF" strokeWidth={3} />}
+                                    </LinearGradient>
                                 </View>
-                                <Text style={[styles.themeLabel, { color: option.isDark ? "#FFFFFF" : "#0F172A" }]}>
+
+                                <Text
+                                    style={[
+                                        styles.swatchLabel,
+                                        isSelected && { color: colors.text, fontWeight: "700" },
+                                    ]}
+                                    numberOfLines={1}
+                                >
                                     {option.label}
-                                </Text>
-                                <Text style={[styles.themeDesc, { color: option.isDark ? "#94A3B8" : "#64748B" }]} numberOfLines={2}>
-                                    {option.description}
                                 </Text>
                             </TouchableOpacity>
                         );
@@ -134,49 +161,46 @@ const getStyles = ({ colors, spacing, radius }: any, insets: any) => StyleSheet.
         marginTop: spacing.lg,
         marginBottom: spacing.md,
     },
-    themeGrid: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: spacing.md,
+    themeSummary: {
+        marginBottom: spacing.lg,
     },
-    themeCard: {
-        width: "47.5%",
-        padding: spacing.md,
-        borderRadius: radius.lg,
-        borderWidth: 2,
-        minHeight: 110,
-        justifyContent: "space-between",
+    themeSummaryName: {
+        fontSize: 20,
+        fontWeight: "700",
+        color: colors.text,
     },
-    themeCardSelected: {
-        borderWidth: 2,
-    },
-    themeHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: spacing.xs,
-    },
-    colorBubble: {
-        width: 18,
-        height: 18,
-        borderRadius: 9,
-    },
-    checkBadge: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    themeLabel: {
-        fontSize: 15,
-        fontWeight: "bold",
-        marginTop: spacing.xs,
-    },
-    themeDesc: {
-        fontSize: 12,
+    themeSummaryDesc: {
+        fontSize: 13,
+        color: colors.textSecondary,
         marginTop: 2,
-        lineHeight: 16,
+    },
+    swatchRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    swatchItem: {
+        alignItems: "center",
+        flex: 1,
+        gap: spacing.sm,
+    },
+    // The ring sits outside the circle so selection doesn't resize the swatch.
+    swatchRing: {
+        padding: 3,
+        borderRadius: 999,
+        borderWidth: 2,
+    },
+    swatch: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    swatchLabel: {
+        fontSize: 11,
+        fontWeight: "500",
+        color: colors.textSecondary,
+        textAlign: "center",
     },
     cardPaddingOverride: {
         paddingHorizontal: 0,

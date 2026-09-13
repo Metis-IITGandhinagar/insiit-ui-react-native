@@ -1,5 +1,13 @@
 export type ThemeMode = 'light' | 'dark' | 'emerald' | 'sunshine';
 
+/**
+ * What the user picked. `system` isn't a palette — it resolves to `light` or `dark`
+ * from the OS setting, and keeps following it when the OS switches.
+ */
+export type ThemePreference = ThemeMode | 'system';
+
+export const SYSTEM_PREFERENCE = 'system' as const;
+
 export interface ColorScheme {
     primary: string;
     primaryLight: string;
@@ -22,15 +30,27 @@ export interface ColorScheme {
 }
 
 export interface ThemeOption {
-    id: ThemeMode;
+    id: ThemePreference;
     label: string;
     description: string;
     primaryColor: string;
     previewBg: string;
     isDark: boolean;
+    /** Swatch gradient: the theme's surface colour running into its accent. */
+    swatch: [string, string];
 }
 
 export const themeOptions: ThemeOption[] = [
+    {
+        id: SYSTEM_PREFERENCE,
+        label: 'System',
+        description: 'Follows your device light/dark setting',
+        primaryColor: '#2563EB',
+        previewBg: '#F8FAFC',
+        isDark: false,
+        // Light into dark, because that's exactly the choice it defers to the OS.
+        swatch: ['#F8FAFC', '#0F172A'],
+    },
     {
         id: 'light',
         label: 'Light Classic',
@@ -38,6 +58,7 @@ export const themeOptions: ThemeOption[] = [
         primaryColor: '#2563EB',
         previewBg: '#F8FAFC',
         isDark: false,
+        swatch: ['#F8FAFC', '#2563EB'],
     },
     {
         id: 'dark',
@@ -46,6 +67,7 @@ export const themeOptions: ThemeOption[] = [
         primaryColor: '#3B82F6',
         previewBg: '#0F172A',
         isDark: true,
+        swatch: ['#334155', '#3B82F6'],
     },
     {
         id: 'emerald',
@@ -54,6 +76,7 @@ export const themeOptions: ThemeOption[] = [
         primaryColor: '#059669',
         previewBg: '#F0FDF4',
         isDark: false,
+        swatch: ['#F0FDF4', '#059669'],
     },
     {
         id: 'sunshine',
@@ -61,6 +84,7 @@ export const themeOptions: ThemeOption[] = [
         description: 'Beauty of beginnings last forever',
         primaryColor: '#EA580C',
         previewBg: '#FAFAF9',
+        swatch: ['#FAFAF9', '#EA580C'],
         isDark: false,
     },
 ];

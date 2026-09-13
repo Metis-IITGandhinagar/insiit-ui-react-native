@@ -13,12 +13,14 @@ import {
     ScrollView,
     Image
 } from 'react-native';
-import { ImagePlus, X } from 'lucide-react-native';
+import { CalendarDays, Clock, ImagePlus, X } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { eventService, splitEventDateTime } from '../services/eventService';
 import { Event } from '../services/searchTypes';
 import { pickImagesAsBase64 } from '@/shared/media/pickImages';
 import { useTheme } from '@core/theme';
+import CalendarPicker, { parseDateString } from '@shared/components/CalendarPicker';
+import TimePicker from '@shared/components/TimePicker';
 
 const EMPTY_FORM = {
     title: '',
@@ -27,6 +29,14 @@ const EMPTY_FORM = {
     time: '',
     image: '',
     description: '',
+};
+
+/** "2026-09-13" -> "13 Sep 2026". Falls back to the raw string if it can't parse. */
+const formatDateLabel = (value: string): string => {
+    const parsed = parseDateString(value);
+    if (!parsed) return value;
+
+    return parsed.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
 interface Props {
@@ -45,9 +55,13 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
     const isEditing = !!event;
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState(EMPTY_FORM);
+    // Only one panel is open at a time; both are inline rather than nested Modals,
+    // which are unreliable inside this pageSheet on iOS.
+    const [openPicker, setOpenPicker] = useState<'date' | 'time' | null>(null);
 
     useEffect(() => {
         if (!visible) return;
+        setOpenPicker(null);
 
         if (event) {
             const { date, time } = splitEventDateTime(event.startDateTime);
@@ -179,23 +193,53 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
                     )}
 
                     <View style={styles.row}>
-                        <TextInput
-                            style={[styles.input, { flex: 1, marginRight: 8 }]}
-                            placeholder="YYYY-MM-DD"
-                            placeholderTextColor="#999"
-                            numberOfLines={1}
-                            value={formData.date}
-                            onChangeText={(val) => handleChange('date', val)}
-                        />
-                        <TextInput
-                            style={[styles.input, { flex: 1, marginLeft: 8 }]}
-                            placeholder="HH:MM AM/PM"
-                            placeholderTextColor="#999"
-                            numberOfLines={1}
-                            value={formData.time}
-                            onChangeText={(val) => handleChange('time', val)}
-                        />
+                        <TouchableOpacity
+                            style={[styles.input, styles.pickerField, { flex: 1, marginRight: 8 }]}
+                            onPress={() => setOpenPicker(openPicker === 'date' ? null : 'date')}
+                            activeOpacity={0.7}
+                        >
+                            <CalendarDays size={16} color={colors.textSecondary} />
+                            <Text
+                                style={formData.date ? styles.pickerValue : styles.pickerPlaceholder}
+                                numberOfLines={1}
+                            >
+                                {formData.date ? formatDateLabel(formData.date) : 'Date'}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.input, styles.pickerField, { flex: 1, marginLeft: 8 }]}
+                            onPress={() => setOpenPicker(openPicker === 'time' ? null : 'time')}
+                            activeOpacity={0.7}
+                        >
+                            <Clock size={16} color={colors.textSecondary} />
+                            <Text
+                                style={formData.time ? styles.pickerValue : styles.pickerPlaceholder}
+                                numberOfLines={1}
+                            >
+                                {formData.time || 'Time'}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
+
+                    {openPicker === 'date' && (
+                        <CalendarPicker
+                            value={formData.date}
+                            onChange={(date) => {
+                                handleChange('date', date);
+                                setOpenPicker(null);
+                            }}
+                            // Submit rejects past events, so don't offer those days.
+                            minDate={new Date()}
+                        />
+                    )}
+
+                    {openPicker === 'time' && (
+                        <TimePicker
+                            value={formData.time}
+                            onChange={(time) => handleChange('time', time)}
+                        />
+                    )}
 
                     <TextInput
                         style={styles.input}
@@ -303,6 +347,22 @@ const getStyles = ({ colors, spacing, typography, radius }: any) => StyleSheet.c
         color: colors.text,
         borderWidth: 1,
         borderColor: colors.border,
+    },
+    // Matches `input` metrics so the tappable fields line up with the text inputs.
+    pickerField: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    pickerValue: {
+        flex: 1,
+        fontSize: 16,
+        color: colors.text,
+    },
+    pickerPlaceholder: {
+        flex: 1,
+        fontSize: 16,
+        color: colors.textSecondary,
     },
     row: {
         flexDirection: 'row',

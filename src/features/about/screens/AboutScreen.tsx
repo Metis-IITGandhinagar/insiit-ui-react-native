@@ -7,7 +7,7 @@ import { useTheme } from '@/core/theme';
 import { Card } from '@/shared/components/Card';
 import { openLink } from '@/utils/linking';
 import { LINKS } from '@/constants/links';
-import appConfig from '../../../../app.json';
+import { DISPLAY_VERSION } from '@/constants/appVersion';
 
 export default function AboutScreen() {
     const theme = useTheme();
@@ -76,7 +76,7 @@ export default function AboutScreen() {
                     </Card>
 
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>Version {appConfig.expo.version}</Text>
+                        <Text style={styles.footerText}>Version {DISPLAY_VERSION}</Text>
                         <Text style={styles.footerText}>© Metis, IIT Gandhinagar</Text>
                     </View>
                 </ScrollView>
