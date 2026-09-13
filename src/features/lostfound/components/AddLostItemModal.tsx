@@ -373,7 +373,7 @@ const getStyles = ({
             borderRadius: radius.round,
             alignItems: "center",
             justifyContent: "center",
-            marginTop: spacing.sm,
+            marginTop: spacing.md,
         },
 
         primaryButtonText: {
