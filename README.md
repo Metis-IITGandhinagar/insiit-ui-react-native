@@ -56,7 +56,7 @@ export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator"
 ## Quick start
 
 ```sh
-git clone https://github.com/Metis-IITGandhinagar/insiit-ui-react-native-new.git
+git clone https://github.com/Metis-IITGandhinagar/insiit-ui-react-native.git
 cd insiit-ui-react-native-new
 npm install
 
