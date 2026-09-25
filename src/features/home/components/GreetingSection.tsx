@@ -1,9 +1,10 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Megaphone, Search } from "lucide-react-native";
+import { Bell, Megaphone, Search } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "@/core/theme";
 import { useAuth } from "@/core/auth/useAuth";
+import { useNotifications } from "@/features/notifications/hooks/useNotifications";
 
 interface Props {
     onRefresh?: () => void;
@@ -16,6 +17,7 @@ const GreetingSection = ({ onRefresh, refreshing = false }: Props) => {
     const { colors } = theme;
     const navigation = useNavigation<any>();
     const { user } = useAuth();
+    const { unreadCount } = useNotifications();
 
     let greeting = "Good Evening";
     if (hour < 12) greeting = "Good Morning";
@@ -40,9 +42,22 @@ const GreetingSection = ({ onRefresh, refreshing = false }: Props) => {
                 )}
             </View>
 
+            <TouchableOpacity
+                style={[styles.settingsButton, styles.buttonSpacing]}
+                activeOpacity={0.75}
+                onPress={() => navigation.navigate("Notifications")}
+                accessibilityLabel="Notifications"
+                accessibilityRole="button"
+            >
+                <Bell size={21} color={colors.primary} strokeWidth={2} />
+                {unreadCount > 0 && (
+                    <View style={styles.badgeDot} />
+                )}
+            </TouchableOpacity>
+
             {!!onRefresh && (
                 <TouchableOpacity
-                    style={[styles.settingsButton, styles.refreshButton]}
+                    style={[styles.settingsButton, styles.buttonSpacing]}
                     activeOpacity={0.75}
                     onPress={() => navigation.navigate("Announcements")}
                     accessibilityLabel="Announcements"
@@ -52,7 +67,6 @@ const GreetingSection = ({ onRefresh, refreshing = false }: Props) => {
                 </TouchableOpacity>
             )}
 
-            {/* Settings moved out of the header — it's still one tap away under More. */}
             <TouchableOpacity
                 style={styles.settingsButton}
                 activeOpacity={0.75}
@@ -79,8 +93,19 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
         alignItems: "center",
         marginBottom: spacing.xs,
     },
-    refreshButton: {
+    buttonSpacing: {
         marginRight: spacing.sm,
+    },
+    badgeDot: {
+        position: "absolute",
+        top: 11,
+        right: 11,
+        width: 9,
+        height: 9,
+        borderRadius: 4.5,
+        backgroundColor: colors.danger,
+        borderWidth: 1.5,
+        borderColor: colors.surface,
     },
     settingsButton: {
         width: 48,

@@ -45,31 +45,48 @@ const LostFoundCard = ({ entry, onPress }: Props) => {
 
     const statusColor = getStatusColor(entry.status, colors);
     const claimCount = entry.found_claims?.length ?? 0;
-    const image =
-        resolveBackendAsset(entry.img_urls?.[0]) ??
-        "https://placehold.co/800x500?text=Lost+%26+Found";
+    const rawImage = entry.img_urls?.[0];
+    const image = resolveBackendAsset(rawImage);
+    const hasImage = Boolean(image && image.trim());
+
     return (
         <TouchableOpacity activeOpacity={0.92} delayPressIn={50} onPress={onPress}>
             <Card variant="surface" style={styles.cardOverrides}>
-                <View style={styles.imageContainer}>
-                    <Image
-                        source={{uri: image}}
-                        style={styles.image}
-                    />
+                {hasImage && (
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={{ uri: image }}
+                            style={styles.image}
+                        />
 
-                    <View
-                        style={[
-                            styles.badge,
-                            { backgroundColor: statusColor },
-                        ]}
-                    >
-                        <Text style={styles.badgeText}>
-                            {STATUS_LABEL[entry.status].toUpperCase()}
-                        </Text>
+                        <View
+                            style={[
+                                styles.badge,
+                                { backgroundColor: statusColor },
+                            ]}
+                        >
+                            <Text style={styles.badgeText}>
+                                {STATUS_LABEL[entry.status].toUpperCase()}
+                            </Text>
+                        </View>
                     </View>
-                </View>
+                )}
 
                 <View style={styles.content}>
+                    {!hasImage && (
+                        <View style={styles.noImageHeader}>
+                            <View
+                                style={[
+                                    styles.inlineBadge,
+                                    { backgroundColor: statusColor },
+                                ]}
+                            >
+                                <Text style={styles.badgeText}>
+                                    {STATUS_LABEL[entry.status].toUpperCase()}
+                                </Text>
+                            </View>
+                        </View>
+                    )}
                     <Text style={styles.title}>{entry.item_name}</Text>
 
                     {!!entry.description && (
@@ -152,6 +169,17 @@ const getStyles = ({ colors, spacing, typography, radius }: any) =>
             color: "#fff",
             fontWeight: "700",
             fontSize: 11,
+        },
+
+        noImageHeader: {
+            flexDirection: "row",
+            marginBottom: spacing.sm,
+        },
+
+        inlineBadge: {
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: radius.round,
         },
 
         content: {

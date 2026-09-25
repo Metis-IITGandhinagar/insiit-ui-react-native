@@ -25,6 +25,7 @@ export type RootStackParamList = {
     CampusMap: undefined;
     AdminEventsApproval:undefined;
     GlobalSearch: undefined;
+    Notifications: undefined;
 };
 /**
  * Mirrors `AdminPermissions` in the backend (src/schemas/admin_schemas.rs) and the

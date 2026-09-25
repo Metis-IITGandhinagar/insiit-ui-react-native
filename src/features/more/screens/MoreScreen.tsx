@@ -2,7 +2,7 @@ import React from "react";
 import { ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ScreenHeader from "@/shared/components/ScreenHeader";
-import { Map, Users, Settings, Info, ShieldCheck, Bug, Megaphone } from "lucide-react-native";
+import { Map, Users, Settings, Info, ShieldCheck, Bug, Megaphone, Bell } from "lucide-react-native";
 
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";

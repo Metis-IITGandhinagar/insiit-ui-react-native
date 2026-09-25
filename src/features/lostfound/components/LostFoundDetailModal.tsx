@@ -138,9 +138,9 @@ const LostFoundDetailModal = ({
         );
     };
 
-    const image =
-        resolveBackendAsset(entry.img_urls?.[0]) ??
-        "https://placehold.co/800x500?text=Lost+%26+Found";
+    const rawImage = entry.img_urls?.[0];
+    const image = resolveBackendAsset(rawImage);
+    const hasImage = Boolean(image && image.trim());
 
     return (
         <>
@@ -165,28 +165,43 @@ const LostFoundDetailModal = ({
                         showsVerticalScrollIndicator={true}
                         nestedScrollEnabled={true}
                     >
-                        <View style={styles.imageWrap}>
-                            <TouchableOpacity
-                                activeOpacity={0.9}
-                                onPress={() => setZoomVisible(true)}
-                            >
-                                <Image
-                                    source={{ uri: image }}
-                                    style={styles.image}
-                                    resizeMode="cover"
-                                />
-                            </TouchableOpacity>
-                            <View
-                                style={[
-                                    styles.statusBadge,
-                                    { backgroundColor: statusColor },
-                                ]}
-                            >
-                                <Text style={styles.statusBadgeText}>
-                                    {STATUS_LABEL[entry.status].toUpperCase()}
-                                </Text>
+                        {hasImage ? (
+                            <View style={styles.imageWrap}>
+                                <TouchableOpacity
+                                    activeOpacity={0.9}
+                                    onPress={() => setZoomVisible(true)}
+                                >
+                                    <Image
+                                        source={{ uri: image }}
+                                        style={styles.image}
+                                        resizeMode="cover"
+                                    />
+                                </TouchableOpacity>
+                                <View
+                                    style={[
+                                        styles.statusBadge,
+                                        { backgroundColor: statusColor },
+                                    ]}
+                                >
+                                    <Text style={styles.statusBadgeText}>
+                                        {STATUS_LABEL[entry.status].toUpperCase()}
+                                    </Text>
+                                </View>
                             </View>
-                        </View>
+                        ) : (
+                            <View style={styles.noImageHeader}>
+                                <View
+                                    style={[
+                                        styles.inlineStatusBadge,
+                                        { backgroundColor: statusColor },
+                                    ]}
+                                >
+                                    <Text style={styles.statusBadgeText}>
+                                        {STATUS_LABEL[entry.status].toUpperCase()}
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
 
                         <Text style={styles.title}>
                             {entry.item_name}
@@ -447,6 +462,18 @@ const getStyles = ({
             color: "#fff",
             fontWeight: "700",
             fontSize: 11,
+        },
+
+        noImageHeader: {
+            flexDirection: "row",
+            paddingTop: spacing.lg,
+            marginBottom: spacing.md,
+        },
+
+        inlineStatusBadge: {
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: radius.round,
         },
 
         body: {

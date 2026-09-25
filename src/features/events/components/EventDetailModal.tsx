@@ -16,46 +16,78 @@ interface EventDetailModalProps {
     visible: boolean;
     event: Event | null;
     onClose: () => void;
+    onToggleReminder?: () => void;
+    isReminded?: boolean;
 }
 
-const EventDetailModal = ({ visible, event, onClose }: EventDetailModalProps) => {
+const EventDetailModal = ({ visible, event, onClose, onToggleReminder, isReminded }: EventDetailModalProps) => {
     const theme = useTheme();
     const { colors, radius, spacing, typography } = theme;
     const styles = getStyles(theme);
 
     if (!event) return null;
 
+    const hasImage = Boolean(event.image && event.image.trim());
+
     return (
         <SheetModal visible={visible} onClose={onClose} sheetStyle={styles.sheetCap}>
             <View style={styles.modalContent}>
-                        <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
-                            <Ionicons name="close" size={24} color={colors.text} />
-                        </TouchableOpacity>
+                <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
 
-                        <Image source={{ uri: event.image }} style={styles.image} />
+                {hasImage && <Image source={{ uri: event.image }} style={styles.image} />}
 
-                        <ScrollView contentContainerStyle={styles.body}>
-                            <Text style={styles.title}>{event.title}</Text>
+                <ScrollView contentContainerStyle={styles.body}>
+                    <Text style={styles.title}>{event.title}</Text>
 
-                            <View style={styles.infoRow}>
-                                <Ionicons name="location-outline" size={18} color={colors.textSecondary || '#6B7280'} />
-                                <Text style={styles.infoText}>{event.venue}</Text>
-                            </View>
+                    <View style={styles.infoRow}>
+                        <Ionicons name="location-outline" size={18} color={colors.textSecondary} />
+                        <Text style={styles.infoText}>{event.venue}</Text>
+                    </View>
 
-                            <View style={styles.infoRow}>
-                                <Ionicons name="calendar-outline" size={18} color={colors.textSecondary || '#6B7280'} />
-                                <Text style={styles.infoText}>
-                                    {event.date} • {event.time}
-                                </Text>
-                            </View>
+                    <View style={styles.infoRow}>
+                        <Ionicons name="calendar-outline" size={18} color={colors.textSecondary} />
+                        <Text style={styles.infoText}>
+                            {event.date} • {event.time}
+                        </Text>
+                    </View>
 
-                            <View style={styles.divider} />
-
-                            <Text style={styles.descriptionTitle}>About Event</Text>
-                            <Text style={styles.descriptionText}>
-                                {event.description || 'No description provided for this event.'}
+                    {onToggleReminder && (
+                        <TouchableOpacity
+                            style={[
+                                styles.reminderButton,
+                                {
+                                    backgroundColor: isReminded ? colors.primaryLight : colors.primary,
+                                    borderColor: isReminded ? colors.primary : "transparent",
+                                }
+                            ]}
+                            onPress={onToggleReminder}
+                            activeOpacity={0.8}
+                        >
+                            <Ionicons
+                                name={isReminded ? "notifications" : "notifications-outline"}
+                                size={18}
+                                color={isReminded ? colors.primary : colors.onPrimary}
+                            />
+                            <Text
+                                style={[
+                                    styles.reminderButtonText,
+                                    { color: isReminded ? colors.primary : colors.onPrimary }
+                                ]}
+                            >
+                                {isReminded ? "Reminder Set (Tap to remove)" : "Notify Me Before Event"}
                             </Text>
-                        </ScrollView>
+                        </TouchableOpacity>
+                    )}
+
+                    <View style={styles.divider} />
+
+                    <Text style={styles.descriptionTitle}>About Event</Text>
+                    <Text style={styles.descriptionText}>
+                        {event.description || 'No description provided for this event.'}
+                    </Text>
+                </ScrollView>
             </View>
         </SheetModal>
     );
@@ -65,8 +97,6 @@ export default EventDetailModal;
 
 const getStyles = ({ colors, radius, spacing, typography }: any) =>
     StyleSheet.create({
-        // The cap sits on the sliding layer: a percentage needs a parent with a
-        // definite height, and the sheet wrapper sizes itself to its content.
         sheetCap: {
             maxHeight: '80%',
         },
@@ -122,9 +152,24 @@ const getStyles = ({ colors, radius, spacing, typography }: any) =>
             ...typography.body,
             color: colors.textSecondary,
         },
+        reminderButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: spacing.sm,
+            paddingVertical: spacing.md,
+            paddingHorizontal: spacing.lg,
+            borderRadius: radius.md,
+            marginTop: spacing.md,
+            borderWidth: 1,
+        },
+        reminderButtonText: {
+            fontSize: 14,
+            fontWeight: '600',
+        },
         divider: {
             height: 1,
-            backgroundColor: '#E5E7EB',
+            backgroundColor: colors.border,
             marginVertical: spacing.lg,
         },
         descriptionTitle: {

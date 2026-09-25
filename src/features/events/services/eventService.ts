@@ -60,9 +60,7 @@ export const mapApiEventToUi = (event: any, fallbackIndex: number): Event => {
         startDateTime: isValidStart ? start!.toISOString() : undefined,
         addedByEmail: event.added_by_email ?? undefined,
         // poster_url is a relative path from the backend's save_image.
-        image:
-            resolveBackendAsset(event.poster_url) ??
-            "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500",
+        image: resolveBackendAsset(event.poster_url) ?? "",
         description: event.description ?? "",
         isBookmarked: false,
     };

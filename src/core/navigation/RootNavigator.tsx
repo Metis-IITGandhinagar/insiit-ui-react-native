@@ -30,6 +30,7 @@ import { AnnouncementManagementScreen } from "@/features/admin/screens/Announcem
 import { MessMenuManagementScreen } from "@/features/admin/screens/MessMenuManagementScreen";
 import { UserManagementScreen } from "@/features/admin/screens/UserManagementScreen";
 import {AdminEventsApprovalScreen} from "@/features/admin/screens/AdminEventsApprovalScreen";
+import NotificationsScreen from "@/features/notifications/screens/NotificationsScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -210,6 +211,11 @@ export default function RootNavigator() {
                         name="BuySell"
                         component={BuySellScreen}
                         options={{ title: "Buy & Sell" }}
+                    />
+                    <Stack.Screen
+                        name="Notifications"
+                        component={NotificationsScreen}
+                        options={{ title: "Notifications" }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

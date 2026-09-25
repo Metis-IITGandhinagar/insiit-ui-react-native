@@ -43,16 +43,20 @@ backend (token verification).
 **Project settings → Your apps → Add app → Android.** Package name must be exactly
 `com.metis.insiit`, matching `expo.android.package` in `app.json`.
 
-## 5. Create a keystore for this project
+## 5. Set up the signing keystore
 
-Create a **new, INSIIT-specific** keystore. Do not reuse a keystore from another
-project, and do not put its credentials in `~/.gradle/gradle.properties` — that file is
-shared across every Gradle project on the machine.
+If someone hands you `upload-keystore.jks` and `keystore.properties`, drop both in the
+repo root and skip to step 6 — that is the whole setup, on every OS. Both are gitignored,
+so they have to be copied across out of band (not through the repo, not through a public
+channel).
+
+Starting fresh instead, create a **new, INSIIT-specific** keystore. Do not reuse one from
+another project:
 
 ```sh
 cd insiit-ui-react-native-new
 keytool -genkeypair -v \
-  -keystore insiit-upload.jks \
+  -keystore upload-keystore.jks \
   -alias insiit-upload \
   -keyalg RSA -keysize 2048 -validity 10000
 ```
@@ -60,36 +64,36 @@ keytool -genkeypair -v \
 `*.jks` is gitignored, so the repo root is a safe place for it. **Back it up somewhere
 durable** — losing it means you can never update the app under the same Play listing.
 
-Record the credentials in `keystore.properties` at the repo root (also already
-gitignored). The `ORG_GRADLE_PROJECT_` prefix is what makes Gradle expose these as
-project properties — it is not decoration, don't drop it:
-
-```properties
-ORG_GRADLE_PROJECT_INSIIT_STORE_FILE=/absolute/path/to/insiit-ui-react-native-new/insiit-upload.jks
-ORG_GRADLE_PROJECT_INSIIT_KEY_ALIAS=insiit-upload
-ORG_GRADLE_PROJECT_INSIIT_STORE_PASSWORD=your-store-password
-ORG_GRADLE_PROJECT_INSIIT_KEY_PASSWORD=your-key-password
-
-# Sign debug builds with the same keystore, so there is only one SHA-1 to register
-ORG_GRADLE_PROJECT_INSIIT_DEBUG_STORE_FILE=/absolute/path/to/insiit-ui-react-native-new/insiit-upload.jks
-ORG_GRADLE_PROJECT_INSIIT_DEBUG_KEY_ALIAS=insiit-upload
-ORG_GRADLE_PROJECT_INSIIT_DEBUG_STORE_PASSWORD=your-store-password
-ORG_GRADLE_PROJECT_INSIIT_DEBUG_KEY_PASSWORD=your-key-password
-```
-
-Use an absolute path — Gradle resolves a relative `storeFile` against `android/app/`,
-not the repo root.
-
-Load it into the shell you build from, every time:
+Record the credentials in `keystore.properties` at the repo root (also gitignored):
 
 ```sh
-set -a; source ./keystore.properties; set +a
+cp keystore.properties.example keystore.properties
 ```
 
-[`plugins/withAndroidSigning.js`](plugins/withAndroidSigning.js) patches these into the
-generated `android/app/build.gradle` at prebuild time. It falls back to the template
-debug keystore only if the `INSIIT_DEBUG_*` values are absent; **release has no fallback
-on purpose** — a missing property fails the build rather than shipping a debug-signed APK.
+```properties
+INSIIT_KEY_ALIAS=insiit-upload
+INSIIT_STORE_PASSWORD=your-store-password
+INSIIT_KEY_PASSWORD=your-key-password
+```
+
+That is it — no `source`, no environment variables, nothing to re-run per shell. Gradle
+reads the file itself, which is what makes this work the same on Windows as on macOS.
+
+Each value resolves in this order, first hit wins:
+
+1. a Gradle property — `-PINSIIT_…`, or `~/.gradle/gradle.properties`
+2. `keystore.properties` at the repo root
+3. `./upload-keystore.jks` at the repo root, else the template `debug.keystore`
+
+`INSIIT_STORE_FILE` is optional: omitted, the root `upload-keystore.jks` is used. If you
+do set it, a relative path resolves against the **repo root**, not `android/app/`.
+
+[`plugins/withAndroidSigning.js`](plugins/withAndroidSigning.js) patches this into the
+generated `android/app/build.gradle` at prebuild time. Debug builds use the same key
+unless you set the `INSIIT_DEBUG_*` values, so there is a single SHA-1 to register.
+Debug falls back to the template `debug.keystore` only when no credentials are found at
+all; **release has no such fallback on purpose** — it fails rather than shipping a
+debug-signed APK.
 
 ## 6. Register the keystore's SHA-1 in Firebase
 
@@ -217,9 +221,8 @@ throws at startup with the list ([`src/core/config/checkEnv.ts`](src/core/config
 ## 13. Prebuild and run
 
 ```sh
-set -a; source ./keystore.properties; set +a   # if not already loaded in this shell
-npx expo prebuild --clean                      # regenerates android/ and ios/
-npx expo run:android                           # builds, installs, starts Metro
+npx expo prebuild --clean     # regenerates android/ and ios/
+npx expo run:android          # builds, installs, starts Metro
 ```
 
 `android/` and `ios/` are gitignored build output — re-run prebuild after any change to
@@ -232,22 +235,25 @@ Confirm the build was signed by your keystore, not a stray debug one:
 cd android && ./gradlew signingReport | grep -A3 'Variant: debug'
 ```
 
+If `Store:` says `debug.keystore`, Gradle found no credentials — `keystore.properties` is
+missing from the repo root, or it is there but has no `INSIIT_STORE_PASSWORD`.
+
 ## 14. Release build
 
 ```sh
-set -a; source ./keystore.properties; set +a
 npx expo prebuild --clean
 cd android
 ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 # → android/app/build/outputs/apk/release/app-release.apk  (~65 MB; universal is ~186 MB)
 ```
 
-If you'd rather not keep a credentials file around, pass them per-invocation instead
-(note these land in your shell history):
+If you'd rather not keep a credentials file around, pass them per-invocation instead —
+command-line properties take precedence over `keystore.properties` (note these land in
+your shell history):
 
 ```sh
 ./gradlew assembleRelease \
-  -PINSIIT_STORE_FILE=$PWD/../insiit-upload.jks \
+  -PINSIIT_STORE_FILE=$PWD/../upload-keystore.jks \
   -PINSIIT_KEY_ALIAS=insiit-upload \
   -PINSIIT_STORE_PASSWORD=… -PINSIIT_KEY_PASSWORD=…
 ```
@@ -266,8 +272,8 @@ $ANDROID_HOME/build-tools/36.0.0/apksigner verify --print-certs \
 | Symptom | Cause |
 | --- | --- |
 | `DEVELOPER_ERROR` / status 10 on sign-in | SHA-1 of the installed APK's signing key isn't in Firebase, or `google-services.json` predates the fingerprint, or the client ID is the Android one |
-| Release build fails on signing | `keystore.properties` not sourced into this shell, or a relative `INSIIT_STORE_FILE` path |
-| Debug build signed by the wrong key | `INSIIT_DEBUG_*` missing → plugin fell back to the template `debug.keystore`. Check `./gradlew signingReport` |
+| Release build fails on signing | No `keystore.properties` in the repo root (copy `keystore.properties.example`), or no `upload-keystore.jks` beside it |
+| Build signed by `debug.keystore` | Gradle found no credentials — `keystore.properties` missing from the repo root, or missing `INSIIT_STORE_PASSWORD`. Check `./gradlew signingReport` |
 | `No matching client found for package name 'com.metis.insiit'` | Firebase Android app registered under a different package name |
 | `Missing environment variable(s): …` | `.env` incomplete, or bundle predates the edit → `npx expo start --clear` |
 | Backend panics immediately | Check `insiit-backend-rust.logs` — bad `POSTGRES_URL`, missing env var, or unreadable `service_account.json` |

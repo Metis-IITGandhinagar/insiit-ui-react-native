@@ -10,23 +10,82 @@ const TEMPLATE_SIGNING_CONFIGS = `    signingConfigs {
         }
     }`;
 
-// Debug falls back to the template keystore so a fresh clone still builds;
-// release has no fallback on purpose — an unsigned/debug-signed release is worse
-// than a failed build.
-const SIGNING_CONFIGS = `    signingConfigs {
+// Every value resolves in this order, so no build step depends on a POSIX shell
+// having sourced anything (that was why Windows silently fell back to the
+// template debug.keystore):
+//
+//   1. a Gradle property  -P… / ORG_GRADLE_PROJECT_… / ~/.gradle/gradle.properties
+//   2. keystore.properties at the repo root — read by Gradle itself, cross-platform
+//   3. upload-keystore.jks at the repo root, else the template debug.keystore
+//
+// Release still has no *debug* fallback on purpose — an unsigned/debug-signed
+// release is worse than a failed build.
+const SIGNING_CONFIGS = `    def insiitLocalProps = new Properties()
+    def insiitLocalPropsFile = rootProject.file('../keystore.properties')
+    if (insiitLocalPropsFile.exists()) {
+        insiitLocalPropsFile.withInputStream { insiitLocalProps.load(it) }
+    }
+
+    // Accepts both \`INSIIT_…\` and the legacy \`ORG_GRADLE_PROJECT_INSIIT_…\` spelling,
+    // so an existing keystore.properties written for \`set -a; source\` still works.
+    def insiitProp = { String name, fallback ->
+        project.findProperty(name)
+            ?: insiitLocalProps.getProperty(name)
+            ?: insiitLocalProps.getProperty('ORG_GRADLE_PROJECT_' + name)
+            ?: fallback
+    }
+
+    // Relative store paths resolve against the repo root, not android/app/.
+    def insiitStoreFile = { value ->
+        def candidate = new File(value.toString())
+        candidate.isAbsolute() ? candidate : rootProject.file('../' + value)
+    }
+
+    def insiitRootKeystore = rootProject.file('../upload-keystore.jks')
+    def insiitStore = insiitProp('INSIIT_STORE_FILE', null)
+    def insiitStorePassword = insiitProp('INSIIT_STORE_PASSWORD', null)
+    def insiitDebugStore = insiitProp('INSIIT_DEBUG_STORE_FILE', null)
+
+    // Sign debug with the release key when that is all we have, so there is a single
+    // SHA-1 to register — but only if its password is actually resolvable, otherwise a
+    // fresh clone carrying the .jks could no longer build a debug APK.
+    def insiitDebugUsesRootKeystore =
+        insiitDebugStore == null && insiitRootKeystore.exists() && insiitStorePassword != null
+
+    signingConfigs {
         debug {
-            storeFile file(findProperty('INSIIT_DEBUG_STORE_FILE') ?: 'debug.keystore')
-            storePassword findProperty('INSIIT_DEBUG_STORE_PASSWORD') ?: 'android'
-            keyAlias findProperty('INSIIT_DEBUG_KEY_ALIAS') ?: 'androiddebugkey'
-            keyPassword findProperty('INSIIT_DEBUG_KEY_PASSWORD') ?: 'android'
+            if (insiitDebugStore != null) {
+                storeFile insiitStoreFile(insiitDebugStore)
+                storePassword insiitProp('INSIIT_DEBUG_STORE_PASSWORD', 'android')
+                keyAlias insiitProp('INSIIT_DEBUG_KEY_ALIAS', 'androiddebugkey')
+                keyPassword insiitProp('INSIIT_DEBUG_KEY_PASSWORD', 'android')
+            } else if (insiitDebugUsesRootKeystore) {
+                storeFile insiitRootKeystore
+                storePassword insiitStorePassword
+                keyAlias insiitProp('INSIIT_KEY_ALIAS', null)
+                keyPassword insiitProp('INSIIT_KEY_PASSWORD', insiitStorePassword)
+            } else {
+                storeFile file('debug.keystore')
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+                logger.lifecycle('[insiit] debug: template debug.keystore ' +
+                    '(no INSIIT_DEBUG_* and no usable ../upload-keystore.jks)')
+            }
         }
         release {
-            if (project.hasProperty('INSIIT_STORE_FILE')) {
-                storeFile file(INSIIT_STORE_FILE)
-                storePassword INSIIT_STORE_PASSWORD
-                keyAlias INSIIT_KEY_ALIAS
-                keyPassword INSIIT_KEY_PASSWORD
+            if (insiitStore != null) {
+                storeFile insiitStoreFile(insiitStore)
+                storePassword insiitStorePassword
+                keyAlias insiitProp('INSIIT_KEY_ALIAS', null)
+                keyPassword insiitProp('INSIIT_KEY_PASSWORD', insiitStorePassword)
+            } else if (insiitRootKeystore.exists()) {
+                storeFile insiitRootKeystore
+                storePassword insiitStorePassword
+                keyAlias insiitProp('INSIIT_KEY_ALIAS', null)
+                keyPassword insiitProp('INSIIT_KEY_PASSWORD', insiitStorePassword)
             }
+            // else: left unconfigured so the release build fails loudly.
         }
     }`;
 

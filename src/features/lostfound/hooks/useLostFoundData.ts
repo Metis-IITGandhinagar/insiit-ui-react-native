@@ -77,7 +77,7 @@ export function useLostFoundData() {
                         status: "lost",
                         img_urls: request.base64_images?.length
                             ? request.base64_images
-                            : ["https://placehold.co/600x400?text=Test+Item"],
+                            : [],
                         found_claims: [],
                     };
                     patchEntries((prev) =>

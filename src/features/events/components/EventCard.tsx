@@ -17,12 +17,15 @@ interface Props {
     onBookmark?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
+    onToggleReminder?: () => void;
+    isReminded?: boolean;
 }
 
-const EventCard = ({ event, onPress, onEdit, onDelete }: Props) => {
+const EventCard = ({ event, onPress, onEdit, onDelete, onToggleReminder, isReminded }: Props) => {
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
+    const hasImage = Boolean(event.image && event.image.trim());
 
     return (
         <TouchableOpacity
@@ -30,12 +33,14 @@ const EventCard = ({ event, onPress, onEdit, onDelete }: Props) => {
             onPress={onPress}
         >
             <Card variant="surface" style={styles.cardOverrides}>
-                <View style={styles.imageContainer}>
-                    <Image
-                        source={{ uri: event.image }}
-                        style={styles.image}
-                    />
-                </View>
+                {hasImage && (
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={{ uri: event.image }}
+                            style={styles.image}
+                        />
+                    </View>
+                )}
 
                 <View style={styles.content}>
                     <Text numberOfLines={2} style={styles.title}>
@@ -46,7 +51,7 @@ const EventCard = ({ event, onPress, onEdit, onDelete }: Props) => {
                         <Ionicons
                             name="location-outline"
                             size={18}
-                            color="#6B7280"
+                            color={colors.textSecondary}
                         />
                         <Text style={styles.infoText}>{event.venue}</Text>
                     </View>
@@ -55,16 +60,32 @@ const EventCard = ({ event, onPress, onEdit, onDelete }: Props) => {
                         <Ionicons
                             name="calendar-outline"
                             size={18}
-                            color="#6B7280"
+                            color={colors.textSecondary}
                         />
                         <Text style={styles.infoText}>
                             {event.date} • {event.time}
                         </Text>
                     </View>
 
-                    {/* Management Utility Buttons */}
-                    {(onEdit || onDelete) && (
+                    {/* Management & Reminder Utility Buttons */}
+                    {(onEdit || onDelete || onToggleReminder) && (
                         <View style={styles.footer}>
+                            {onToggleReminder && (
+                                <TouchableOpacity
+                                    style={[
+                                        styles.actionButton,
+                                        { backgroundColor: isReminded ? colors.primaryLight : colors.border }
+                                    ]}
+                                    onPress={(e) => { e.stopPropagation(); onToggleReminder(); }}
+                                    accessibilityLabel={isReminded ? "Remove Reminder" : "Set Reminder"}
+                                >
+                                    <Ionicons
+                                        name={isReminded ? "notifications" : "notifications-outline"}
+                                        size={18}
+                                        color={isReminded ? colors.primary : colors.textSecondary}
+                                    />
+                                </TouchableOpacity>
+                            )}
                             {onEdit && (
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.editButton]}
@@ -78,7 +99,7 @@ const EventCard = ({ event, onPress, onEdit, onDelete }: Props) => {
                                     style={[styles.actionButton, styles.deleteButton]}
                                     onPress={(e) => { e.stopPropagation(); onDelete(); }}
                                 >
-                                    <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                                    <Ionicons name="trash-outline" size={18} color={colors.danger} />
                                 </TouchableOpacity>
                             )}
                         </View>

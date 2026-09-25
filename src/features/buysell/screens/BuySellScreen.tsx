@@ -277,29 +277,32 @@ export default function BuySellScreen() {
 
                                     <Text style={styles.cardSubtitle}>{entry.description}</Text>
 
-                                    {entry.img_urls.length > 0 && (
-                                        <ScrollView
-                                            horizontal
-                                            showsHorizontalScrollIndicator={false}
-                                            contentContainerStyle={styles.thumbRow}
-                                        >
-                                            {entry.img_urls.map((url) => {
-                                                const resolved = resolveBackendAsset(url);
-                                                return (
+                                    {(() => {
+                                        const validImages = (entry.img_urls || [])
+                                            .map((url) => resolveBackendAsset(url))
+                                            .filter((url): url is string => Boolean(url && url.trim()));
+                                        if (validImages.length === 0) return null;
+                                        return (
+                                            <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={false}
+                                                contentContainerStyle={styles.thumbRow}
+                                            >
+                                                {validImages.map((resolved) => (
                                                     <TouchableOpacity
-                                                        key={url}
+                                                        key={resolved}
                                                         activeOpacity={0.85}
-                                                        onPress={() => resolved && setZoomImage(resolved)}
+                                                        onPress={() => setZoomImage(resolved)}
                                                     >
                                                         <Image
                                                             source={{ uri: resolved }}
                                                             style={styles.thumb}
                                                         />
                                                     </TouchableOpacity>
-                                                );
-                                            })}
-                                        </ScrollView>
-                                    )}
+                                                ))}
+                                            </ScrollView>
+                                        );
+                                    })()}
 
                                     <Text style={styles.metaText}>
                                         {entry.added_by_email}
