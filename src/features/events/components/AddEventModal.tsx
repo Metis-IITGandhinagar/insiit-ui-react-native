@@ -27,6 +27,7 @@ const EMPTY_FORM = {
     venue: '',
     date: '',
     time: '',
+    endTime: '',
     image: '',
     description: '',
 };
@@ -57,7 +58,7 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
     const [formData, setFormData] = useState(EMPTY_FORM);
     // Only one panel is open at a time; both are inline rather than nested Modals,
     // which are unreliable inside this pageSheet on iOS.
-    const [openPicker, setOpenPicker] = useState<'date' | 'time' | null>(null);
+    const [openPicker, setOpenPicker] = useState<'date' | 'time' | 'endTime' | null>(null);
 
     useEffect(() => {
         if (!visible) return;
@@ -65,11 +66,17 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
 
         if (event) {
             const { date, time } = splitEventDateTime(event.startDateTime);
+            const endTime = event.endDateTime
+                ? splitEventDateTime(event.endDateTime).time
+                : event.startDateTime
+                    ? splitEventDateTime(new Date(new Date(event.startDateTime).getTime() + 60 * 60 * 1000).toISOString()).time
+                    : '';
             setFormData({
                 title: event.title,
                 venue: event.venue,
                 date,
                 time,
+                endTime,
                 image: event.image,
                 description: event.description,
             });
@@ -80,6 +87,13 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
 
     const handleChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleStartTimeChange = (value: string) => {
+        const start = parseDateTime(formData.date || '2000-01-01', value);
+        const end = start ? new Date(start.getTime() + 60 * 60 * 1000) : null;
+        const endTime = end ? end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
+        setFormData(prev => ({ ...prev, time: value, endTime }));
     };
 
     const handlePickPoster = async () => {
@@ -172,7 +186,7 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView contentContainerStyle={styles.formContainer}>
+                <ScrollView contentContainerStyle={[styles.formContainer, { paddingBottom: insets.bottom + spacing.xl }]} keyboardShouldPersistTaps="handled">
                     {formData.image ? (
                         <View style={styles.posterWrap}>
                             <Image source={{ uri: formData.image }} style={styles.poster} />
@@ -237,7 +251,26 @@ export default function AddEventModal({ visible, event, onClose, onSuccess }: Pr
                     {openPicker === 'time' && (
                         <TimePicker
                             value={formData.time}
-                            onChange={(time) => handleChange('time', time)}
+                            onChange={handleStartTimeChange}
+                        />
+                    )}
+
+                    <View style={styles.row}>
+                        <TouchableOpacity
+                            style={[styles.input, styles.pickerField, { flex: 1 }]}
+                            onPress={() => setOpenPicker(openPicker === 'endTime' ? null : 'endTime')}
+                            activeOpacity={0.7}
+                        >
+                            <Clock size={16} color={colors.textSecondary} />
+                            <Text style={formData.endTime ? styles.pickerValue : styles.pickerPlaceholder} numberOfLines={1}>
+                                {formData.endTime || 'End time'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    {openPicker === 'endTime' && (
+                        <TimePicker
+                            value={formData.endTime}
+                            onChange={(endTime) => handleChange('endTime', endTime)}
                         />
                     )}
 

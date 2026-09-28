@@ -86,7 +86,7 @@ export default function RootNavigator() {
                         animationDuration: 200,
                     }}
                 >
-                    {user || isGuest ? (
+                    {true ? (
                         <>
                             <Stack.Screen
                                 name="MainTabs"

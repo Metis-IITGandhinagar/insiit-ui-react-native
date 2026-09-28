@@ -55,9 +55,11 @@ export const mapApiEventToUi = (event: any, fallbackIndex: number): Event => {
         time: isValidStart
             ? start!.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
             : "",
+        endTime: parseBackendInstant(event.end_datetime)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         // Kept raw so an edit can round-trip the exact instant instead of re-parsing
         // the localised strings above.
         startDateTime: isValidStart ? start!.toISOString() : undefined,
+        endDateTime: parseBackendInstant(event.end_datetime)?.toISOString(),
         addedByEmail: event.added_by_email ?? undefined,
         // poster_url is a relative path from the backend's save_image.
         image: resolveBackendAsset(event.poster_url) ?? "",
@@ -79,6 +81,11 @@ const buildPayload = (eventData: EventFormData) => {
         throw new Error('Enter the date as YYYY-MM-DD and the time as HH:MM AM/PM.');
     }
 
+    const end = parseEventDateTime(eventData.date, eventData.endTime ?? '');
+    if (!end || end.getTime() <= start.getTime()) {
+        throw new Error('End time must be later than the start time.');
+    }
+
     const isNewUpload = eventData.image?.startsWith('data:');
 
     return {
@@ -88,6 +95,7 @@ const buildPayload = (eventData: EventFormData) => {
         address: eventData.venue || null,
         // RFC 3339, matching time::serde::rfc3339 on the Rust side.
         start_datetime: toBackendTimestamp(start),
+        end_datetime: toBackendTimestamp(end),
     };
 };
 

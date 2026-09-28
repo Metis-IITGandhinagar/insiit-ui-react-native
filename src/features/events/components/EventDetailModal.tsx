@@ -38,7 +38,10 @@ const EventDetailModal = ({ visible, event, onClose, onToggleReminder, isReminde
 
                 {hasImage && <Image source={{ uri: event.image }} style={styles.image} />}
 
-                <ScrollView contentContainerStyle={styles.body}>
+                <ScrollView
+                    contentContainerStyle={styles.body}
+                    showsVerticalScrollIndicator={false}
+                >
                     <Text style={styles.title}>{event.title}</Text>
 
                     <View style={styles.infoRow}>
@@ -135,7 +138,9 @@ const getStyles = ({ colors, radius, spacing, typography }: any) =>
             height: 220,
         },
         body: {
-            padding: spacing.lg,
+            paddingHorizontal: spacing.lg,
+            paddingTop: spacing.lg,
+            paddingBottom: spacing.xl * 2, // Added extra bottom padding to prevent text cutoff
         },
         title: {
             ...typography.h2,
