@@ -71,22 +71,15 @@ export const useAdminPermissions = (): UseAdminPermissionsResult => {
     }, [canManageAnnouncements, canManageMessMenu, canManageUsers, canManageEvents]);
 
     return {
-        permissions: {
-            manage_events: true,
-            post_announcement: true,
-            post_mess_menu: true,
-            get_admin: true,
-            post_admin: true,
-            put_admin: true,
-        } as any,
-        isLoading: false,
-        isRefreshing: false,
-        error: null,
-        refetch: async () => { },
-        canManageAnnouncements: true,
-        canManageMessMenu: true,
-        canManageUsers: true,
-        canManageEvents: true,
-        hasAnyAdminPermission: true,
+        permissions,
+        isLoading: loading,
+        isRefreshing,
+        error,
+        refetch,
+        canManageAnnouncements,
+        canManageMessMenu,
+        canManageUsers,
+        canManageEvents,
+        hasAnyAdminPermission,
     };
 };
