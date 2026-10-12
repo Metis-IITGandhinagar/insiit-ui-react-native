@@ -41,12 +41,11 @@ export default function RootNavigator() {
     const navigationRef = useRef<any>(null);
 
     useEffect(() => {
-        // 1. Ask permission once (for existing users after update)
+        const intervals: ReturnType<typeof setInterval>[] = [];
+
         import('@/features/notifications/services/notificationService')
             .then(async ({ askPermissionOnceOnLaunch, notificationService }) => {
                 await askPermissionOnceOnLaunch();
-
-                // 2. Sync reminders if the toggle is already ON
                 try {
                     const { eventService } = await import('@/features/events/services/eventService');
                     const events = await eventService.getAllEvents();
@@ -72,11 +71,12 @@ export default function RootNavigator() {
         const initialResponse = Notifications.getLastNotificationResponse();
         if (initialResponse?.notification) {
             const response = initialResponse;
-            const waitForNavigation = setInterval(() => {
+            const id = setInterval(() => {
                 if (!navigationRef.current?.isReady()) return;
-                clearInterval(waitForNavigation);
+                clearInterval(id);
                 openDestination(response.notification);
             }, 50);
+            intervals.push(id);
         }
 
         const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
@@ -84,14 +84,18 @@ export default function RootNavigator() {
                 openDestination(response.notification);
                 return;
             }
-            const waitForNavigation = setInterval(() => {
+            const id = setInterval(() => {
                 if (!navigationRef.current?.isReady()) return;
-                clearInterval(waitForNavigation);
+                clearInterval(id);
                 openDestination(response.notification);
             }, 50);
+            intervals.push(id);
         });
 
-        return () => subscription.remove();
+        return () => {
+            subscription.remove();
+            intervals.forEach(clearInterval);
+        };
     }, []);
 
     const navigationTheme = {

@@ -387,7 +387,7 @@ const LostFoundDetailModal = ({
 
         <ImageZoomModal
             visible={zoomVisible}
-            imageUri={image}
+            imageUri={image ?? null}
             onClose={() => setZoomVisible(false)}
         />
         </>

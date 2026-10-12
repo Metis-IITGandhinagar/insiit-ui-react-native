@@ -140,24 +140,27 @@ export const notificationService = {
             }
 
             const now = Date.now();
-            let trigger: Notifications.NotificationTriggerInput;
+
+            if (!targetTime || targetTime.getTime() <= now) {
+                return { success: false, message: 'This event has already started or has an invalid date.' };
+            }
 
             const tenMinutesBefore = new Date(targetTime.getTime() - 10 * 60 * 1000);
 
-            if (tenMinutesBefore.getTime() > now) {
-                trigger = {
-                    type: Notifications.SchedulableTriggerInputTypes.DATE,
-                    date: tenMinutesBefore,
-                    channelId: 'events_announcements',
-                };
-            } else {
-                trigger = {
-                    type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-                    seconds: 5,
-                    channelId: 'events_announcements',
+            // Already inside the 10-minute window → skip (prevents repeat notifications)
+            if (tenMinutesBefore.getTime() <= now) {
+                return {
+                    success: false,
+                    message: 'Event is starting too soon to schedule a reminder.',
                 };
             }
-            
+
+            const trigger: Notifications.NotificationTriggerInput = {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: tenMinutesBefore,
+                channelId: 'events_announcements',
+            };
+
             const notifId = await Notifications.scheduleNotificationAsync({
                 content: {
                     title: `Upcoming Event: ${event.title}`,
@@ -228,6 +231,17 @@ export const notificationService = {
             if (!target) target = parseEventDateTime(e.date, e.time);
             return target && target.getTime() > now;
         });
+
+        // iOS silently drops local notifications beyond 64
+        const MAX_SCHEDULED = 60;
+        const toSchedule = futureEvents
+            .sort((a, b) => {
+                // soonest first
+                const ta = a.startDateTime ? new Date(a.startDateTime).getTime() : 0;
+                const tb = b.startDateTime ? new Date(b.startDateTime).getTime() : 0;
+                return ta - tb;
+            })
+            .slice(0, MAX_SCHEDULED);
 
         const futureIds = new Set(futureEvents.map((e) => e.id));
 

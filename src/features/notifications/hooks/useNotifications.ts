@@ -2,13 +2,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { notificationService } from '../services/notificationService';
 import { AppNotification } from '../services/notificationTypes';
-import { Event } from '@/features/events/services/searchTypes';
 
 export function useNotifications() {
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [revision, setRevision] = useState(0);
 
     const loadNotifications = useCallback(async () => {
         try {
@@ -25,10 +23,6 @@ export function useNotifications() {
     useEffect(() => {
         loadNotifications();
     }, [loadNotifications]);
-
-    useEffect(() => {
-        if (revision > 0) loadNotifications();
-    }, [revision, loadNotifications]);
 
     const refresh = useCallback(async () => {
         setRefreshing(true);
@@ -78,6 +72,5 @@ export function useNotifications() {
         dismissNotification,
         clearAll,
         refresh,
-        revision,
     };
 }

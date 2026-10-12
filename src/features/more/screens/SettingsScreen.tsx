@@ -45,6 +45,10 @@ const SettingsScreen = () => {
     };
 
     const handleToggleReminders = async (value: boolean) => {
+        // Write the flag FIRST so syncAllEventReminders sees the new value
+        setEventRemindersEnabled(value);
+        settingsStorage.set(EVENT_REMINDERS_KEY, value);
+
         if (value) {
             const granted = await notificationService.requestPermissions();
             if (!granted) {
@@ -67,9 +71,6 @@ const SettingsScreen = () => {
         } else {
             await notificationService.syncAllEventReminders([]);
         }
-
-        setEventRemindersEnabled(value);
-        settingsStorage.set(EVENT_REMINDERS_KEY, value);
     };
 
     return (
