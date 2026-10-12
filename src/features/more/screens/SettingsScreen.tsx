@@ -1,26 +1,34 @@
-import React from "react";
-import { ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Alert, Switch } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Check, LogIn, LogOut } from "lucide-react-native";
+import { Bell, Check, LogIn, LogOut } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { createMMKV } from "react-native-mmkv";
 
 import { useTheme } from "../../../core/theme";
 import { themeOptions, ThemePreference, SYSTEM_PREFERENCE } from "../../../core/theme/colors";
 import { Card } from "../../../shared/components/Card";
 import { useAuth } from "../../../core/auth/useAuth";
+import { notificationService } from "@/features/notifications/services/notificationService";
+
+const settingsStorage = createMMKV({ id: "insiit.settings" });
+const EVENT_REMINDERS_KEY = "event_reminders_enabled";
 
 const SettingsScreen = () => {
     const theme = useTheme();
     const { preference, setThemeKey, colors } = theme;
     const { signOut, isGuest } = useAuth();
     const navigation = useNavigation<any>();
-
-    // Hooks into the device hardware safe zones (notches, islands, home bars)
     const insets = useSafeAreaInsets();
-
-    // Pass insets to the styles function for dynamic padding calculation
     const styles = getStyles(theme, insets);
+
+    const [eventRemindersEnabled, setEventRemindersEnabled] = useState(false);
+
+    useEffect(() => {
+        const saved = settingsStorage.getBoolean(EVENT_REMINDERS_KEY);
+        setEventRemindersEnabled(saved ?? false);
+    }, []);
 
     const selectedOption =
         themeOptions.find((option) => option.id === preference) ?? themeOptions[0];
@@ -36,6 +44,34 @@ const SettingsScreen = () => {
         );
     };
 
+    const handleToggleReminders = async (value: boolean) => {
+        if (value) {
+            const granted = await notificationService.requestPermissions();
+            if (!granted) {
+                Alert.alert(
+                    "Permission needed",
+                    "Please allow notifications in settings to receive event reminders."
+                );
+                setEventRemindersEnabled(false);
+                settingsStorage.set(EVENT_REMINDERS_KEY, false);
+                return;
+            }
+
+            try {
+                const { eventService } = await import("@/features/events/services/eventService");
+                const events = await eventService.getAllEvents();
+                await notificationService.syncAllEventReminders(events);
+            } catch (e) {
+                console.warn("Could not sync event reminders:", e);
+            }
+        } else {
+            await notificationService.syncAllEventReminders([]);
+        }
+
+        setEventRemindersEnabled(value);
+        settingsStorage.set(EVENT_REMINDERS_KEY, value);
+    };
+
     return (
         <View style={styles.container}>
             <StatusBar
@@ -44,7 +80,6 @@ const SettingsScreen = () => {
             />
 
             <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
-
                 {/* Appearance & Theme */}
                 <Text style={[styles.sectionTitle, { marginTop: 0 }]}>Appearance & Theme</Text>
 
@@ -135,6 +170,27 @@ const SettingsScreen = () => {
                     )}
                 </Card>
 
+                {/* Notifications */}
+                <Text style={styles.sectionTitle}>Notifications</Text>
+                <Card style={styles.cardPaddingOverride}>
+                    <View style={styles.rowItem}>
+                        <View style={styles.rowLeft}>
+                            <Bell size={20} color={colors.primary} style={styles.rowIcon} />
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.rowTitle}>Event reminders</Text>
+                                <Text style={styles.rowSubtitle}>
+                                    Get notified 10 min before events
+                                </Text>
+                            </View>
+                        </View>
+                        <Switch
+                            value={eventRemindersEnabled}
+                            onValueChange={handleToggleReminders}
+                            trackColor={{ false: colors.border, true: colors.primary }}
+                            thumbColor="#FFFFFF"
+                        />
+                    </View>
+                </Card>
             </ScrollView>
         </View>
     );
@@ -142,94 +198,92 @@ const SettingsScreen = () => {
 
 export default SettingsScreen;
 
-const getStyles = ({ colors, spacing, radius }: any, insets: any) => StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background,
-    },
-    contentScroll: {
-        paddingHorizontal: spacing.lg,
-        // The stack header already clears the notch/status bar.
-        paddingTop: spacing.lg,
-        // Calculate safe bottom padding (accommodates home bars and floating navs)
-        paddingBottom: insets.bottom + spacing.xxxl + 60,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: colors.text,
-        marginTop: spacing.lg,
-        marginBottom: spacing.md,
-    },
-    themeSummary: {
-        marginBottom: spacing.lg,
-    },
-    themeSummaryName: {
-        fontSize: 20,
-        fontWeight: "700",
-        color: colors.text,
-    },
-    themeSummaryDesc: {
-        fontSize: 13,
-        color: colors.textSecondary,
-        marginTop: 2,
-    },
-    swatchRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
-    swatchItem: {
-        alignItems: "center",
-        flex: 1,
-        gap: spacing.sm,
-    },
-    // The ring sits outside the circle so selection doesn't resize the swatch.
-    swatchRing: {
-        padding: 3,
-        borderRadius: 999,
-        borderWidth: 2,
-    },
-    swatch: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    swatchLabel: {
-        fontSize: 11,
-        fontWeight: "500",
-        color: colors.textSecondary,
-        textAlign: "center",
-    },
-    cardPaddingOverride: {
-        paddingHorizontal: 0,
-        paddingVertical: 0,
-        overflow: "hidden",
-    },
-    rowItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.md,
-    },
-    rowLeft: {
-        flexDirection: "row",
-        alignItems: "center",
-        flex: 1,
-    },
-    rowIcon: {
-        marginRight: spacing.md,
-    },
-    rowTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: colors.text,
-    },
-    rowSubtitle: {
-        fontSize: 13,
-        color: colors.textSecondary,
-        marginTop: 2,
-    },
-});
+const getStyles = ({ colors, spacing, radius }: any, insets: any) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        contentScroll: {
+            paddingHorizontal: spacing.lg,
+            paddingTop: spacing.lg,
+            paddingBottom: insets.bottom + spacing.xxxl + 60,
+        },
+        sectionTitle: {
+            fontSize: 18,
+            fontWeight: "bold",
+            color: colors.text,
+            marginTop: spacing.lg,
+            marginBottom: spacing.md,
+        },
+        themeSummary: {
+            marginBottom: spacing.lg,
+        },
+        themeSummaryName: {
+            fontSize: 20,
+            fontWeight: "700",
+            color: colors.text,
+        },
+        themeSummaryDesc: {
+            fontSize: 13,
+            color: colors.textSecondary,
+            marginTop: 2,
+        },
+        swatchRow: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+        },
+        swatchItem: {
+            alignItems: "center",
+            flex: 1,
+            gap: spacing.sm,
+        },
+        swatchRing: {
+            padding: 3,
+            borderRadius: 999,
+            borderWidth: 2,
+        },
+        swatch: {
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            alignItems: "center",
+            justifyContent: "center",
+        },
+        swatchLabel: {
+            fontSize: 11,
+            fontWeight: "500",
+            color: colors.textSecondary,
+            textAlign: "center",
+        },
+        cardPaddingOverride: {
+            paddingHorizontal: 0,
+            paddingVertical: 0,
+            overflow: "hidden",
+        },
+        rowItem: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.md,
+        },
+        rowLeft: {
+            flexDirection: "row",
+            alignItems: "center",
+            flex: 1,
+        },
+        rowIcon: {
+            marginRight: spacing.md,
+        },
+        rowTitle: {
+            fontSize: 16,
+            fontWeight: "600",
+            color: colors.text,
+        },
+        rowSubtitle: {
+            fontSize: 13,
+            color: colors.textSecondary,
+            marginTop: 2,
+        },
+    });

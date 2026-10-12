@@ -8,6 +8,7 @@ export function useNotifications() {
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [revision, setRevision] = useState(0);
 
     const loadNotifications = useCallback(async () => {
         try {
@@ -25,6 +26,10 @@ export function useNotifications() {
         loadNotifications();
     }, [loadNotifications]);
 
+    useEffect(() => {
+        if (revision > 0) loadNotifications();
+    }, [revision, loadNotifications]);
+
     const refresh = useCallback(async () => {
         setRefreshing(true);
         await loadNotifications();
@@ -37,36 +42,6 @@ export function useNotifications() {
     const isReminderSet = useCallback((eventId: string) => {
         return notificationService.isReminderSet(eventId);
     }, []);
-
-    const toggleReminder = useCallback(
-        async (event: Event): Promise<{ success: boolean; message: string }> => {
-            const alreadySet = notificationService.isReminderSet(event.id);
-            if (alreadySet) {
-                await notificationService.cancelEventReminder(event.id);
-                setNotifications((prev) =>
-                    prev.map((n) =>
-                        n.targetId === event.id && n.type === 'reminder'
-                            ? { ...n, type: 'event', title: `Event: ${event.title}` }
-                            : n
-                    )
-                );
-                return { success: true, message: `Removed reminder for "${event.title}".` };
-            } else {
-                const res = await notificationService.scheduleEventReminder(event);
-                if (res.success) {
-                    setNotifications((prev) =>
-                        prev.map((n) =>
-                            n.targetId === event.id
-                                ? { ...n, type: 'reminder', title: `Reminder: ${event.title}` }
-                                : n
-                        )
-                    );
-                }
-                return res;
-            }
-        },
-        []
-    );
 
     const markAsRead = useCallback((notificationId: string) => {
         notificationService.markAsRead(notificationId);
@@ -98,11 +73,11 @@ export function useNotifications() {
         refreshing,
         unreadCount,
         isReminderSet,
-        toggleReminder,
         markAsRead,
         markAllAsRead,
         dismissNotification,
         clearAll,
         refresh,
+        revision,
     };
 }

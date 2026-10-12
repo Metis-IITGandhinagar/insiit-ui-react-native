@@ -6,14 +6,18 @@ import { announcementsService } from '@/features/announcements/services/announce
 import { eventService, parseEventDateTime } from '@/features/events/services/eventService';
 import { Event } from '@/features/events/services/searchTypes';
 import { AppNotification, ScheduledReminder } from './notificationTypes';
+import { backendInstantMs } from '@/core/api/backendTime';
 
 const storage = createMMKV({ id: 'insiit.notifications' });
+const settingsStorage = createMMKV({ id: 'insiit.settings' });
 
 const READ_IDS_KEY = 'read_ids';
 const DISMISSED_IDS_KEY = 'dismissed_ids';
 const REMINDERS_KEY = 'scheduled_reminders';
+const PERMISSION_ASKED_KEY = 'notification_permission_asked';
+const EVENT_REMINDERS_KEY = 'event_reminders_enabled';
 
-// Configure foreground presentation in compliance with Expo SDK 57
+// Configure foreground presentation (Expo SDK 57+)
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldPlaySound: true,
@@ -24,9 +28,10 @@ Notifications.setNotificationHandler({
 });
 
 let channelConfigured = false;
+
 export async function ensureNotificationChannelAsync(): Promise<void> {
-    if (channelConfigured) return;
     if (Platform.OS === 'android') {
+        if (channelConfigured) return;
         try {
             await Notifications.setNotificationChannelAsync('events_announcements', {
                 name: 'Events & Announcements',
@@ -56,6 +61,19 @@ export async function requestNotificationPermissions(): Promise<boolean> {
         console.warn('Error checking notification permissions:', e);
         return false;
     }
+}
+
+/** Ask permission only once (for existing users after Play Store update). */
+export async function askPermissionOnceOnLaunch(): Promise<void> {
+    const alreadyAsked = storage.getBoolean(PERMISSION_ASKED_KEY);
+    if (alreadyAsked) return;
+
+    storage.set(PERMISSION_ASKED_KEY, true);
+
+    const remindersEnabled = settingsStorage.getBoolean(EVENT_REMINDERS_KEY) ?? false;
+    if (!remindersEnabled) return;
+
+    await requestNotificationPermissions();
 }
 
 function getStoredStringArray(key: string): string[] {
@@ -117,35 +135,29 @@ export const notificationService = {
                 targetTime = parseEventDateTime(event.date, event.time);
             }
 
+            if (!targetTime || targetTime.getTime() <= Date.now()) {
+                return { success: false, message: 'This event has already started or has an invalid date.' };
+            }
+
             const now = Date.now();
             let trigger: Notifications.NotificationTriggerInput;
 
-            if (targetTime && targetTime.getTime() > now) {
-                // Schedule 15 minutes before the event
-                const fifteenMinutesBefore = new Date(targetTime.getTime() - 15 * 60 * 1000);
-                if (fifteenMinutesBefore.getTime() > now) {
-                    trigger = {
-                        type: Notifications.SchedulableTriggerInputTypes.DATE,
-                        date: fifteenMinutesBefore,
-                        channelId: 'events_announcements',
-                    };
-                } else {
-                    // Starts in less than 15 minutes: trigger in 5 seconds
-                    trigger = {
-                        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-                        seconds: 5,
-                        channelId: 'events_announcements',
-                    };
-                }
+            const tenMinutesBefore = new Date(targetTime.getTime() - 10 * 60 * 1000);
+
+            if (tenMinutesBefore.getTime() > now) {
+                trigger = {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: tenMinutesBefore,
+                    channelId: 'events_announcements',
+                };
             } else {
-                // Trigger in 3 seconds as a confirmation notification
                 trigger = {
                     type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-                    seconds: 3,
+                    seconds: 5,
                     channelId: 'events_announcements',
                 };
             }
-
+            
             const notifId = await Notifications.scheduleNotificationAsync({
                 content: {
                     title: `Upcoming Event: ${event.title}`,
@@ -161,7 +173,7 @@ export const notificationService = {
                 eventId: event.id,
                 notificationId: notifId,
                 eventTitle: event.title,
-                scheduledFor: targetTime ? targetTime.toISOString() : new Date().toISOString(),
+                scheduledFor: targetTime.toISOString(),
             };
             saveStoredReminders(reminders);
 
@@ -194,14 +206,71 @@ export const notificationService = {
         }
     },
 
+    /** Schedule / cancel reminders for all future events according to the Settings toggle. */
+    syncAllEventReminders: async (events: Event[]): Promise<void> => {
+        const enabled = settingsStorage.getBoolean(EVENT_REMINDERS_KEY) ?? false;
+
+        if (!enabled) {
+            const reminders = getStoredReminders();
+            for (const eventId of Object.keys(reminders)) {
+                await notificationService.cancelEventReminder(eventId);
+            }
+            return;
+        }
+
+        const now = Date.now();
+        const futureEvents = events.filter((e) => {
+            let target: Date | null = null;
+            if (e.startDateTime) {
+                const parsed = new Date(e.startDateTime);
+                if (!isNaN(parsed.getTime())) target = parsed;
+            }
+            if (!target) target = parseEventDateTime(e.date, e.time);
+            return target && target.getTime() > now;
+        });
+
+        const futureIds = new Set(futureEvents.map((e) => e.id));
+
+        // Cancel reminders for events that no longer exist or already started
+        const currentReminders = getStoredReminders();
+        for (const eventId of Object.keys(currentReminders)) {
+            if (!futureIds.has(eventId)) {
+                await notificationService.cancelEventReminder(eventId);
+            }
+        }
+
+        // Schedule missing ones
+        for (const event of futureEvents) {
+            if (!notificationService.isReminderSet(event.id)) {
+                await notificationService.scheduleEventReminder(event);
+            }
+        }
+    },
+
     getNotifications: async (): Promise<AppNotification[]> => {
         const readIds = new Set(getStoredStringArray(READ_IDS_KEY));
         const dismissedIds = new Set(getStoredStringArray(DISMISSED_IDS_KEY));
         const reminders = getStoredReminders();
 
+        try {
+            const scheduledIds = new Set(
+                (await Notifications.getAllScheduledNotificationsAsync()).map((item) => item.identifier)
+            );
+            let changed = false;
+            for (const [eventId, reminder] of Object.entries(reminders)) {
+                if (!scheduledIds.has(reminder.notificationId)) {
+                    delete reminders[eventId];
+                    changed = true;
+                }
+            }
+            if (changed) saveStoredReminders(reminders);
+        } catch (e) {
+            console.warn('Could not reconcile scheduled event reminders:', e);
+        }
+
         const notifications: AppNotification[] = [];
 
-        // 1. Announcements
+        // Announcements
         try {
             const announcements = await announcementsService.getAll();
             for (const item of announcements) {
@@ -213,7 +282,7 @@ export const notificationService = {
                     type: 'announcement',
                     title: item.title,
                     body: item.description,
-                    timestamp: item.added_on_timestamp || new Date().toISOString(),
+                    timestamp: item.added_on_timestamp,
                     read: readIds.has(notifId),
                     targetId: String(item.id),
                     targetRoute: 'Announcements',
@@ -223,35 +292,36 @@ export const notificationService = {
             console.warn('Could not fetch announcements for notifications:', e);
         }
 
-        // 2. Events
-        try {
-            const events = await eventService.getAllEvents();
-            for (const event of events) {
-                const notifId = `event-${event.id}`;
-                if (dismissedIds.has(notifId)) continue;
-
-                const hasReminder = Boolean(reminders[event.id]);
-
-                notifications.push({
-                    id: notifId,
-                    type: hasReminder ? 'reminder' : 'event',
-                    title: hasReminder ? `Reminder: ${event.title}` : `Event: ${event.title}`,
-                    body: `${event.venue ? `${event.venue} • ` : ''}${event.date} ${event.time}`.trim(),
-                    timestamp: event.startDateTime || new Date().toISOString(),
-                    read: readIds.has(notifId),
-                    targetId: event.id,
-                    targetRoute: 'Events',
-                    venue: event.venue,
-                    eventTime: `${event.date} • ${event.time}`,
-                });
+        // Event reminders (only when user has opted in)
+        if (Object.keys(reminders).length > 0) {
+            try {
+                const events = await eventService.getAllEvents();
+                const eventById = new Map(events.map((event) => [event.id, event]));
+                for (const [eventId, reminder] of Object.entries(reminders)) {
+                    const event = eventById.get(eventId);
+                    if (!event) continue;
+                    const notifId = `event-${event.id}`;
+                    if (dismissedIds.has(notifId)) continue;
+                    notifications.push({
+                        id: notifId,
+                        type: 'reminder',
+                        title: `Reminder: ${event.title}`,
+                        body: `${event.venue ? `${event.venue} • ` : ''}${event.date} ${event.time}`.trim(),
+                        timestamp: reminder.scheduledFor,
+                        read: readIds.has(notifId),
+                        targetId: event.id,
+                        targetRoute: 'Events',
+                        venue: event.venue,
+                        eventTime: `${event.date} • ${event.time}`,
+                        scheduledNotificationId: reminder.notificationId,
+                    });
+                }
+            } catch (e) {
+                console.warn('Could not fetch events for reminders:', e);
             }
-        } catch (e) {
-            console.warn('Could not fetch events for notifications:', e);
         }
 
-        // Sort latest first
-        notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
+        notifications.sort((a, b) => backendInstantMs(b.timestamp) - backendInstantMs(a.timestamp));
         return notifications;
     },
 
@@ -268,12 +338,40 @@ export const notificationService = {
     },
 
     dismissNotification: (notificationId: string): void => {
+        const reminderEventId = notificationId.startsWith('event-')
+            ? notificationId.slice('event-'.length)
+            : undefined;
+        if (reminderEventId) {
+            const reminders = getStoredReminders();
+            const reminder = reminders[reminderEventId];
+            if (reminder?.notificationId) {
+                void Notifications.cancelScheduledNotificationAsync(reminder.notificationId).catch((e) =>
+                    console.warn('Could not cancel dismissed event reminder:', e)
+                );
+            }
+            delete reminders[reminderEventId];
+            saveStoredReminders(reminders);
+        }
         const dismissed = new Set(getStoredStringArray(DISMISSED_IDS_KEY));
         dismissed.add(notificationId);
         saveStringArray(DISMISSED_IDS_KEY, Array.from(dismissed));
     },
 
     clearAll: (notificationIds: string[]): void => {
+        notificationIds.forEach((id) => {
+            if (id.startsWith('event-')) {
+                const reminders = getStoredReminders();
+                const eventId = id.slice('event-'.length);
+                const reminder = reminders[eventId];
+                if (reminder?.notificationId) {
+                    void Notifications.cancelScheduledNotificationAsync(reminder.notificationId).catch((e) =>
+                        console.warn('Could not cancel cleared event reminder:', e)
+                    );
+                }
+                delete reminders[eventId];
+                saveStoredReminders(reminders);
+            }
+        });
         const dismissed = new Set(getStoredStringArray(DISMISSED_IDS_KEY));
         notificationIds.forEach((id) => dismissed.add(id));
         saveStringArray(DISMISSED_IDS_KEY, Array.from(dismissed));

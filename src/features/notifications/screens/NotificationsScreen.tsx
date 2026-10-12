@@ -1,5 +1,5 @@
 // src/features/notifications/screens/NotificationsScreen.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -12,7 +12,7 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {
     Bell,
     BellOff,
@@ -52,6 +52,10 @@ export default function NotificationsScreen() {
     } = useNotifications();
 
     const [activeTab, setActiveTab] = useState<FilterTab>('all');
+
+    useFocusEffect(useCallback(() => {
+        refresh();
+    }, [refresh]));
 
     const filteredNotifications = useMemo(() => {
         if (activeTab === 'all') return notifications;
@@ -310,7 +314,7 @@ export default function NotificationsScreen() {
 
                                             <View style={styles.cardFooter}>
                                                 <Text style={styles.actionHint}>
-                                                    Tap to view {notification.targetRoute}
+                                                    Tap to view {notification.targetRoute ?? 'updates'}
                                                 </Text>
                                                 <TouchableOpacity
                                                     style={styles.dismissButton}

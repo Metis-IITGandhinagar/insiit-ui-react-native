@@ -1,5 +1,5 @@
 // src/navigation/RootNavigator.tsx
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -31,12 +31,68 @@ import { MessMenuManagementScreen } from "@/features/admin/screens/MessMenuManag
 import { UserManagementScreen } from "@/features/admin/screens/UserManagementScreen";
 import {AdminEventsApprovalScreen} from "@/features/admin/screens/AdminEventsApprovalScreen";
 import NotificationsScreen from "@/features/notifications/screens/NotificationsScreen";
+import * as Notifications from 'expo-notifications';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
     const { user, isGuest, loading } = useAuth();
     const { colors, isDark, typography } = useTheme();
+    const navigationRef = useRef<any>(null);
+
+    useEffect(() => {
+        // 1. Ask permission once (for existing users after update)
+        import('@/features/notifications/services/notificationService')
+            .then(async ({ askPermissionOnceOnLaunch, notificationService }) => {
+                await askPermissionOnceOnLaunch();
+
+                // 2. Sync reminders if the toggle is already ON
+                try {
+                    const { eventService } = await import('@/features/events/services/eventService');
+                    const events = await eventService.getAllEvents();
+                    await notificationService.syncAllEventReminders(events);
+                } catch (e) {
+                    console.warn('Could not sync reminders on launch:', e);
+                }
+            })
+            .catch(() => { });
+
+        const openDestination = (notification: Notifications.Notification) => {
+            const data = notification.request.content.data;
+            if (data?.route === 'Events') {
+                navigationRef.current?.navigate('MainTabs', { tab: 'Events' });
+            } else if (data?.route === 'Announcements') {
+                navigationRef.current?.navigate('Announcements');
+            } else {
+                navigationRef.current?.navigate('Notifications');
+            }
+            Notifications.clearLastNotificationResponse();
+        };
+
+        const initialResponse = Notifications.getLastNotificationResponse();
+        if (initialResponse?.notification) {
+            const response = initialResponse;
+            const waitForNavigation = setInterval(() => {
+                if (!navigationRef.current?.isReady()) return;
+                clearInterval(waitForNavigation);
+                openDestination(response.notification);
+            }, 50);
+        }
+
+        const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+            if (navigationRef.current?.isReady()) {
+                openDestination(response.notification);
+                return;
+            }
+            const waitForNavigation = setInterval(() => {
+                if (!navigationRef.current?.isReady()) return;
+                clearInterval(waitForNavigation);
+                openDestination(response.notification);
+            }, 50);
+        });
+
+        return () => subscription.remove();
+    }, []);
 
     const navigationTheme = {
         ...DefaultTheme,
@@ -68,7 +124,7 @@ export default function RootNavigator() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
-            <NavigationContainer theme={navigationTheme}>
+            <NavigationContainer ref={navigationRef} theme={navigationTheme}>
                 <Stack.Navigator
                     screenOptions={{
                         headerShown: true,
