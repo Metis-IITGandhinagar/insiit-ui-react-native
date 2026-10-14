@@ -50,11 +50,12 @@ export async function ensureNotificationChannelAsync(): Promise<void> {
 export async function requestNotificationPermissions(): Promise<boolean> {
     try {
         await ensureNotificationChannelAsync();
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
+        const permission = await Notifications.getPermissionsAsync();
+        let finalStatus = permission.status;
+        const wasRequested = storage.getBoolean(PERMISSION_ASKED_KEY) ?? false;
+        if (permission.status !== 'granted' && permission.canAskAgain && !wasRequested) {
+            storage.set(PERMISSION_ASKED_KEY, true);
+            finalStatus = (await Notifications.requestPermissionsAsync()).status;
         }
         return finalStatus === 'granted';
     } catch (e) {
@@ -69,9 +70,6 @@ export async function askPermissionOnceOnLaunch(): Promise<void> {
     if (alreadyAsked) return;
 
     storage.set(PERMISSION_ASKED_KEY, true);
-
-    const remindersEnabled = settingsStorage.getBoolean(EVENT_REMINDERS_KEY) ?? false;
-    if (!remindersEnabled) return;
 
     await requestNotificationPermissions();
 }
@@ -207,6 +205,19 @@ export const notificationService = {
             console.warn('Error cancelling reminder:', e);
             return false;
         }
+    },
+
+    clearLocalEventReminders: async (): Promise<void> => {
+        const reminders = getStoredReminders();
+        for (const reminder of Object.values(reminders)) {
+            if (!reminder.notificationId) continue;
+            try {
+                await Notifications.cancelScheduledNotificationAsync(reminder.notificationId);
+            } catch (error) {
+                console.warn('Could not cancel a legacy local event reminder:', error);
+            }
+        }
+        saveStoredReminders({});
     },
 
     /** Schedule / cancel reminders for all future events according to the Settings toggle. */

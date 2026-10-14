@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Alert, Switch } from "react-native";
+import { AppState, ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Alert, Switch, Linking } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Bell, Check, LogIn, LogOut } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -11,6 +11,8 @@ import { themeOptions, ThemePreference, SYSTEM_PREFERENCE } from "../../../core/
 import { Card } from "../../../shared/components/Card";
 import { useAuth } from "../../../core/auth/useAuth";
 import { notificationService } from "@/features/notifications/services/notificationService";
+import { setEventReminderPreference } from "@/features/notifications/services/pushRegistrationService";
+import * as Notifications from 'expo-notifications';
 
 const settingsStorage = createMMKV({ id: "insiit.settings" });
 const EVENT_REMINDERS_KEY = "event_reminders_enabled";
@@ -24,10 +26,21 @@ const SettingsScreen = () => {
     const styles = getStyles(theme, insets);
 
     const [eventRemindersEnabled, setEventRemindersEnabled] = useState(false);
+    const [permissionDenied, setPermissionDenied] = useState(false);
 
     useEffect(() => {
         const saved = settingsStorage.getBoolean(EVENT_REMINDERS_KEY);
-        setEventRemindersEnabled(saved ?? false);
+        setEventRemindersEnabled(saved ?? true);
+        const refreshPermission = () => {
+            void Notifications.getPermissionsAsync()
+                .then(({ status }) => setPermissionDenied(status !== 'granted'))
+                .catch((error) => console.warn('Could not read notification permission:', error));
+        };
+        refreshPermission();
+        const subscription = AppState.addEventListener('change', (state) => {
+            if (state === 'active') refreshPermission();
+        });
+        return () => subscription.remove();
     }, []);
 
     const selectedOption =
@@ -45,31 +58,29 @@ const SettingsScreen = () => {
     };
 
     const handleToggleReminders = async (value: boolean) => {
-        // Write the flag FIRST so syncAllEventReminders sees the new value
-        setEventRemindersEnabled(value);
-        settingsStorage.set(EVENT_REMINDERS_KEY, value);
-
         if (value) {
             const granted = await notificationService.requestPermissions();
             if (!granted) {
+                setPermissionDenied(true);
                 Alert.alert(
                     "Permission needed",
-                    "Please allow notifications in settings to receive event reminders."
+                    "Notifications are disabled for INSIIT. Enable them in your device settings to receive event updates.",
+                    [
+                        { text: "Not now", style: "cancel" },
+                        { text: "Open Settings", onPress: () => void Linking.openSettings() },
+                    ]
                 );
-                setEventRemindersEnabled(false);
-                settingsStorage.set(EVENT_REMINDERS_KEY, false);
                 return;
             }
-
-            try {
-                const { eventService } = await import("@/features/events/services/eventService");
-                const events = await eventService.getAllEvents();
-                await notificationService.syncAllEventReminders(events);
-            } catch (e) {
-                console.warn("Could not sync event reminders:", e);
-            }
-        } else {
-            await notificationService.syncAllEventReminders([]);
+            setPermissionDenied(false);
+        }
+        try {
+            await setEventReminderPreference(value);
+            setEventRemindersEnabled(value);
+            settingsStorage.set(EVENT_REMINDERS_KEY, value);
+        } catch (error) {
+            console.warn("Could not update event reminder preference:", error);
+            Alert.alert("Could not update notifications", "Please check your connection and try again.");
         }
     };
 
@@ -191,6 +202,17 @@ const SettingsScreen = () => {
                             thumbColor="#FFFFFF"
                         />
                     </View>
+                    {permissionDenied && (
+                        <TouchableOpacity
+                            style={{ paddingHorizontal: 16, paddingBottom: 14 }}
+                            onPress={() => void Linking.openSettings()}
+                            accessibilityRole="button"
+                        >
+                            <Text style={{ color: colors.primary, fontWeight: '600' }}>
+                                Enable notifications in device settings
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </Card>
             </ScrollView>
         </View>

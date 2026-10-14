@@ -1,9 +1,12 @@
 import React, { createContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
+import { AppState } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 import { nativeAuth } from '../auth/firebase';
 import { authService } from '../auth/authService';
 import { userService } from '../api/userService';
 import { readCache, writeCache, removeCacheByPrefix, adminPermissionsPolicy, USER_SCOPED_PREFIX } from '../cache';
 import { UserSessionProfile, AppPermissions, NO_PERMISSIONS } from '../navigation/types';
+import { registerPushDevice, unregisterPushDevice } from '@/features/notifications/services/pushRegistrationService';
 
 interface AuthContextType {
     /** The signed-in IITGN student. Null while browsing as a guest. */
@@ -72,6 +75,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // after a sign-out (or a switch to another account) is discarded instead of
     // granting the wrong person admin rights.
     const sessionRef = useRef(0);
+
+    useEffect(() => {
+        if (!user?.email) return;
+        const safeRegister = () => {
+            void registerPushDevice().catch((error) => console.warn('Push registration failed:', error));
+        };
+        safeRegister();
+        const tokenRefresh = messaging().onTokenRefresh(safeRegister);
+        const appState = AppState.addEventListener('change', (state) => {
+            if (state === 'active') safeRegister();
+        });
+        return () => {
+            tokenRefresh();
+            appState.remove();
+        };
+    }, [user?.email]);
 
     /**
      * Refreshes permissions without blocking the UI. Failure is silent and expected:
@@ -176,6 +195,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const signOut = async () => {
         setLoading(true);
         try {
+            await unregisterPushDevice();
             await authService.logout();
             sessionRef.current++;
             // Shared reference data (bus timings, outlets) is deliberately kept: it

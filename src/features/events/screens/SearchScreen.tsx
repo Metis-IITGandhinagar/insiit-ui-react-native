@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, StatusBar, StyleSheet, Text, View, RefreshControl, Alert, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,6 +14,7 @@ import { eventService } from "../services/eventService";
 import { Event } from "../services/searchTypes";
 import { useTheme } from "@core/theme";
 import { useAuth } from "@core/auth/useAuth";
+import { consumePendingPushEvent } from "@/features/notifications/services/pushRegistrationService";
 
 export default function SearchScreen() {
     const [search, setSearch] = useState("");
@@ -30,6 +31,19 @@ export default function SearchScreen() {
     const { user } = useAuth();
     const { eventsList, loading, refreshing, usingCachedData, lastUpdatedAt, refreshEvents } =
         useEventData();
+
+    useEffect(() => {
+        if (loading) return;
+        const pendingId = consumePendingPushEvent();
+        if (!pendingId) return;
+        const event = eventsList.find((item) => item.id === pendingId);
+        if (event) {
+            setSelectedEvent(event);
+            setModalVisible(true);
+        } else {
+            Alert.alert('Event unavailable', 'This event may have been removed or is no longer available.');
+        }
+    }, [eventsList, loading]);
 
     const filteredEvents = useMemo(() => {
         if (!search.trim()) return eventsList;

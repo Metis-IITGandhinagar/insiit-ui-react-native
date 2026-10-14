@@ -32,6 +32,7 @@ import { UserManagementScreen } from "@/features/admin/screens/UserManagementScr
 import {AdminEventsApprovalScreen} from "@/features/admin/screens/AdminEventsApprovalScreen";
 import NotificationsScreen from "@/features/notifications/screens/NotificationsScreen";
 import * as Notifications from 'expo-notifications';
+import { setPendingPushEvent } from '@/features/notifications/services/pushRegistrationService';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -39,26 +40,28 @@ export default function RootNavigator() {
     const { user, isGuest, loading } = useAuth();
     const { colors, isDark, typography } = useTheme();
     const navigationRef = useRef<any>(null);
+    const pendingEventRedirect = useRef(false);
+
+    useEffect(() => {
+        void import('@/features/notifications/services/notificationService')
+            .then(({ notificationService }) => notificationService.clearLocalEventReminders())
+            .catch((error) => console.warn('Could not clear legacy local event reminders:', error));
+    }, []);
 
     useEffect(() => {
         const intervals: ReturnType<typeof setInterval>[] = [];
 
-        import('@/features/notifications/services/notificationService')
-            .then(async ({ askPermissionOnceOnLaunch, notificationService }) => {
-                await askPermissionOnceOnLaunch();
-                try {
-                    const { eventService } = await import('@/features/events/services/eventService');
-                    const events = await eventService.getAllEvents();
-                    await notificationService.syncAllEventReminders(events);
-                } catch (e) {
-                    console.warn('Could not sync reminders on launch:', e);
-                }
-            })
-            .catch(() => { });
-
         const openDestination = (notification: Notifications.Notification) => {
             const data = notification.request.content.data;
-            if (data?.route === 'Events') {
+            const eventId = data?.event_id ?? data?.eventId;
+            if (eventId !== undefined && eventId !== null) {
+                setPendingPushEvent(String(eventId));
+                if (user || isGuest) {
+                    navigationRef.current?.navigate('MainTabs', { tab: 'Events' });
+                } else {
+                    pendingEventRedirect.current = true;
+                }
+            } else if (data?.route === 'Events') {
                 navigationRef.current?.navigate('MainTabs', { tab: 'Events' });
             } else if (data?.route === 'Announcements') {
                 navigationRef.current?.navigate('Announcements');
@@ -96,7 +99,25 @@ export default function RootNavigator() {
             subscription.remove();
             intervals.forEach(clearInterval);
         };
-    }, []);
+    }, [user, isGuest]);
+
+    useEffect(() => {
+        if (!user && !isGuest) return;
+        if (pendingEventRedirect.current) {
+            pendingEventRedirect.current = false;
+            navigationRef.current?.navigate('MainTabs', { tab: 'Events' });
+        }
+        // A tap received while signed out is held until the authenticated navigator exists.
+        const pending = Notifications.getLastNotificationResponse();
+        if (pending?.notification) {
+            const data = pending.notification.request.content.data;
+            if (data?.event_id !== undefined) {
+                setPendingPushEvent(String(data.event_id));
+                navigationRef.current?.navigate('MainTabs', { tab: 'Events' });
+                Notifications.clearLastNotificationResponse();
+            }
+        }
+    }, [user, isGuest]);
 
     const navigationTheme = {
         ...DefaultTheme,
