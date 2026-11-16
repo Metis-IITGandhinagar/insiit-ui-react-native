@@ -296,6 +296,14 @@ function ChatPane({ request }: { request: number }) {
     const [sending, setSending] = useState(false);
     const list = useRef<FlatList<Message>>(null);
 
+    // Moved to another vehicle by the final regroup: older pages loaded from
+    // the previous one were written to other people, so drop them.
+    const trip = chat.data?.trip;
+    useEffect(() => {
+        setOlder([]);
+        setOlderCursor(undefined);
+    }, [trip]);
+
     const cursor = olderCursor === undefined ? chat.data?.older ?? null : olderCursor;
     const all = [...older, ...(chat.data?.messages ?? [])].filter((m, i, a) => a.findIndex((x) => x.id === m.id) === i);
     const shown = [...all].reverse(); // inverted list: newest at the bottom

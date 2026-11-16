@@ -216,6 +216,8 @@ export interface Message {
 export interface ChatPage {
     messages: Message[];
     older: string | null;
+    /** The vehicle this thread belongs to; a regroup can move the rider to another. */
+    trip?: number;
 }
 
 export interface CabNotification {
