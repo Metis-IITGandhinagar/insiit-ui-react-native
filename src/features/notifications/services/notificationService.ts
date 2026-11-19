@@ -222,7 +222,7 @@ export const notificationService = {
 
     /** Schedule / cancel reminders for all future events according to the Settings toggle. */
     syncAllEventReminders: async (events: Event[]): Promise<void> => {
-        const enabled = settingsStorage.getBoolean(EVENT_REMINDERS_KEY) ?? false;
+        const enabled = settingsStorage.getBoolean(EVENT_REMINDERS_KEY) ?? true;
 
         if (!enabled) {
             const reminders = getStoredReminders();

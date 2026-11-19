@@ -1,5 +1,5 @@
 // src/features/notifications/screens/NotificationsScreen.tsx
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
 import {
     Bell,
     BellOff,
@@ -28,6 +29,7 @@ import { useTheme } from '@/core/theme';
 import { Card } from '@/shared/components/Card';
 import ScreenHeader from '@/shared/components/ScreenHeader';
 import { useNotifications } from '../hooks/useNotifications';
+import { registerPushDevice } from '../services/pushRegistrationService';
 import { AppNotification, NotificationType } from '../services/notificationTypes';
 import { formatRelativeDate } from '@/features/lostfound/utils/formatDate';
 
@@ -50,6 +52,38 @@ export default function NotificationsScreen() {
         clearAll,
         refresh,
     } = useNotifications();
+
+    const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
+    const [permissionDenied, setPermissionDenied] = useState(false);
+    const [enablingNotifications, setEnablingNotifications] = useState(false);
+
+    const refreshPermissionStatus = useCallback(async () => {
+        const { status } = await Notifications.getPermissionsAsync();
+        setPermissionGranted(status === 'granted');
+        setPermissionDenied(status === 'denied');
+    }, []);
+
+    useEffect(() => {
+        void refreshPermissionStatus();
+    }, [refreshPermissionStatus]);
+
+    const handleEnableNotifications = useCallback(async () => {
+        setEnablingNotifications(true);
+        try {
+            const { status } = await Notifications.requestPermissionsAsync();
+            setPermissionGranted(status === 'granted');
+            setPermissionDenied(status === 'denied');
+            if (status === 'granted') {
+                await registerPushDevice();
+            }
+        } catch (error) {
+            console.warn('Failed to enable notifications:', error);
+        } finally {
+            setEnablingNotifications(false);
+        }
+    }, []);
+
+    const showEnableCard = permissionGranted !== null && !permissionGranted;
 
     const [activeTab, setActiveTab] = useState<FilterTab>('all');
 
@@ -152,6 +186,35 @@ export default function NotificationsScreen() {
                         }
                     />
                 </View>
+
+                {showEnableCard && (
+                    <Card style={styles.enableCard}>
+                        <View style={styles.enableHeader}>
+                            <Bell size={20} color={colors.primary} strokeWidth={2} />
+                            <Text style={styles.enableTitle}>Enable Notifications</Text>
+                        </View>
+                        <Text style={styles.enableSubtitle}>
+                            Get a notification when new announcements are posted.
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.enableButton}
+                            onPress={handleEnableNotifications}
+                            disabled={enablingNotifications}
+                            accessibilityLabel="Enable notifications"
+                        >
+                            {enablingNotifications ? (
+                                <ActivityIndicator color={colors.onPrimary} />
+                            ) : (
+                                <Text style={styles.enableButtonText}>Turn On Notifications</Text>
+                            )}
+                        </TouchableOpacity>
+                        {permissionDenied && (
+                            <Text style={styles.enableDeniedHint}>
+                                Notifications are disabled. You can turn them on in your device Settings.
+                            </Text>
+                        )}
+                    </Card>
+                )}
 
                 {/* Filter Tabs */}
                 <View style={styles.tabsContainer}>
@@ -520,5 +583,47 @@ const getStyles = ({ colors, spacing, radius, typography }: any) =>
         },
         dismissButton: {
             padding: 4,
+        },
+        enableCard: {
+            backgroundColor: colors.surface,
+            borderRadius: radius.lg,
+            borderWidth: 1,
+            borderColor: colors.primary + '33',
+            padding: spacing.lg,
+            marginBottom: spacing.sm,
+        },
+        enableHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+            marginBottom: spacing.xs,
+        },
+        enableTitle: {
+            fontSize: 15,
+            fontWeight: '700',
+            color: colors.text,
+        },
+        enableSubtitle: {
+            fontSize: 13,
+            color: colors.textSecondary,
+            marginBottom: spacing.md,
+        },
+        enableButton: {
+            backgroundColor: colors.primary,
+            borderRadius: radius.round,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 12,
+        },
+        enableButtonText: {
+            fontWeight: '600',
+            fontSize: 14,
+            color: colors.onPrimary,
+        },
+        enableDeniedHint: {
+            fontSize: 12,
+            color: colors.danger,
+            marginTop: spacing.sm,
+            textAlign: 'center',
         },
     });

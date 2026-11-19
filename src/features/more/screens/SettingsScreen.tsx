@@ -11,7 +11,7 @@ import { themeOptions, ThemePreference, SYSTEM_PREFERENCE } from "../../../core/
 import { Card } from "../../../shared/components/Card";
 import { useAuth } from "../../../core/auth/useAuth";
 import { notificationService } from "@/features/notifications/services/notificationService";
-import { setEventReminderPreference } from "@/features/notifications/services/pushRegistrationService";
+import { setEventReminderPreference, getEffectiveRemindersEnabled } from "@/features/notifications/services/pushRegistrationService";
 import * as Notifications from 'expo-notifications';
 
 const settingsStorage = createMMKV({ id: "insiit.settings" });
@@ -30,7 +30,7 @@ const SettingsScreen = () => {
 
     useEffect(() => {
         const saved = settingsStorage.getBoolean(EVENT_REMINDERS_KEY);
-        setEventRemindersEnabled(saved ?? true);
+        setEventRemindersEnabled(getEffectiveRemindersEnabled());
         const refreshPermission = () => {
             void Notifications.getPermissionsAsync()
                 .then(({ status }) => setPermissionDenied(status !== 'granted'))

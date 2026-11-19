@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     ActivityIndicator,
     Image,
@@ -16,6 +16,7 @@ import { useTheme } from '@/core/theme';
 import { formatBackendDateTime } from '@/core/api/backendTime';
 import { resolveBackendAsset } from '@/core/api/apiClient';
 import OfflineNotice from '@/shared/components/OfflineNotice';
+import { notificationService } from '../../notifications/services/notificationService';
 import { useAnnouncements } from '../hooks/useAnnouncements';
 
 export default function AnnouncementsScreen() {
@@ -24,6 +25,12 @@ export default function AnnouncementsScreen() {
     const styles = getStyles(theme);
     const { announcements, loading, refreshing, error, usingCachedData, lastUpdatedAt, refresh } =
         useAnnouncements();
+
+    useEffect(() => {
+        for (const announcement of announcements) {
+            notificationService.markAsRead(`announcement-${announcement.id}`);
+        }
+    }, [announcements]);
 
     return (
         <>

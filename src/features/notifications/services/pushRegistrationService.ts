@@ -7,12 +7,12 @@ import { createMMKV } from 'react-native-mmkv';
 import { apiClient } from '@/core/api/apiClient';
 
 const DEVICE_ID_KEY = 'push_device_id';
-const PERMISSION_REQUESTED_KEY = 'push_permission_requested';
 const CHANNEL_ID = 'events_announcements';
 const navigationStorage = createMMKV({ id: 'insiit.notifications' });
 const settingsStorage = createMMKV({ id: 'insiit.settings' });
 const PENDING_EVENT_KEY = 'pending_push_event_id';
 const EVENT_REMINDERS_KEY = 'event_reminders_enabled';
+const EVENT_REMINDERS_USER_OFF_KEY = 'event_reminders_user_off';
 
 export function setPendingPushEvent(eventId: string): void {
     navigationStorage.set(PENDING_EVENT_KEY, eventId);
@@ -33,25 +33,50 @@ async function getDeviceId(): Promise<string> {
     return id;
 }
 
+export function isEventRemindersUserOff(): boolean {
+    return settingsStorage.getBoolean(EVENT_REMINDERS_USER_OFF_KEY) === true;
+}
+
+export function getEffectiveRemindersEnabled(): boolean {
+    if (isEventRemindersUserOff()) return false;
+    const saved = settingsStorage.getBoolean(EVENT_REMINDERS_KEY);
+    if (saved === false) return false;
+    return true;
+}
+
+export function setLocalRemindersPreference(enabled: boolean): void {
+    settingsStorage.set(EVENT_REMINDERS_KEY, enabled);
+    if (enabled) {
+        settingsStorage.remove(EVENT_REMINDERS_USER_OFF_KEY);
+    } else {
+        settingsStorage.set(EVENT_REMINDERS_USER_OFF_KEY, true);
+    }
+}
+
+export function autoEnableRemindersIfAllowed(): void {
+    if (isEventRemindersUserOff()) return;
+    settingsStorage.set(EVENT_REMINDERS_KEY, true);
+}
+
 export async function registerPushDevice(): Promise<'registered' | 'denied' | 'unsupported'> {
     if (Platform.OS !== 'ios' && Platform.OS !== 'android') return 'unsupported';
 
     if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
             name: 'Events & Announcements',
-            description: 'Event approvals and reminders',
+            description: 'Campus events (10 min before) and announcements',
             importance: Notifications.AndroidImportance.HIGH,
         });
     }
 
     let permission = await Notifications.getPermissionsAsync();
-    const permissionRequested = await SecureStore.getItemAsync(PERMISSION_REQUESTED_KEY);
-    if (permission.status !== 'granted' && permission.canAskAgain && permissionRequested !== 'true') {
-        await SecureStore.setItemAsync(PERMISSION_REQUESTED_KEY, 'true');
-        navigationStorage.set('notification_permission_asked', true);
+    if (permission.status !== 'granted' && permission.canAskAgain) {
         permission = await Notifications.requestPermissionsAsync();
+        navigationStorage.set('notification_permission_asked', true);
     }
     if (permission.status !== 'granted') return 'denied';
+
+    autoEnableRemindersIfAllowed();
 
     try {
         const token = await messaging().getToken();
@@ -59,7 +84,7 @@ export async function registerPushDevice(): Promise<'registered' | 'denied' | 'u
         await apiClient.post('/push/devices', {
             device_id: await getDeviceId(),
             token,
-            reminders_enabled: settingsStorage.getBoolean(EVENT_REMINDERS_KEY) ?? true,
+            reminders_enabled: getEffectiveRemindersEnabled(),
         });
         return 'registered';
     } catch (error) {
@@ -69,6 +94,7 @@ export async function registerPushDevice(): Promise<'registered' | 'denied' | 'u
 }
 
 export async function setEventReminderPreference(enabled: boolean): Promise<void> {
+    setLocalRemindersPreference(enabled);
     await apiClient.put('/push/preferences', { reminders_enabled: enabled });
 }
 

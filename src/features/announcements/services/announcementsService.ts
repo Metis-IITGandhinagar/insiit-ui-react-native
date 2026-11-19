@@ -1,6 +1,7 @@
 // src/features/announcements/services/announcementsService.ts
 import { apiClient } from '@/core/api/apiClient';
 import { backendInstantMs } from '@/core/api/backendTime';
+import { notifyNewAnnouncements } from './announcementPushService';
 
 /** Mirrors `AnnouncementEntry` in the backend (src/schemas/announcements_schemas.rs). */
 export interface AnnouncementEntry {
@@ -18,8 +19,11 @@ export const announcementsService = {
         const response = await apiClient.get<AnnouncementEntry[]>('/announcements');
         if (!Array.isArray(response.data)) return [];
         // Newest first — the backend returns table order.
-        return [...response.data].sort(
+        const sorted = [...response.data].sort(
             (a, b) => backendInstantMs(b.added_on_timestamp) - backendInstantMs(a.added_on_timestamp)
         );
+        // New announcements also go out as OS-level notifications.
+        void notifyNewAnnouncements(sorted);
+        return sorted;
     },
 };

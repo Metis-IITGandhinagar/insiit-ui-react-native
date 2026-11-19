@@ -1,5 +1,5 @@
 // src/screens/home/HomeScreen.tsx
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { ScrollView, StatusBar, StyleSheet, ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RefreshCw } from "lucide-react-native";
@@ -12,7 +12,9 @@ import GreetingSection from "../components/GreetingSection";
 import TimetableWidget from "../components/TimetableWidget";
 import ServicesGrid from "../components/ServicesGrid";
 
-import { useTheme } from "@core/theme"; 
+import { useTheme } from "@core/theme";
+import { useAuth } from "@/core/auth/useAuth";
+import { registerPushDevice } from "@/features/notifications/services/pushRegistrationService";
 
 import { useMessData } from "../hooks/useMessData";
 import type { QRBottomSheetRef } from "../components/QRBottomSheet";
@@ -22,12 +24,31 @@ const HomeScreen = () => {
     const qrSheetRef = useRef<QRBottomSheetRef>(null);
     const menuSheetRef = useRef<WeeklyMenuSheetRef>(null);
     const navigation = useNavigation<any>();
+    const { user } = useAuth();
+    const promptedForUser = useRef<string | null>(null);
 
     const { menuData, currentMeal, loading, error, manualRefresh } = useMessData();
 
     const theme = useTheme();
     const { colors } = theme;
     const styles = getStyles(theme);
+
+    // After @iitgn.ac.in login, when Home is first shown: ask notification permission
+    // (if still needed) and register the device. First install, reinstall, returning users.
+    useEffect(() => {
+        const email = user?.email;
+        if (!email) return;
+        if (promptedForUser.current === email) return;
+        promptedForUser.current = email;
+
+        const timer = setTimeout(() => {
+            void registerPushDevice().catch((err) =>
+                console.warn('Home: push registration / permission prompt failed:', err)
+            );
+        }, 600);
+
+        return () => clearTimeout(timer);
+    }, [user?.email]);
 
     return (
         <>
@@ -79,8 +100,6 @@ const getStyles = ({ colors, radius, shadows, spacing, typography }: any) => Sty
     },
     contentScroll: {
         paddingHorizontal: spacing.lg,
-        // Matches ScreenHeader's paddingTop so the greeting sits at the same height
-        // as every other tab's title.
         paddingTop: spacing.md,
         paddingBottom: 120,
         gap: spacing.lg,
