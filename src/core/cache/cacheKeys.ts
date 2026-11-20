@@ -34,6 +34,8 @@ export const CACHE_POLICIES = {
     /** The student council changes once an academic year. */
     representatives: { key: "representatives", version: 1, ttlMs: 24 * HOUR },
     lostFound: { key: "lost-found", version: 1, ttlMs: 10 * MINUTE },
+    /** Cabshare's stops, vehicles and rate cards: change only with a backend release. */
+    cabshareCatalogue: { key: "cabshare-catalogue", version: 1, ttlMs: 24 * HOUR },
 } as const satisfies Record<string, CachePolicy>;
 
 /**

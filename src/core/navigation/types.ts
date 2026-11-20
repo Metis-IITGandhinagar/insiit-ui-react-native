@@ -19,6 +19,9 @@ export type RootStackParamList = {
     Announcements: undefined;
     LostFound: undefined;
     Cabshare: undefined;
+    /** One cabshare request: its ride, chat and fare once grouped. */
+    CabTrip: { request: number };
+    CabPost: { direction?: 'from_campus' | 'to_campus'; destination?: string } | undefined;
     BuySell: undefined;
     Profile: undefined;
     Settings: undefined;
