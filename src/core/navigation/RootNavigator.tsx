@@ -23,6 +23,8 @@ import TeamScreen from "@/features/about/screens/TeamScreen";
 import RepresentativesScreen from "@/features/about/screens/RepresentativesScreen";
 import LostFoundScreen from "@/features/lostfound/screens/LostFoundScreen";
 import CabshareScreen from "@/features/cabshare/screens/CabshareScreen";
+import CabTripScreen from "@/features/cabshare/screens/CabTripScreen";
+import CabPostScreen from "@/features/cabshare/screens/CabPostScreen";
 import BuySellScreen from "@/features/buysell/screens/BuySellScreen";
 import { useTheme } from "@/core/theme";
 import { AdminDashboardScreen } from "@/features/admin/screens/AdminDashboardScreen";
@@ -54,7 +56,11 @@ export default function RootNavigator() {
         const openDestination = (notification: Notifications.Notification) => {
             const data = notification.request.content.data;
             const eventId = data?.event_id ?? data?.eventId;
-            if (eventId !== undefined && eventId !== null) {
+            const cabRequest = Number(data?.cabshare_request);
+            if (Number.isInteger(cabRequest) && cabRequest > 0) {
+                // a cabshare push: open that ride
+                navigationRef.current?.navigate('CabTrip', { request: cabRequest });
+            } else if (eventId !== undefined && eventId !== null) {
                 setPendingPushEvent(String(eventId));
                 if (user || isGuest) {
                     navigationRef.current?.navigate('MainTabs', { tab: 'Events' });
@@ -287,6 +293,16 @@ export default function RootNavigator() {
                         name="Cabshare"
                         component={CabshareScreen}
                         options={{ title: "Cabshare" }}
+                    />
+                    <Stack.Screen
+                        name="CabTrip"
+                        component={CabTripScreen}
+                        options={{ title: "Ride" }}
+                    />
+                    <Stack.Screen
+                        name="CabPost"
+                        component={CabPostScreen}
+                        options={{ title: "Post a ride" }}
                     />
                     <Stack.Screen
                         name="BuySell"
