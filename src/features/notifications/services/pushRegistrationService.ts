@@ -34,7 +34,12 @@ async function getDeviceId(): Promise<string> {
 }
 
 export function isEventRemindersUserOff(): boolean {
-    return settingsStorage.getBoolean(EVENT_REMINDERS_USER_OFF_KEY) === true;
+    // Older app versions only stored EVENT_REMINDERS_KEY. Preserve an existing
+    // opt-out even when the newer explicit marker has not been written yet.
+    return (
+        settingsStorage.getBoolean(EVENT_REMINDERS_USER_OFF_KEY) === true ||
+        settingsStorage.getBoolean(EVENT_REMINDERS_KEY) === false
+    );
 }
 
 export function getEffectiveRemindersEnabled(): boolean {
